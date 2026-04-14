@@ -116,8 +116,10 @@ class JobCreateUpdateSerializer(serializers.ModelSerializer):
             'benefits', 'category', 'skills_required', 'job_type',
             'experience_level', 'location', 'is_remote',
             'salary_min', 'salary_max', 'salary_currency', 'show_salary',
-            'status', 'application_deadline',
+            'application_deadline',
         ]
+        # Security: 'status' intentionally excluded to prevent mass assignment.
+        # Status is set in perform_create/perform_update, not by user input.
 
     def validate(self, attrs):
         # Reject any keys that aren't declared in Meta.fields (mass-assignment protection)

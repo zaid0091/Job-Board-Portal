@@ -12,8 +12,8 @@ export const authAPI = {
     return response.data;
   },
 
-  logout: async (refreshToken: string) => {
-    await axiosInstance.post('/auth/logout/', { refresh: refreshToken });
+  logout: async () => {
+    await axiosInstance.post('/auth/logout/', {});
   },
 
   getCurrentUser: async () => {
@@ -26,9 +26,21 @@ export const authAPI = {
     return response.data;
   },
 
-  refreshToken: async (refreshToken: string) => {
-    const response = await axiosInstance.post('/auth/token/refresh/', {
-      refresh: refreshToken,
+  refreshToken: async () => {
+    const response = await axiosInstance.post('/auth/token/refresh/', {});
+    return response.data;
+  },
+
+  requestPasswordReset: async (email: string) => {
+    const response = await axiosInstance.post('/auth/password/reset/request/', { email });
+    return response.data;
+  },
+
+  resetPassword: async (token: string, password: string, password_confirm: string) => {
+    const response = await axiosInstance.post('/auth/password/reset/confirm/', {
+      token,
+      password,
+      password_confirm,
     });
     return response.data;
   },

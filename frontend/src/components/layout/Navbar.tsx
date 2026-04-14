@@ -2,7 +2,7 @@
 import { profilesAPI } from '@/api';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { logout } from '@/store/slices/authSlice';
+import { logoutUser } from '@/store/slices/authSlice';
 import { fetchUnreadCount } from '@/store/slices/notificationsSlice';
 import { Bars2Icon, XMarkIcon, BellIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
@@ -76,7 +76,7 @@ export default function Navbar() {
     return () => document.removeEventListener('click', handler);
   }, [profileOpen]);
 
-  const handleLogout = () => dispatch(logout());
+  const handleLogout = () => dispatch(logoutUser());
 
   const isActive = (match: string) => location.pathname.startsWith(match);
   const isHome = location.pathname === '/';

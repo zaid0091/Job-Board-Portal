@@ -123,7 +123,12 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-5 text-center border-t border-ink-900/[0.04] dark:border-ink-300/[0.06]">
+          <div className="mt-6 pt-5 text-center border-t border-ink-900/[0.04] dark:border-ink-300/[0.06] space-y-2">
+            <p className="text-[13px] text-ink-400">
+              <Link to="/password/reset/request" className="font-medium text-ink-800 hover:text-primary-600 transition-colors">
+                Forgot password?
+              </Link>
+            </p>
             <p className="text-[13px] text-ink-400">
               Don&apos;t have an account?{' '}
               <Link to="/register" className="font-medium text-ink-800 hover:text-primary-600 transition-colors">

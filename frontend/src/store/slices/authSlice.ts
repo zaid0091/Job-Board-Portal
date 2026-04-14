@@ -1,23 +1,17 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authAPI } from '@/api';
-import type { User, AuthTokens, LoginCredentials, RegisterData } from '@/types';
+import type { User, LoginCredentials, RegisterData } from '@/types';
 
 interface AuthState {
   user: User | null;
-  tokens: AuthTokens | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
 }
 
-// Load tokens from localStorage
-const storedTokens = localStorage.getItem('tokens');
-const initialTokens: AuthTokens | null = storedTokens ? JSON.parse(storedTokens) : null;
-
 const initialState: AuthState = {
   user: null,
-  tokens: initialTokens,
-  isAuthenticated: !!initialTokens,
+  isAuthenticated: false,
   isLoading: false,
   error: null,
 };
@@ -65,20 +59,28 @@ export const fetchCurrentUser = createAsyncThunk(
   },
 );
 
+export const logoutUser = createAsyncThunk(
+  'auth/logout',
+  async () => {
+    try {
+      await authAPI.logout();
+    } catch (error) {
+      // Logout API failure shouldn't prevent local logout
+      // The refresh token is invalidated server-side if call succeeded
+    }
+    // Always clear local state
+    return null;
+  },
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
     logout: (state) => {
       state.user = null;
-      state.tokens = null;
       state.isAuthenticated = false;
       state.error = null;
-      localStorage.removeItem('tokens');
-    },
-    setTokens: (state, action: PayloadAction<AuthTokens>) => {
-      state.tokens = action.payload;
-      localStorage.setItem('tokens', JSON.stringify(action.payload));
     },
     clearError: (state) => {
       state.error = null;
@@ -93,9 +95,7 @@ const authSlice = createSlice({
     builder.addCase(loginUser.fulfilled, (state, action) => {
       state.isLoading = false;
       state.user = action.payload.user;
-      state.tokens = action.payload.tokens;
       state.isAuthenticated = true;
-      localStorage.setItem('tokens', JSON.stringify(action.payload.tokens));
     });
     builder.addCase(loginUser.rejected, (state, action) => {
       state.isLoading = false;
@@ -110,9 +110,7 @@ const authSlice = createSlice({
     builder.addCase(registerUser.fulfilled, (state, action) => {
       state.isLoading = false;
       state.user = action.payload.user;
-      state.tokens = action.payload.tokens;
       state.isAuthenticated = true;
-      localStorage.setItem('tokens', JSON.stringify(action.payload.tokens));
     });
     builder.addCase(registerUser.rejected, (state, action) => {
       state.isLoading = false;
@@ -131,12 +129,17 @@ const authSlice = createSlice({
     builder.addCase(fetchCurrentUser.rejected, (state) => {
       state.isLoading = false;
       state.user = null;
-      state.tokens = null;
       state.isAuthenticated = false;
-      localStorage.removeItem('tokens');
+    });
+
+    // Logout
+    builder.addCase(logoutUser.fulfilled, (state) => {
+      state.user = null;
+      state.isAuthenticated = false;
+      state.error = null;
     });
   },
 });
 
-export const { logout, setTokens, clearError } = authSlice.actions;
+export const { logout, clearError } = authSlice.actions;
 export default authSlice.reducer;

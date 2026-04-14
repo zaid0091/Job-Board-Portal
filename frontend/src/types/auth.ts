@@ -30,8 +30,8 @@ export interface AuthTokens {
 }
 
 export interface AuthResponse {
+  message?: string;
   user: User;
-  tokens: AuthTokens;
 }
 
 export interface ChangePasswordData {

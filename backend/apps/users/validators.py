@@ -1,4 +1,5 @@
 import magic
+import os
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
@@ -21,6 +22,13 @@ def validate_resume_file(file):
     """Validate resume file type and size."""
     validate_file_size(file, settings.MAX_RESUME_SIZE)
 
+    ext = os.path.splitext(file.name)[1].lower()
+    if ext not in ['.pdf', '.doc', '.docx']:
+        raise ValidationError(
+            _('Unsupported file extension: %(ext)s. Allowed extensions: PDF, DOC, DOCX'),
+            params={'ext': ext}
+        )
+
     file_mime = magic.from_buffer(file.read(2048), mime=True)
     file.seek(0)
 
@@ -34,6 +42,13 @@ def validate_resume_file(file):
 def validate_image_file(file):
     """Validate image file type and size."""
     validate_file_size(file, settings.MAX_IMAGE_SIZE)
+
+    ext = os.path.splitext(file.name)[1].lower()
+    if ext not in ['.jpeg', '.jpg', '.png', '.webp']:
+        raise ValidationError(
+            _('Unsupported image extension: %(ext)s. Allowed extensions: JPEG, JPG, PNG, WebP'),
+            params={'ext': ext}
+        )
 
     file_mime = magic.from_buffer(file.read(2048), mime=True)
     file.seek(0)

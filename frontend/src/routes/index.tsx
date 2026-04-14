@@ -21,6 +21,8 @@ const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const TermsPage = lazy(() => import('@/pages/TermsPage'));
+const RequestResetPasswordPage = lazy(() => import('@/pages/RequestResetPasswordPage'));
+const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'));
 
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -46,6 +48,8 @@ export default function AppRoutes() {
         <Route path="/jobs/:slug" element={<SuspenseWrapper><JobDetailPage /></SuspenseWrapper>} />
         <Route path="/login" element={<SuspenseWrapper><LoginPage /></SuspenseWrapper>} />
         <Route path="/register" element={<SuspenseWrapper><RegisterPage /></SuspenseWrapper>} />
+        <Route path="/password/reset/request" element={<SuspenseWrapper><RequestResetPasswordPage /></SuspenseWrapper>} />
+        <Route path="/password/reset/confirm" element={<SuspenseWrapper><ResetPasswordPage /></SuspenseWrapper>} />
         <Route path="/about" element={<SuspenseWrapper><AboutPage /></SuspenseWrapper>} />
         <Route path="/contact" element={<SuspenseWrapper><ContactPage /></SuspenseWrapper>} />
         <Route path="/privacy" element={<SuspenseWrapper><PrivacyPage /></SuspenseWrapper>} />

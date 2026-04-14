@@ -1,32 +1,96 @@
 import logging
+from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from core.throttles import LoginRateThrottle, RegistrationRateThrottle, PasswordChangeThrottle
+from core.throttles import (
+    LoginRateThrottle,
+    RegistrationRateThrottle,
+    PasswordChangeThrottle,
+    PasswordResetThrottle,
+)
 from .serializers import (
     CustomTokenObtainPairSerializer,
     RegisterSerializer,
     UserSerializer,
     ChangePasswordSerializer,
+    PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
 )
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
 
+def set_auth_cookies(response, access_token, refresh_token):
+    secure_cookie = not settings.DEBUG
+    response.set_cookie(
+        getattr(settings, "JWT_AUTH_COOKIE", "access"),
+        access_token,
+        httponly=True,
+        secure=secure_cookie,
+        samesite="Lax",
+    )
+    if refresh_token:
+        response.set_cookie(
+            getattr(settings, "JWT_AUTH_REFRESH_COOKIE", "refresh"),
+            refresh_token,
+            httponly=True,
+            secure=secure_cookie,
+            samesite="Lax",
+        )
+    return response
+
+
 class CustomTokenObtainPairView(TokenObtainPairView):
     """POST /api/v1/auth/login/ — Login with JWT tokens + user info."""
+
     serializer_class = CustomTokenObtainPairSerializer
     # Strict IP-based throttle: 5 attempts per minute
     throttle_classes = [LoginRateThrottle]
 
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            tokens = response.data.pop("tokens", {})
+            access_token = tokens.get("access")
+            refresh_token = tokens.get("refresh")
+            if access_token:
+                set_auth_cookies(response, access_token, refresh_token)
+        return response
+
+
+class CookieTokenRefreshView(TokenRefreshView):
+    """POST /api/v1/auth/token/refresh/ — Refresh JWT tokens from cookies."""
+
+    def post(self, request, *args, **kwargs):
+        refresh_cookie = getattr(settings, "JWT_AUTH_REFRESH_COOKIE", "refresh")
+        refresh_token = request.COOKIES.get(refresh_cookie)
+
+        if refresh_token is not None:
+            if hasattr(request.data, "_mutable"):
+                request.data._mutable = True
+            request.data["refresh"] = refresh_token
+            if hasattr(request.data, "_mutable"):
+                request.data._mutable = False
+
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            access_token = response.data.pop("access", None)
+            refresh_token = response.data.pop("refresh", None)
+            if access_token:
+                set_auth_cookies(response, access_token, refresh_token)
+        return response
+
 
 class RegisterView(generics.CreateAPIView):
     """POST /api/v1/auth/register/ — Register a new user."""
+
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
     # Strict IP-based throttle: 3 registrations per minute
@@ -39,50 +103,61 @@ class RegisterView(generics.CreateAPIView):
 
         refresh = RefreshToken.for_user(user)
 
-        logger.info(f'New user registered: {user.email} (role: {user.role})')
+        logger.info(f"New user registered: {user.email}")
 
-        return Response({
-            'message': 'Registration successful.',
-            'user': UserSerializer(user).data,
-            'tokens': {
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            }
-        }, status=status.HTTP_201_CREATED)
+        response = Response(
+            {
+                "message": "Registration successful.",
+                "user": UserSerializer(user).data,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+        return set_auth_cookies(response, str(refresh.access_token), str(refresh))
 
 
 class LogoutView(APIView):
     """POST /api/v1/auth/logout/ — Blacklist refresh token."""
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         try:
-            refresh_token = request.data.get('refresh')
+            refresh_cookie = getattr(settings, "JWT_AUTH_REFRESH_COOKIE", "refresh")
+            refresh_token = request.COOKIES.get(refresh_cookie) or request.data.get(
+                "refresh"
+            )
+
             if not refresh_token:
-                return Response(
-                    {'error': 'Refresh token is required.'},
-                    status=status.HTTP_400_BAD_REQUEST
+                response = Response(
+                    {"message": "Already logged out."}, status=status.HTTP_200_OK
+                )
+            else:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+                logger.info(f"User logged out: {request.user.email}")
+                response = Response(
+                    {"message": "Logout successful."}, status=status.HTTP_200_OK
                 )
 
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-
-            logger.info(f'User logged out: {request.user.email}')
-
-            return Response(
-                {'message': 'Logout successful.'},
-                status=status.HTTP_200_OK
-            )
+            response.delete_cookie(getattr(settings, "JWT_AUTH_COOKIE", "access"))
+            response.delete_cookie(refresh_cookie)
+            return response
         except Exception as e:
-            logger.error(f'Logout error: {str(e)}')
-            return Response(
-                {'error': 'Invalid token.'},
-                status=status.HTTP_400_BAD_REQUEST
+            logger.error(f"Logout error: {str(e)}")
+            response = Response(
+                {"error": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST
             )
+            response.delete_cookie(getattr(settings, "JWT_AUTH_COOKIE", "access"))
+            response.delete_cookie(
+                getattr(settings, "JWT_AUTH_REFRESH_COOKIE", "refresh")
+            )
+            return response
 
 
 class CurrentUserView(generics.RetrieveAPIView):
     """GET /api/v1/auth/me/ — Current authenticated user info."""
+
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -92,10 +167,12 @@ class CurrentUserView(generics.RetrieveAPIView):
 
 class ChangePasswordView(generics.UpdateAPIView):
     """PUT /api/v1/auth/change-password/ — Change password."""
+
     serializer_class = ChangePasswordSerializer
     permission_classes = [permissions.IsAuthenticated]
-    # Limit password change attempts: 3/hour per user
     throttle_classes = [PasswordChangeThrottle]
+
+    PASSWORD_HISTORY_LIMIT = 5
 
     def get_object(self):
         return self.request.user
@@ -105,12 +182,128 @@ class ChangePasswordView(generics.UpdateAPIView):
         serializer.is_valid(raise_exception=True)
 
         user = self.get_object()
-        user.set_password(serializer.validated_data['new_password'])
+        old_password_hash = user.password
+        new_password = serializer.validated_data["new_password"]
+
+        user.set_password(new_password)
         user.save()
 
-        logger.info(f'Password changed for user: {user.email}')
+        from .models import PasswordHistory
+
+        PasswordHistory.objects.create(user=user, password=old_password_hash)
+
+        if user.password_history.count() > self.PASSWORD_HISTORY_LIMIT:
+            old_records = user.password_history.order_by("created_at")[
+                : -self.PASSWORD_HISTORY_LIMIT
+            ]
+            old_records.delete()
+
+        logger.info("Password changed for user")
 
         return Response(
-            {'message': 'Password updated successfully.'},
-            status=status.HTTP_200_OK
+            {"message": "Password updated successfully."}, status=status.HTTP_200_OK
+        )
+
+
+class PasswordResetRequestView(APIView):
+    """
+    POST /api/v1/auth/password/reset/request/
+    Request a password reset email.
+    """
+
+    permission_classes = [permissions.AllowAny]
+    throttle_classes = [PasswordResetThrottle]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email = serializer.validated_data["email"].lower().strip()
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return Response(
+                {
+                    "message": "If an account with that email exists, we have sent a password reset link."
+                },
+                status=status.HTTP_200_OK,
+            )
+
+        from .models import PasswordResetToken
+
+        PasswordResetToken.objects.filter(user=user, used=False).update(used=True)
+
+        token = PasswordResetToken.create_token_for_user(user)
+
+        reset_url = f"{settings.FRONTEND_URL}/password/reset/confirm?token={token}"
+
+        logger.info(f"Password reset requested for: {email}")
+
+        self._send_reset_email(user.email, reset_url)
+
+        return Response(
+            {
+                "message": "If an account with that email exists, we have sent a password reset link."
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    def _send_reset_email(self, email, reset_url):
+        try:
+            from core.email_services import send_password_reset_email
+
+            send_password_reset_email(email, reset_url)
+        except Exception as e:
+            logger.error(f"Failed to send password reset email: {e}")
+
+
+class PasswordResetConfirmView(APIView):
+    """
+    POST /api/v1/auth/password/reset/confirm/
+    Confirm password reset with token.
+    """
+
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        token = serializer.validated_data["token"]
+        password = serializer.validated_data["password"]
+
+        from .models import PasswordResetToken
+
+        reset_token, user = PasswordResetToken.get_user_from_token(token)
+
+        if not user:
+            return Response(
+                {"detail": "Invalid or expired reset token."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        old_password_hash = user.password
+        user.set_password(password)
+        user.save()
+
+        from .models import PasswordHistory
+
+        PasswordHistory.objects.create(user=user, password=old_password_hash)
+
+        reset_token.used = True
+        reset_token.save()
+
+        try:
+            user.refresh_token.all().delete()
+        except Exception:
+            pass
+
+        logger.info(f"Password reset completed for: {user.email}")
+
+        return Response(
+            {
+                "message": "Password has been reset successfully. You can now login with your new password."
+            },
+            status=status.HTTP_200_OK,
         )

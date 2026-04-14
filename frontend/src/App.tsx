@@ -5,13 +5,15 @@ import AppRoutes from './routes';
 
 function App() {
   const dispatch = useAppDispatch();
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { user } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
-    if (isAuthenticated && !user) {
+    // Fetch current user on app load to check authentication status
+    // This works with HttpOnly cookies - we don't need to check localStorage
+    if (!user) {
       dispatch(fetchCurrentUser());
     }
-  }, [isAuthenticated, user, dispatch]);
+  }, [user, dispatch]);
 
   return <AppRoutes />;
 }
