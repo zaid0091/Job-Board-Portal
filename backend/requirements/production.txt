@@ -1,0 +1,5 @@
+-r base.txt
+
+# Production
+sentry-sdk[django]>=1.40,<2.0
+django-anymail>=10.0,<11.0

@@ -1,0 +1,37 @@
+# Django
+Django>=5.1,<5.2
+djangorestframework>=3.15,<3.16
+django-cors-headers>=4.3,<5.0
+django-filter>=24.0,<25.0
+djangorestframework-simplejwt>=5.3,<6.0
+
+# API Documentation
+drf-spectacular>=0.27,<1.0
+
+# Database
+psycopg2-binary>=2.9,<3.0
+
+# Caching
+django-redis>=5.4,<6.0
+
+# Task Queue
+celery>=5.4,<6.0
+django-celery-beat>=2.6,<3.0
+django-celery-results>=2.5,<3.0
+redis>=5.0,<6.0
+
+# File Handling
+Pillow>=10.0,<11.0
+python-magic>=0.4,<1.0
+boto3>=1.34,<2.0
+django-storages>=1.14,<2.0
+
+# Security
+argon2-cffi>=23.0,<24.0
+# HTML sanitization – protects against stored XSS (OWASP A7:2017)
+bleach>=6.1,<7.0
+
+# Utilities
+python-decouple>=3.8,<4.0
+gunicorn>=22.0,<23.0
+whitenoise>=6.6,<7.0
