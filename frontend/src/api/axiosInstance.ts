@@ -58,7 +58,8 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await axios.post(`${API_BASE_URL}/auth/token/refresh/`, {}, { withCredentials: true });
+        // Use the same axios instance for refresh to ensure cookies are sent
+        await axiosInstance.post('/auth/token/refresh/', {});
         
         processQueue(null);
         return axiosInstance(originalRequest);

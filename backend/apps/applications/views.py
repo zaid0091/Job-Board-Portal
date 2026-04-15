@@ -32,7 +32,6 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             return [
                 permissions.IsAuthenticated(),
                 IsApplicationOwner(),
-                IsVerifiedUser(),
             ]
         elif self.action == "withdraw":
             return [

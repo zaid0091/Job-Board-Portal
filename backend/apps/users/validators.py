@@ -29,8 +29,14 @@ def validate_resume_file(file):
             params={'ext': ext}
         )
 
-    file_mime = magic.from_buffer(file.read(2048), mime=True)
-    file.seek(0)
+    file_mime = None
+    try:
+        file_mime = magic.from_buffer(file.read(2048), mime=True)
+    except Exception:
+        # Fallback for environments where libmagic is unavailable/misconfigured.
+        file_mime = getattr(file, 'content_type', None)
+    finally:
+        file.seek(0)
 
     if file_mime not in settings.ALLOWED_RESUME_TYPES:
         raise ValidationError(
@@ -50,8 +56,13 @@ def validate_image_file(file):
             params={'ext': ext}
         )
 
-    file_mime = magic.from_buffer(file.read(2048), mime=True)
-    file.seek(0)
+    file_mime = None
+    try:
+        file_mime = magic.from_buffer(file.read(2048), mime=True)
+    except Exception:
+        file_mime = getattr(file, 'content_type', None)
+    finally:
+        file.seek(0)
 
     if file_mime not in settings.ALLOWED_IMAGE_TYPES:
         raise ValidationError(

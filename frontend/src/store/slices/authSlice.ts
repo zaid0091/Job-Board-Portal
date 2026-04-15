@@ -47,6 +47,19 @@ export const registerUser = createAsyncThunk(
   },
 );
 
+export const googleLoginUser = createAsyncThunk(
+  'auth/googleLogin',
+  async (token: string, { rejectWithValue }) => {
+    try {
+      const response = await authAPI.googleLogin(token);
+      return response;
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { error?: string } } };
+      return rejectWithValue(err.response?.data?.error || 'Google login failed');
+    }
+  },
+);
+
 export const fetchCurrentUser = createAsyncThunk(
   'auth/fetchUser',
   async (_, { rejectWithValue }) => {
@@ -61,15 +74,17 @@ export const fetchCurrentUser = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk(
   'auth/logout',
-  async () => {
+  async (_, { rejectWithValue }) => {
     try {
       await authAPI.logout();
+      // Return success to trigger fulfilled case
+      return { success: true };
     } catch (error) {
       // Logout API failure shouldn't prevent local logout
-      // The refresh token is invalidated server-side if call succeeded
+      console.error('Logout API error:', error);
+      // Still clear local state even if API fails
+      return rejectWithValue('Logout failed');
     }
-    // Always clear local state
-    return null;
   },
 );
 
@@ -87,7 +102,6 @@ const authSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    // Login
     builder.addCase(loginUser.pending, (state) => {
       state.isLoading = true;
       state.error = null;
@@ -98,6 +112,21 @@ const authSlice = createSlice({
       state.isAuthenticated = true;
     });
     builder.addCase(loginUser.rejected, (state, action) => {
+      state.isLoading = false;
+      state.error = action.payload as string;
+    });
+
+    // Google Login
+    builder.addCase(googleLoginUser.pending, (state) => {
+      state.isLoading = true;
+      state.error = null;
+    });
+    builder.addCase(googleLoginUser.fulfilled, (state, action) => {
+      state.isLoading = false;
+      state.user = action.payload.user;
+      state.isAuthenticated = true;
+    });
+    builder.addCase(googleLoginUser.rejected, (state, action) => {
       state.isLoading = false;
       state.error = action.payload as string;
     });

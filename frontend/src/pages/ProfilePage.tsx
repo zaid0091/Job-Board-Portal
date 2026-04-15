@@ -1,9 +1,17 @@
-﻿import { useEffect, useState } from 'react';
+﻿import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import { profilesAPI } from '@/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import SEO from '@/components/SEO';
 import toast from 'react-hot-toast';
+import type {
+  ParsedEducation,
+  ParsedExperience,
+  ParsedSkill,
+  ResumeParseJob,
+  ResumeParsePreview,
+  SeekerProfile,
+} from '@/types';
 
 export default function ProfilePage() {
   const { user, isLoading } = useAppSelector((state) => state.auth);
@@ -142,50 +150,155 @@ function EmployerProfileSection() {
   );
 }
 
-import { useRef } from 'react';
-// ...existing code...
+type SeekerFormState = {
+  headline: string;
+  bio: string;
+  location: string;
+  phone: string;
+  portfolio_url: string;
+  linkedin_url: string;
+  github_url: string;
+  experience_years: number;
+};
+
+function mapProfileToForm(profile: SeekerProfile): SeekerFormState {
+  return {
+    headline: profile.headline || '',
+    bio: profile.bio || '',
+    location: profile.location || '',
+    phone: profile.phone || '',
+    portfolio_url: profile.portfolio_url || '',
+    linkedin_url: profile.linkedin_url || '',
+    github_url: profile.github_url || '',
+    experience_years: profile.experience_years || 0,
+  };
+}
+
 function SeekerProfileSection() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({
-    headline: '',
-    bio: '',
-    location: '',
-    phone: '',
-    portfolio_url: '',
-    linkedin_url: '',
-    github_url: '',
-    experience_years: 0,
-  });
+  const [form, setForm] = useState<SeekerFormState>(mapProfileToForm({} as SeekerProfile));
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumeJob, setResumeJob] = useState<ResumeParseJob | null>(null);
+  const [resumePreview, setResumePreview] = useState<ResumeParsePreview | null>(null);
+  const [parseApplying, setParseApplying] = useState(false);
+  const [editedSummary, setEditedSummary] = useState('');
+  const [editedLocation, setEditedLocation] = useState('');
+  const [editedHeadline, setEditedHeadline] = useState('');
+  const [editedExperienceYears, setEditedExperienceYears] = useState(0);
+  const [editedSkills, setEditedSkills] = useState<ParsedSkill[]>([]);
+  const [editedExperiences, setEditedExperiences] = useState<ParsedExperience[]>([]);
+  const [editedEducations, setEditedEducations] = useState<ParsedEducation[]>([]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     profilesAPI
       .getSeekerProfile()
       .then((res) => {
-        setForm({
-          headline: res.headline || '',
-          bio: res.bio || '',
-          location: res.location || '',
-          phone: res.phone || '',
-          portfolio_url: res.portfolio_url || '',
-          linkedin_url: res.linkedin_url || '',
-          github_url: res.github_url || '',
-          experience_years: res.experience_years || 0,
-        });
+        setForm(mapProfileToForm(res));
         setAvatarUrl(res.avatar || null);
       })
       .catch(() => toast.error('Failed to load profile'))
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (!resumeJob || resumeJob.status === 'REVIEW_READY' || resumeJob.status === 'FAILED') {
+      return;
+    }
+    const timer = window.setInterval(async () => {
+      try {
+        const status = await profilesAPI.getResumeParseStatus(resumeJob.id);
+        setResumeJob(status);
+        if (status.status === 'REVIEW_READY') {
+          const preview = await profilesAPI.getResumeParsePreview(status.id);
+          hydratePreview(preview);
+          window.clearInterval(timer);
+        }
+      } catch {
+        window.clearInterval(timer);
+      }
+    }, 2000);
+    return () => window.clearInterval(timer);
+  }, [resumeJob]);
+
+  const parseInProgress = useMemo(
+    () => resumeJob?.status === 'QUEUED' || resumeJob?.status === 'PROCESSING',
+    [resumeJob],
+  );
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setAvatarFile(file);
       setAvatarUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleResumeSelection = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile) return;
+    setResumeFile(selectedFile);
+    setResumePreview(null);
+    try {
+      const job = await profilesAPI.parseResume(selectedFile);
+      setResumeJob(job);
+      toast.success('Resume parsing started');
+    } catch {
+      toast.error('Failed to start resume parsing');
+    }
+  };
+
+  const hydratePreview = (preview: ResumeParsePreview) => {
+    setResumePreview(preview);
+    setEditedSummary(preview.summary || '');
+    setEditedLocation(preview.location || '');
+    setEditedHeadline((preview.normalized_payload?.headline as string) || form.headline || '');
+    setEditedExperienceYears(Number(preview.normalized_payload?.experience_years || form.experience_years || 0));
+    setEditedSkills(preview.skills || []);
+    setEditedExperiences(preview.experiences || []);
+    setEditedEducations(preview.educations || []);
+    toast.success('Resume parsed. Review autofill suggestions.');
+  };
+
+  const handleApplyAutofill = async () => {
+    if (!resumeJob) return;
+    setParseApplying(true);
+    try {
+      const response = await profilesAPI.applyResumeAutofill(resumeJob.id, {
+        summary: editedSummary,
+        location: editedLocation,
+        headline: editedHeadline,
+        experience_years: editedExperienceYears,
+        skills: editedSkills,
+        experiences: editedExperiences,
+        educations: editedEducations,
+      });
+      setForm(mapProfileToForm(response.profile));
+      setAvatarUrl(response.profile.avatar || null);
+      setResumePreview(null);
+      toast.success('Autofill applied to profile');
+    } catch {
+      toast.error('Failed to apply autofill');
+    } finally {
+      setParseApplying(false);
+    }
+  };
+
+  const handleDiscardAutofill = async () => {
+    if (!resumeJob) return;
+    try {
+      await profilesAPI.discardResumeParse(resumeJob.id);
+      setResumeJob(null);
+      setResumePreview(null);
+      setResumeFile(null);
+      toast.success('Parsed draft discarded');
+    } catch {
+      toast.error('Failed to discard parsed draft');
     }
   };
 
@@ -243,6 +356,136 @@ function SeekerProfileSection() {
         <div>
           <p className="text-[13px] text-ink-500">Profile photo (JPG, PNG, max 2MB)</p>
         </div>
+      </div>
+      <div className="rounded-xl border border-ink-900/[0.08] dark:border-ink-300/[0.12] p-4 space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <p className="text-sm font-medium text-ink-700">Resume Parsing + Autofill</p>
+            <p className="text-[12px] text-ink-400">
+              Upload resume and review extracted summary, location, skills, experience, and education.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => resumeInputRef.current?.click()}
+            disabled={parseInProgress}
+            className="btn-secondary text-[13px] py-2 px-3"
+          >
+            {parseInProgress ? 'Parsing...' : 'Upload resume'}
+          </button>
+          <input
+            ref={resumeInputRef}
+            type="file"
+            accept=".pdf,.doc,.docx"
+            className="hidden"
+            onChange={handleResumeSelection}
+          />
+        </div>
+        {(resumeFile || resumeJob) && (
+          <div className="text-[12px] text-ink-500">
+            {resumeFile?.name ? `Selected: ${resumeFile.name}` : 'Resume selected'}
+            {resumeJob ? ` • Status: ${resumeJob.status} (${resumeJob.progress}%)` : ''}
+          </div>
+        )}
+        {resumePreview && (
+          <div className="space-y-4 pt-2">
+            {resumePreview.warnings.length > 0 && (
+              <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 p-3 text-[12px] text-amber-700 dark:text-amber-300">
+                {resumePreview.warnings.join(' ')}
+              </div>
+            )}
+            <div>
+              <label className="block text-[13px] font-medium text-ink-600 mb-1">Autofill Headline</label>
+              <input
+                type="text"
+                className="input-field"
+                value={editedHeadline}
+                onChange={(e) => setEditedHeadline(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-[13px] font-medium text-ink-600 mb-1">Autofill Summary</label>
+              <textarea
+                rows={4}
+                className="input-field"
+                value={editedSummary}
+                onChange={(e) => setEditedSummary(e.target.value)}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[13px] font-medium text-ink-600 mb-1">Autofill Location</label>
+                <input
+                  type="text"
+                  className="input-field"
+                  value={editedLocation}
+                  onChange={(e) => setEditedLocation(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-[13px] font-medium text-ink-600 mb-1">Autofill Experience Years</label>
+                <input
+                  type="number"
+                  min={0}
+                  className="input-field"
+                  value={editedExperienceYears}
+                  onChange={(e) => setEditedExperienceYears(parseInt(e.target.value, 10) || 0)}
+                />
+              </div>
+            </div>
+            <div>
+              <p className="text-[13px] font-medium text-ink-600 mb-2">Detected Skills</p>
+              <div className="flex flex-wrap gap-2">
+                {editedSkills.length > 0 ? editedSkills.map((skill) => (
+                  <span key={skill.name} className="px-2 py-1 rounded-md bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 text-xs">
+                    {skill.name} {typeof skill.confidence === 'number' ? `(${Math.round(skill.confidence * 100)}%)` : ''}
+                  </span>
+                )) : <span className="text-[12px] text-ink-400">No skills detected.</span>}
+              </div>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-[13px] font-medium text-ink-600 mb-2">Detected Experiences</p>
+                <div className="space-y-2 max-h-48 overflow-y-auto premium-sidebar-scroll pr-2">
+                  {editedExperiences.length > 0 ? editedExperiences.map((exp, idx) => (
+                    <div key={`${exp.company_name}-${exp.job_title}-${idx}`} className="rounded-md border border-ink-900/[0.06] p-2 text-xs">
+                      <p className="font-medium text-ink-700">{exp.job_title || 'Role'}</p>
+                      <p className="text-ink-500">{exp.company_name || 'Company'}</p>
+                    </div>
+                  )) : <p className="text-[12px] text-ink-400">No experiences detected.</p>}
+                </div>
+              </div>
+              <div>
+                <p className="text-[13px] font-medium text-ink-600 mb-2">Detected Education</p>
+                <div className="space-y-2 max-h-48 overflow-y-auto premium-sidebar-scroll pr-2">
+                  {editedEducations.length > 0 ? editedEducations.map((edu, idx) => (
+                    <div key={`${edu.institution}-${edu.degree}-${idx}`} className="rounded-md border border-ink-900/[0.06] p-2 text-xs">
+                      <p className="font-medium text-ink-700">{edu.degree || 'Degree'}</p>
+                      <p className="text-ink-500">{edu.institution || 'Institution'}</p>
+                    </div>
+                  )) : <p className="text-[12px] text-ink-400">No education detected.</p>}
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={handleApplyAutofill}
+                disabled={parseApplying}
+                className="btn-primary py-2 px-4 text-[13px]"
+              >
+                {parseApplying ? 'Applying...' : 'Apply Autofill'}
+              </button>
+              <button
+                type="button"
+                onClick={handleDiscardAutofill}
+                className="btn-secondary py-2 px-4 text-[13px]"
+              >
+                Discard
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       <div>
         <label className="block text-[13px] font-medium text-ink-600 mb-1.5">Professional Title</label>

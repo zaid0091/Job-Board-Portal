@@ -1,10 +1,12 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { toast } from 'react-hot-toast';
+import { GoogleLogin, CredentialResponse } from '@react-oauth/google';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { loginUser } from '@/store/slices/authSlice';
+import { loginUser, googleLoginUser } from '@/store/slices/authSlice';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import SEO from '@/components/SEO';
 import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
@@ -33,8 +35,23 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     const result = await dispatch(loginUser(data));
     if (loginUser.fulfilled.match(result)) {
+      toast.success('Successfully logged in!');
       navigate('/');
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
+    if (credentialResponse.credential) {
+      const result = await dispatch(googleLoginUser(credentialResponse.credential));
+      if (googleLoginUser.fulfilled.match(result)) {
+        toast.success('Successfully logged in with Google!');
+        navigate('/');
+      }
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error('Google Sign-In was unsuccessful. Please try again.');
   };
 
   return (
@@ -122,6 +139,26 @@ export default function LoginPage() {
               {isLoading ? <LoadingSpinner size="sm" /> : 'Sign in'}
             </button>
           </form>
+
+          <div className="mt-6 relative">
+            <div className="absolute inset-0 flex items-center" aria-hidden="true">
+              <div className="w-full border-t border-ink-900/[0.04] dark:border-ink-300/[0.06]"></div>
+            </div>
+            <div className="relative flex justify-center text-[11px] uppercase tracking-wider font-semibold">
+              <span className="px-3 bg-card text-ink-300">Or continue with</span>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="outline"
+              shape="pill"
+              size="large"
+              width="320"
+            />
+          </div>
 
           <div className="mt-6 pt-5 text-center border-t border-ink-900/[0.04] dark:border-ink-300/[0.06] space-y-2">
             <p className="text-[13px] text-ink-400">

@@ -16,9 +16,10 @@ export interface EmployerProfile {
 }
 
 export interface Experience {
-  id: number;
-  company: string;
-  title: string;
+  id: string;
+  company_name: string;
+  job_title: string;
+  location: string;
   start_date: string;
   end_date: string | null;
   is_current: boolean;
@@ -26,7 +27,7 @@ export interface Experience {
 }
 
 export interface Education {
-  id: number;
+  id: string;
   institution: string;
   degree: string;
   field_of_study: string;
@@ -55,4 +56,58 @@ export interface SeekerProfile {
   expected_salary_max: string | null;
   experiences: Experience[];
   educations: Education[];
+}
+
+export interface ResumeParseJob {
+  id: string;
+  status: 'QUEUED' | 'PROCESSING' | 'REVIEW_READY' | 'FAILED' | 'APPLIED' | 'DISCARDED';
+  progress: number;
+  error_code: string;
+  error_message: string;
+  parser_version: string;
+  llm_model: string;
+  pipeline_mode: string;
+  created_at: string;
+  updated_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface ParsedSkill {
+  name: string;
+  confidence?: number;
+  source?: string;
+}
+
+export interface ParsedExperience {
+  company_name: string;
+  job_title: string;
+  description?: string;
+  location?: string;
+  start_date?: string;
+  end_date?: string;
+  is_current?: boolean;
+  confidence?: number;
+}
+
+export interface ParsedEducation {
+  institution: string;
+  degree: string;
+  field_of_study?: string;
+  start_date?: string;
+  end_date?: string;
+  grade?: string;
+  confidence?: number;
+}
+
+export interface ResumeParsePreview {
+  job: ResumeParseJob;
+  summary: string;
+  location: string;
+  skills: ParsedSkill[];
+  experiences: ParsedExperience[];
+  educations: ParsedEducation[];
+  confidence: Record<string, number>;
+  warnings: string[];
+  normalized_payload: Record<string, unknown>;
 }

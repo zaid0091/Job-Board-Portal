@@ -30,6 +30,10 @@ app.conf.beat_schedule = {
         'task': 'apps.notifications.tasks.cleanup_old_notifications',
         'schedule': crontab(hour=3, minute=0, day_of_week='sunday'),
     },
+    'cleanup-expired-resume-parsing-artifacts': {
+        'task': 'apps.profiles.tasks.cleanup_expired_resume_parsing_artifacts',
+        'schedule': crontab(hour=4, minute=0),
+    },
 }
 
 # Task Routing
@@ -39,4 +43,5 @@ app.conf.task_routes = {
     'apps.jobs.tasks.*': {'queue': 'jobs'},
     'apps.applications.tasks.*': {'queue': 'applications'},
     'apps.analytics.tasks.*': {'queue': 'analytics'},
+    'apps.profiles.tasks.*': {'queue': 'profiles'},
 }

@@ -5,6 +5,9 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 User = get_user_model()
 
+class GoogleLoginSerializer(serializers.Serializer):
+    """Serializer to accept Google OAuth 2.0 credential string."""
+    token = serializers.CharField(required=True, help_text="The credential token from Google")
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     """Custom JWT token serializer that includes user role and profile info."""
@@ -137,11 +140,9 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate_new_password(self, value):
         user = self.context["request"].user
         password_history = user.password_history.all()[: self.PASSWORD_HISTORY_LIMIT]
+        from django.contrib.auth.hashers import check_password
         for history in password_history:
-            if (
-                user.check_password(value)
-                and user.make_password(value) == history.password
-            ):
+            if check_password(value, history.password):
                 raise serializers.ValidationError(
                     "Cannot reuse a recent password. Please choose a different password."
                 )
@@ -176,13 +177,6 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         required=True, write_only=True, style={"input_type": "password"}
     )
 
-    def validate(self, data):
-        if data["password"] != data["password_confirm"]:
-            raise serializers.ValidationError(
-                {"password_confirm": "Passwords do not match."}
-            )
-        return data
-
     def validate_token(self, value):
         from .models import PasswordResetToken
 
@@ -195,7 +189,11 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         return value
 
     def validate(self, data):
-        from .models import PasswordResetToken
+        if data["password"] != data["password_confirm"]:
+            raise serializers.ValidationError(
+                {"password_confirm": "Passwords do not match."}
+            )
+
         from django.contrib.auth.password_validation import (
             validate_password as django_validate,
         )

@@ -18,6 +18,10 @@ def seeker_resume_path(instance, filename):
     return f'seekers/{instance.user.id}/resume/{filename}'
 
 
+def resume_parse_source_path(instance, filename):
+    return f'seekers/{instance.user.id}/resume-parse/{instance.id}/{filename}'
+
+
 class Skill(models.Model):
     """Represents a skill that can be associated with seeker profiles and job requirements."""
     name = models.CharField(max_length=100, unique=True)
@@ -201,3 +205,142 @@ class Education(UUIDModel, TimeStampedModel):
 
     def __str__(self):
         return f'{self.degree} - {self.institution}'
+
+
+class ResumeParseJob(UUIDModel, TimeStampedModel):
+    class Status(models.TextChoices):
+        QUEUED = 'QUEUED', _('Queued')
+        PROCESSING = 'PROCESSING', _('Processing')
+        REVIEW_READY = 'REVIEW_READY', _('Review Ready')
+        FAILED = 'FAILED', _('Failed')
+        APPLIED = 'APPLIED', _('Applied')
+        DISCARDED = 'DISCARDED', _('Discarded')
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='resume_parse_jobs',
+    )
+    status = models.CharField(max_length=20, choices=Status.choices, default=Status.QUEUED, db_index=True)
+    source_file = models.FileField(
+        upload_to=resume_parse_source_path,
+        validators=[validate_resume_file],
+        max_length=500,
+    )
+    source_hash = models.CharField(max_length=64, db_index=True)
+    parser_version = models.CharField(max_length=50, default='v1')
+    llm_model = models.CharField(max_length=100, blank=True)
+    pipeline_mode = models.CharField(max_length=20, default='hybrid')
+    progress = models.PositiveSmallIntegerField(default=0)
+    retries = models.PositiveSmallIntegerField(default=0)
+    error_code = models.CharField(max_length=100, blank=True)
+    error_message = models.TextField(blank=True)
+    started_at = models.DateTimeField(blank=True, null=True)
+    completed_at = models.DateTimeField(blank=True, null=True)
+    last_applied_at = models.DateTimeField(blank=True, null=True)
+    metadata = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'status']),
+            models.Index(fields=['source_hash']),
+        ]
+
+    def __str__(self):
+        return f'{self.user.email} - {self.status}'
+
+
+class ParsedResumeResult(TimeStampedModel):
+    job = models.OneToOneField(
+        ResumeParseJob,
+        on_delete=models.CASCADE,
+        related_name='result',
+    )
+    summary = models.TextField(blank=True)
+    location = models.CharField(max_length=255, blank=True)
+    skills = models.JSONField(default=list, blank=True)
+    experiences = models.JSONField(default=list, blank=True)
+    educations = models.JSONField(default=list, blank=True)
+    confidence = models.JSONField(default=dict, blank=True)
+    warnings = models.JSONField(default=list, blank=True)
+    raw_text = models.TextField(blank=True)
+    normalized_payload = models.JSONField(default=dict, blank=True)
+
+    def __str__(self):
+        return f'Parsed result for {self.job_id}'
+
+
+class ProfileAutofillDraft(UUIDModel, TimeStampedModel):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='profile_autofill_drafts',
+    )
+    job = models.ForeignKey(
+        ResumeParseJob,
+        on_delete=models.CASCADE,
+        related_name='drafts',
+    )
+    payload = models.JSONField(default=dict, blank=True)
+    is_active = models.BooleanField(default=True, db_index=True)
+    expires_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'is_active']),
+        ]
+
+    def __str__(self):
+        return f'Draft {self.id} for {self.user.email}'
+
+
+class ResumeAutofillAudit(TimeStampedModel):
+    class Action(models.TextChoices):
+        PREVIEWED = 'previewed', _('Previewed')
+        ACCEPTED = 'accepted', _('Accepted')
+        EDITED_BEFORE_APPLY = 'edited_before_apply', _('Edited Before Apply')
+        APPLIED = 'applied', _('Applied')
+        REJECTED = 'rejected', _('Rejected')
+        FAILED = 'failed', _('Failed')
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='resume_autofill_audits',
+    )
+    job = models.ForeignKey(
+        ResumeParseJob,
+        on_delete=models.CASCADE,
+        related_name='audits',
+    )
+    action = models.CharField(max_length=32, choices=Action.choices, db_index=True)
+    before_snapshot = models.JSONField(default=dict, blank=True)
+    after_snapshot = models.JSONField(default=dict, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'action']),
+            models.Index(fields=['job', 'action']),
+        ]
+
+    def __str__(self):
+        return f'{self.user.email} - {self.action}'
+
+
+class SkillAlias(TimeStampedModel):
+    skill = models.ForeignKey(
+        Skill,
+        on_delete=models.CASCADE,
+        related_name='aliases',
+    )
+    alias = models.CharField(max_length=120, unique=True, db_index=True)
+
+    class Meta:
+        ordering = ['alias']
+
+    def __str__(self):
+        return f'{self.alias} -> {self.skill.name}'

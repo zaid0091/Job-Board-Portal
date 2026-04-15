@@ -2,7 +2,8 @@ from rest_framework import serializers
 from core.sanitizers import strip_all_html
 from .models import (
     EmployerProfile, SeekerProfile,
-    Skill, Experience, Education
+    Skill, Experience, Education,
+    ResumeParseJob, ParsedResumeResult, ResumeAutofillAudit,
 )
 
 
@@ -136,3 +137,64 @@ class SeekerProfileSerializer(serializers.ModelSerializer):
 
     def validate_headline(self, value):
         return strip_all_html(value) if value else value
+
+
+class ResumeParseCreateSerializer(serializers.Serializer):
+    resume = serializers.FileField(required=True)
+
+
+class ResumeParseJobSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResumeParseJob
+        fields = [
+            'id', 'status', 'progress', 'error_code', 'error_message',
+            'parser_version', 'llm_model', 'pipeline_mode',
+            'created_at', 'updated_at', 'started_at', 'completed_at',
+        ]
+
+
+class ParsedResumeResultSerializer(serializers.ModelSerializer):
+    job = ResumeParseJobSerializer(read_only=True)
+
+    class Meta:
+        model = ParsedResumeResult
+        fields = [
+            'job', 'summary', 'location', 'skills', 'experiences',
+            'educations', 'confidence', 'warnings', 'normalized_payload',
+            'created_at', 'updated_at',
+        ]
+
+
+class ResumeParsePreviewSerializer(serializers.Serializer):
+    summary = serializers.CharField(required=False, allow_blank=True)
+    location = serializers.CharField(required=False, allow_blank=True)
+    skills = serializers.ListField(child=serializers.DictField(), required=False)
+    experiences = serializers.ListField(child=serializers.DictField(), required=False)
+    educations = serializers.ListField(child=serializers.DictField(), required=False)
+    confidence = serializers.DictField(required=False)
+    warnings = serializers.ListField(child=serializers.CharField(), required=False)
+
+
+class ResumeParseApplySerializer(serializers.Serializer):
+    summary = serializers.CharField(required=False, allow_blank=True)
+    location = serializers.CharField(required=False, allow_blank=True)
+    headline = serializers.CharField(required=False, allow_blank=True)
+    experience_years = serializers.IntegerField(required=False, min_value=0)
+    skills = serializers.ListField(
+        child=serializers.DictField(), required=False
+    )
+    experiences = serializers.ListField(
+        child=serializers.DictField(), required=False
+    )
+    educations = serializers.ListField(
+        child=serializers.DictField(), required=False
+    )
+
+
+class ResumeAutofillAuditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ResumeAutofillAudit
+        fields = [
+            'id', 'action', 'before_snapshot', 'after_snapshot', 'metadata',
+            'created_at',
+        ]

@@ -76,7 +76,11 @@ export default function Navbar() {
     return () => document.removeEventListener('click', handler);
   }, [profileOpen]);
 
-  const handleLogout = () => dispatch(logoutUser());
+  const handleLogout = async () => {
+    await dispatch(logoutUser());
+    // Force redirect to login page after logout
+    window.location.href = '/login';
+  };
 
   const isActive = (match: string) => location.pathname.startsWith(match);
   const isHome = location.pathname === '/';
@@ -258,7 +262,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-t border-ink-900/[0.06] px-4 py-3 flex flex-col gap-1">
+        <div className="md:hidden premium-sidebar-scroll max-h-[calc(100vh-3.5rem)] overflow-y-auto bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-t border-ink-900/[0.06] px-4 py-3 flex flex-col gap-1">
           {navLinks.map((link) => (
             <Link
               key={link.to}

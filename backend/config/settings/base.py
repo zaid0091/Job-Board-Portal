@@ -162,11 +162,17 @@ SIMPLE_JWT = {
 JWT_AUTH_COOKIE = "access"
 JWT_AUTH_REFRESH_COOKIE = "refresh"
 
+# GOOGLE OAUTH
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "471380820430-t1svgevqrt7ndl0r7hncad8f8d2k30r1.apps.googleusercontent.com")
+
 # CORS
 CORS_ALLOWED_ORIGINS = os.environ.get(
     "CORS_ALLOWED_ORIGINS", "http://localhost:5173"
 ).split(",")
 CORS_ALLOW_CREDENTIALS = True
+
+# Security Headers for Google OAuth
+SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 # CACHING (Redis)
 CACHES = {
@@ -207,6 +213,10 @@ ALLOWED_RESUME_TYPES = [
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ]
 ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"]
+RESUME_PARSE_RETENTION_DAYS = int(os.environ.get("RESUME_PARSE_RETENTION_DAYS", 30))
+RESUME_PARSE_MAX_RAW_TEXT_CHARS = int(os.environ.get("RESUME_PARSE_MAX_RAW_TEXT_CHARS", 50000))
+RESUME_PARSE_ENABLE_LLM = os.environ.get("RESUME_PARSE_ENABLE_LLM", "false").lower() == "true"
+RESUME_PARSE_LLM_MODEL = os.environ.get("RESUME_PARSE_LLM_MODEL", "")
 
 # STATIC & MEDIA FILES
 STATIC_URL = "/static/"

@@ -1,5 +1,10 @@
 import axiosInstance from './axiosInstance';
-import type { EmployerProfile, SeekerProfile } from '@/types';
+import type {
+  EmployerProfile,
+  ResumeParseJob,
+  ResumeParsePreview,
+  SeekerProfile,
+} from '@/types';
 
 export const profilesAPI = {
   getEmployerProfile: async () => {
@@ -42,12 +47,12 @@ export const profilesAPI = {
     return response.data;
   },
 
-  updateExperience: async (id: number, data: Record<string, unknown>) => {
+  updateExperience: async (id: string, data: Record<string, unknown>) => {
     const response = await axiosInstance.patch(`/profiles/experiences/${id}/`, data);
     return response.data;
   },
 
-  deleteExperience: async (id: number) => {
+  deleteExperience: async (id: string) => {
     await axiosInstance.delete(`/profiles/experiences/${id}/`);
   },
 
@@ -57,12 +62,47 @@ export const profilesAPI = {
     return response.data;
   },
 
-  updateEducation: async (id: number, data: Record<string, unknown>) => {
+  updateEducation: async (id: string, data: Record<string, unknown>) => {
     const response = await axiosInstance.patch(`/profiles/educations/${id}/`, data);
     return response.data;
   },
 
-  deleteEducation: async (id: number) => {
+  deleteEducation: async (id: string) => {
     await axiosInstance.delete(`/profiles/educations/${id}/`);
+  },
+
+  parseResume: async (resume: File) => {
+    const formData = new FormData();
+    formData.append('resume', resume);
+    const response = await axiosInstance.post<ResumeParseJob>('/profiles/seeker/resume/parse/', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  getResumeParseStatus: async (jobId: string) => {
+    const response = await axiosInstance.get<ResumeParseJob>(`/profiles/seeker/resume/parse/${jobId}/status/`);
+    return response.data;
+  },
+
+  getResumeParsePreview: async (jobId: string) => {
+    const response = await axiosInstance.get<ResumeParsePreview>(`/profiles/seeker/resume/parse/${jobId}/preview/`);
+    return response.data;
+  },
+
+  applyResumeAutofill: async (jobId: string, payload: Record<string, unknown>) => {
+    const response = await axiosInstance.post<{ message: string; profile: SeekerProfile }>(
+      `/profiles/seeker/resume/parse/${jobId}/apply/`,
+      payload,
+    );
+    return response.data;
+  },
+
+  discardResumeParse: async (jobId: string) => {
+    const response = await axiosInstance.post<{ message: string }>(
+      `/profiles/seeker/resume/parse/${jobId}/discard/`,
+      {},
+    );
+    return response.data;
   },
 };

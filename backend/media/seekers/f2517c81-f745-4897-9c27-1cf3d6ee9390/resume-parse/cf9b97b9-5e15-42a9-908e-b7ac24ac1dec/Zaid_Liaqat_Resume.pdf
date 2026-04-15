@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="module">import { injectIntoGlobalHook } from "/@react-refresh";
+injectIntoGlobalHook(window);
+window.$RefreshReg$ = () => {};
+window.$RefreshSig$ = () => (type) => type;</script>
+
+    <script type="module" src="/@vite/client"></script>
+
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Zaid Liaqat | Software Developer & Full-Stack Engineer</title>
+    <meta name="description" content="Software Developer and Full-Stack Engineer specializing in React, Node.js, Python, Django, and AWS. Based in Hasilpur, Pakistan." />
+    <meta name="author" content="Zaid Liaqat" />
+    <meta name="keywords" content="Zaid Liaqat, Software Developer, Full-Stack Engineer, React, Node.js, Python, Django, AWS, Portfolio" />
+
+    <!-- Open Graph (LinkedIn, Facebook) -->
+    <meta property="og:title" content="Zaid Liaqat | Software Developer & Full-Stack Engineer" />
+    <meta property="og:description" content="Software Developer specializing in React, Node.js, Python, Django, and AWS. Check out my projects and experience." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-preview.png" />
+    <meta property="og:url" content="https://zaidliaqat.dev" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Zaid Liaqat | Software Developer" />
+    <meta name="twitter:description" content="Software Developer specializing in React, Node.js, Python, Django, and AWS." />
+    <meta name="twitter:image" content="/og-preview.png" />
+
+    <link rel="canonical" href="https://zaidliaqat.dev" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx?t=1772362476303"></script>
+  </body>
+</html>

@@ -8,6 +8,7 @@ app_name = "users"
 urlpatterns = [
     path("auth/register/", views.RegisterView.as_view(), name="register"),
     path("auth/login/", views.CustomTokenObtainPairView.as_view(), name="login"),
+    path("auth/google/", views.GoogleLoginView.as_view(), name="google-login"),
     path("auth/logout/", views.LogoutView.as_view(), name="logout"),
     path(
         "auth/token/refresh/",

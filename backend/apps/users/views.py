@@ -8,6 +8,9 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+
 from core.throttles import (
     LoginRateThrottle,
     RegistrationRateThrottle,
@@ -15,6 +18,7 @@ from core.throttles import (
     PasswordResetThrottle,
 )
 from .serializers import (
+    GoogleLoginSerializer,
     CustomTokenObtainPairSerializer,
     RegisterSerializer,
     UserSerializer,
@@ -140,17 +144,33 @@ class LogoutView(APIView):
                     {"message": "Logout successful."}, status=status.HTTP_200_OK
                 )
 
-            response.delete_cookie(getattr(settings, "JWT_AUTH_COOKIE", "access"))
-            response.delete_cookie(refresh_cookie)
+            secure_cookie = not settings.DEBUG
+            response.delete_cookie(
+                getattr(settings, "JWT_AUTH_COOKIE", "access"),
+                samesite="Lax",
+                secure=secure_cookie,
+            )
+            response.delete_cookie(
+                refresh_cookie,
+                samesite="Lax",
+                secure=secure_cookie,
+            )
             return response
         except Exception as e:
             logger.error(f"Logout error: {str(e)}")
             response = Response(
                 {"error": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST
             )
-            response.delete_cookie(getattr(settings, "JWT_AUTH_COOKIE", "access"))
+            secure_cookie = not settings.DEBUG
             response.delete_cookie(
-                getattr(settings, "JWT_AUTH_REFRESH_COOKIE", "refresh")
+                getattr(settings, "JWT_AUTH_COOKIE", "access"),
+                samesite="Lax",
+                secure=secure_cookie,
+            )
+            response.delete_cookie(
+                getattr(settings, "JWT_AUTH_REFRESH_COOKIE", "refresh"),
+                samesite="Lax",
+                secure=secure_cookie,
             )
             return response
 
@@ -193,10 +213,8 @@ class ChangePasswordView(generics.UpdateAPIView):
         PasswordHistory.objects.create(user=user, password=old_password_hash)
 
         if user.password_history.count() > self.PASSWORD_HISTORY_LIMIT:
-            old_records = user.password_history.order_by("created_at")[
-                : -self.PASSWORD_HISTORY_LIMIT
-            ]
-            old_records.delete()
+            recent_ids = user.password_history.order_by("-created_at")[: self.PASSWORD_HISTORY_LIMIT].values_list("id", flat=True)
+            user.password_history.exclude(id__in=recent_ids).delete()
 
         logger.info("Password changed for user")
 
@@ -295,7 +313,7 @@ class PasswordResetConfirmView(APIView):
         reset_token.save()
 
         try:
-            user.refresh_token.all().delete()
+            user.outstandingtoken_set.all().delete()
         except Exception:
             pass
 
@@ -307,3 +325,55 @@ class PasswordResetConfirmView(APIView):
             },
             status=status.HTTP_200_OK,
         )
+
+
+class GoogleLoginView(APIView):
+    """
+    POST /api/v1/auth/google/
+    Verifies a Google OAuth id_token and issues JWT session cookies.
+    """
+    permission_classes = [permissions.AllowAny]
+    authentication_classes = []
+    throttle_classes = [LoginRateThrottle]
+
+    def post(self, request, *args, **kwargs):
+        serializer = GoogleLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        token = serializer.validated_data["token"]
+
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                token, 
+                google_requests.Request(), 
+                settings.GOOGLE_CLIENT_ID
+            )
+            
+            email = idinfo['email']
+            username = idinfo.get('name', email.split("@")[0])
+            
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={
+                    'username': username,
+                    'is_verified': True,
+                }
+            )
+            
+            if not created and not user.is_verified:
+                user.is_verified = True
+                user.save()
+                
+            refresh = RefreshToken.for_user(user)
+            
+            logger.info(f"Google OAuth login for {user.email}")
+            
+            response = Response({
+                "message": "Login successful",
+                "user": UserSerializer(user).data
+            }, status=status.HTTP_200_OK)
+            
+            return set_auth_cookies(response, str(refresh.access_token), str(refresh))
+            
+        except ValueError as e:
+            logger.error(f"Google Token Verification Failed: {e}")
+            return Response({"error": "Invalid Google token."}, status=status.HTTP_400_BAD_REQUEST)

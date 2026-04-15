@@ -57,7 +57,6 @@ export default function AppRoutes() {
 
         {/* Authenticated routes */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/profile" element={<SuspenseWrapper><ProfilePage /></SuspenseWrapper>} />
           <Route path="/notifications" element={<SuspenseWrapper><NotificationsPage /></SuspenseWrapper>} />
         </Route>
 
@@ -66,6 +65,7 @@ export default function AppRoutes() {
           <Route element={<RoleRoute allowedRoles={['EMPLOYER']} />}>
             <Route path="/employer/dashboard" element={<SuspenseWrapper><EmployerDashboardPage /></SuspenseWrapper>} />
             <Route path="/employer/applications" element={<SuspenseWrapper><EmployerApplicationsPage /></SuspenseWrapper>} />
+            <Route path="/employer/profile" element={<SuspenseWrapper><ProfilePage /></SuspenseWrapper>} />
             <Route path="/employer/jobs/create" element={<SuspenseWrapper><CreateJobPage /></SuspenseWrapper>} />
           </Route>
         </Route>

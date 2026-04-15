@@ -82,6 +82,63 @@ html.theme-transition *::after {
 }
 
 @layer components {
+  .premium-sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(124, 58, 237, 0.65) transparent;
+  }
+
+  .premium-sidebar-scroll::-webkit-scrollbar {
+    width: 9px;
+  }
+
+  .premium-sidebar-scroll::-webkit-scrollbar-track {
+    background: transparent;
+    margin-block: 6px;
+  }
+
+  .premium-sidebar-scroll::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    background-image: linear-gradient(
+      180deg,
+      rgba(167, 139, 250, 0.92),
+      rgba(124, 58, 237, 0.88)
+    );
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.22), 0 4px 10px rgba(124, 58, 237, 0.26);
+    transition: background-image 180ms ease, box-shadow 180ms ease;
+  }
+
+  .premium-sidebar-scroll:hover::-webkit-scrollbar-thumb {
+    background-image: linear-gradient(
+      180deg,
+      rgba(196, 181, 253, 0.96),
+      rgba(139, 92, 246, 0.92)
+    );
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3), 0 6px 14px rgba(124, 58, 237, 0.34);
+  }
+
+  .premium-sidebar-scroll::-webkit-scrollbar-thumb:active {
+    background-image: linear-gradient(
+      180deg,
+      rgba(139, 92, 246, 0.95),
+      rgba(91, 33, 182, 0.94)
+    );
+  }
+
+  .dark .premium-sidebar-scroll {
+    scrollbar-color: rgba(167, 139, 250, 0.8) transparent;
+  }
+
+  .dark .premium-sidebar-scroll::-webkit-scrollbar-thumb {
+    background-image: linear-gradient(
+      180deg,
+      rgba(196, 181, 253, 0.88),
+      rgba(124, 58, 237, 0.9)
+    );
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 6px 16px rgba(124, 58, 237, 0.38);
+  }
+
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-5 py-2.5
     bg-primary-600 text-white text-sm font-medium rounded-xl
