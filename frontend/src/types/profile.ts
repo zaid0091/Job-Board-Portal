@@ -4,7 +4,7 @@ export interface EmployerProfile {
   id: string;
   company_name: string;
   logo: string | null;
-  website: string;
+  company_website: string;
   company_size: string;
   industry: string;
   location: string;

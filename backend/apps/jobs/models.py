@@ -150,9 +150,9 @@ class Job(UUIDModel, TimeStampedModel):
         ]
         constraints = [
             models.CheckConstraint(
-                check=models.Q(salary_min__lte=models.F('salary_max')) |
-                      models.Q(salary_min__isnull=True) |
-                      models.Q(salary_max__isnull=True),
+                condition=models.Q(salary_min__lte=models.F('salary_max')) |
+                          models.Q(salary_min__isnull=True) |
+                          models.Q(salary_max__isnull=True),
                 name='salary_min_lte_max'
             ),
         ]

@@ -1,9 +1,11 @@
 ﻿import { useEffect, useMemo, useRef, useState } from 'react';
-import { useAppSelector } from '@/store/hooks';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { profilesAPI } from '@/api';
+import { fetchEmployerProfile, updateEmployerProfile, fetchSeekerProfile, updateSeekerProfile } from '@/store/slices/profileSlice';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import SEO from '@/components/SEO';
 import toast from 'react-hot-toast';
+import { CountryDropdown, RegionDropdown } from 'react-country-region-selector';
 import type {
   ParsedEducation,
   ParsedExperience,
@@ -31,7 +33,8 @@ export default function ProfilePage() {
 }
 
 function EmployerProfileSection() {
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { employerProfile, isLoading, error } = useAppSelector((state) => state.profile);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
     company_name: '',
@@ -41,23 +44,38 @@ function EmployerProfileSection() {
     industry: '',
     location: '',
   });
+  const [country, setCountry] = useState('');
+  const [region, setRegion] = useState('');
 
   useEffect(() => {
-    profilesAPI
-      .getEmployerProfile()
-      .then((res) => {
-        setForm({
-          company_name: res.company_name || '',
-          website: res.website || '',
-          description: res.description || '',
-          company_size: res.company_size || '',
-          industry: res.industry || '',
-          location: res.location || '',
-        });
-      })
-      .catch(() => toast.error('Failed to load profile'))
-      .finally(() => setLoading(false));
-  }, []);
+    dispatch(fetchEmployerProfile());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (employerProfile) {
+      setForm({
+        company_name: employerProfile.company_name || '',
+        website: employerProfile.company_website || '',
+        description: employerProfile.description || '',
+        company_size: employerProfile.company_size || '',
+        industry: employerProfile.industry || '',
+        location: employerProfile.location || '',
+      });
+      if (employerProfile.location) {
+        const parts = employerProfile.location.split(', ');
+        if (parts.length === 2) {
+          setCountry(parts[1]);
+          setRegion(parts[0]);
+        }
+      }
+    }
+  }, [employerProfile]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,30 +83,52 @@ function EmployerProfileSection() {
     try {
       const formData = new FormData();
       Object.entries(form).forEach(([key, value]) => {
-        formData.append(key, value);
+        if (key === 'website') {
+          formData.append('company_website', String(value));
+        } else {
+          formData.append(key, String(value));
+        }
       });
-      await profilesAPI.updateEmployerProfile(formData);
+      await dispatch(updateEmployerProfile(formData)).unwrap();
       toast.success('Profile updated');
-    } catch {
-      toast.error('Failed to update profile');
+    } catch (error: any) {
+      toast.error(error || 'Failed to update profile');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <LoadingSpinner size="lg" />;
+  if (isLoading) return <LoadingSpinner size="lg" />;
 
   return (
     <form onSubmit={handleSubmit} className="bg-card rounded-xl p-6 sm:p-8 space-y-5" style={{ boxShadow: 'var(--card-shadow)' }}>
-      <div>
-        <label className="block text-[13px] font-medium text-ink-600 mb-1.5">Company Name</label>
-        <input
-          type="text"
-          className="input-field"
-          value={form.company_name}
-          onChange={(e) => setForm({ ...form, company_name: e.target.value })}
-        />
-      </div>
+        <div>
+          <label className="block text-[13px] font-medium text-ink-600 mb-1">Location</label>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <CountryDropdown
+                value={country}
+                onChange={(val) => {
+                  setCountry(val);
+                  setRegion('');
+                  setForm({ ...form, location: region && val ? `${region}, ${val}` : val });
+                }}
+                className="input-field"
+              />
+            </div>
+            <div>
+              <RegionDropdown
+                country={country}
+                value={region}
+                onChange={(val) => {
+                  setRegion(val);
+                  setForm({ ...form, location: `${val}, ${country}` });
+                }}
+                className="input-field"
+              />
+            </div>
+          </div>
+        </div>
       <div>
         <label className="block text-[13px] font-medium text-ink-600 mb-1">Website</label>
         <input
@@ -175,9 +215,12 @@ function mapProfileToForm(profile: SeekerProfile): SeekerFormState {
 }
 
 function SeekerProfileSection() {
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const { seekerProfile, isLoading, error } = useAppSelector((state) => state.profile);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState<SeekerFormState>(mapProfileToForm({} as SeekerProfile));
+  const [country, setCountry] = useState('');
+  const [region, setRegion] = useState('');
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -196,15 +239,28 @@ function SeekerProfileSection() {
   const resumeInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    profilesAPI
-      .getSeekerProfile()
-      .then((res) => {
-        setForm(mapProfileToForm(res));
-        setAvatarUrl(res.avatar || null);
-      })
-      .catch(() => toast.error('Failed to load profile'))
-      .finally(() => setLoading(false));
-  }, []);
+    dispatch(fetchSeekerProfile());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (seekerProfile) {
+      setForm(mapProfileToForm(seekerProfile));
+      setAvatarUrl(seekerProfile.avatar || null);
+      if (seekerProfile.location) {
+        const parts = seekerProfile.location.split(', ');
+        if (parts.length === 2) {
+          setRegion(parts[0]);
+          setCountry(parts[1]);
+        }
+      }
+    }
+  }, [seekerProfile]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
   useEffect(() => {
     if (!resumeJob || resumeJob.status === 'REVIEW_READY' || resumeJob.status === 'FAILED') {
@@ -313,16 +369,16 @@ function SeekerProfileSection() {
       if (avatarFile) {
         formData.append('avatar', avatarFile);
       }
-      await profilesAPI.updateSeekerProfile(formData);
+      await dispatch(updateSeekerProfile(formData)).unwrap();
       toast.success('Profile updated');
-    } catch {
-      toast.error('Failed to update profile');
+    } catch (error: any) {
+      toast.error(error || 'Failed to update profile');
     } finally {
       setSaving(false);
     }
   };
 
-  if (loading) return <LoadingSpinner size="lg" />;
+  if (isLoading) return <LoadingSpinner size="lg" />;
 
   return (
     <form onSubmit={handleSubmit} className="bg-card rounded-xl p-6 sm:p-8 space-y-5" style={{ boxShadow: 'var(--card-shadow)' }}>
@@ -500,12 +556,30 @@ function SeekerProfileSection() {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-[13px] font-medium text-ink-600 mb-1">Location</label>
-          <input
-            type="text"
-            className="input-field"
-            value={form.location}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
-          />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <CountryDropdown
+                value={country}
+                onChange={(val) => {
+                  setCountry(val);
+                  setRegion('');
+                  setForm({ ...form, location: region && val ? `${region}, ${val}` : val });
+                }}
+                className="input-field"
+              />
+            </div>
+            <div>
+              <RegionDropdown
+                country={country}
+                value={region}
+                onChange={(val) => {
+                  setRegion(val);
+                  setForm({ ...form, location: `${val}, ${country}` });
+                }}
+                className="input-field"
+              />
+            </div>
+          </div>
         </div>
         <div>
           <label className="block text-[13px] font-medium text-ink-600 mb-1">Years of Experience</label>

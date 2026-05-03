@@ -1,8 +1,13 @@
-import magic
 import os
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+
+# Handle magic import gracefully on Windows where libmagic may not be available
+try:
+    import magic
+except ImportError:
+    magic = None
 
 
 def validate_file_size(file, max_size):
@@ -30,13 +35,17 @@ def validate_resume_file(file):
         )
 
     file_mime = None
-    try:
-        file_mime = magic.from_buffer(file.read(2048), mime=True)
-    except Exception:
-        # Fallback for environments where libmagic is unavailable/misconfigured.
+    if magic:
+        try:
+            file_mime = magic.from_buffer(file.read(2048), mime=True)
+        except Exception:
+            # Fallback for environments where libmagic is unavailable/misconfigured.
+            file_mime = getattr(file, 'content_type', None)
+        finally:
+            file.seek(0)
+    else:
+        # Fallback when magic is not available
         file_mime = getattr(file, 'content_type', None)
-    finally:
-        file.seek(0)
 
     if file_mime not in settings.ALLOWED_RESUME_TYPES:
         raise ValidationError(
@@ -57,12 +66,16 @@ def validate_image_file(file):
         )
 
     file_mime = None
-    try:
-        file_mime = magic.from_buffer(file.read(2048), mime=True)
-    except Exception:
+    if magic:
+        try:
+            file_mime = magic.from_buffer(file.read(2048), mime=True)
+        except Exception:
+            file_mime = getattr(file, 'content_type', None)
+        finally:
+            file.seek(0)
+    else:
+        # Fallback when magic is not available
         file_mime = getattr(file, 'content_type', None)
-    finally:
-        file.seek(0)
 
     if file_mime not in settings.ALLOWED_IMAGE_TYPES:
         raise ValidationError(

@@ -15,6 +15,7 @@ const EmployerDashboardPage = lazy(() => import('@/pages/EmployerDashboardPage')
 const EmployerApplicationsPage = lazy(() => import('@/pages/EmployerApplicationsPage'));
 const SeekerDashboardPage = lazy(() => import('@/pages/SeekerDashboardPage'));
 const CreateJobPage = lazy(() => import('@/pages/CreateJobPage'));
+const EditJobPage = lazy(() => import('@/pages/EditJobPage'));
 const MyApplicationsPage = lazy(() => import('@/pages/MyApplicationsPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
@@ -38,7 +39,11 @@ function SuspenseWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function AppRoutes() {
+interface AppRoutesProps {
+  authInitialized: boolean;
+}
+
+export default function AppRoutes({ authInitialized }: AppRoutesProps) {
   return (
     <Routes>
       <Route element={<Layout />}>
@@ -56,22 +61,23 @@ export default function AppRoutes() {
         <Route path="/terms" element={<SuspenseWrapper><TermsPage /></SuspenseWrapper>} />
 
         {/* Authenticated routes */}
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute authInitialized={authInitialized} />}>
           <Route path="/notifications" element={<SuspenseWrapper><NotificationsPage /></SuspenseWrapper>} />
         </Route>
 
         {/* Employer routes */}
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute authInitialized={authInitialized} />}>
           <Route element={<RoleRoute allowedRoles={['EMPLOYER']} />}>
             <Route path="/employer/dashboard" element={<SuspenseWrapper><EmployerDashboardPage /></SuspenseWrapper>} />
             <Route path="/employer/applications" element={<SuspenseWrapper><EmployerApplicationsPage /></SuspenseWrapper>} />
             <Route path="/employer/profile" element={<SuspenseWrapper><ProfilePage /></SuspenseWrapper>} />
             <Route path="/employer/jobs/create" element={<SuspenseWrapper><CreateJobPage /></SuspenseWrapper>} />
+            <Route path="/jobs/:slug/edit" element={<SuspenseWrapper><EditJobPage /></SuspenseWrapper>} />
           </Route>
         </Route>
 
         {/* Seeker routes */}
-        <Route element={<ProtectedRoute />}>
+        <Route element={<ProtectedRoute authInitialized={authInitialized} />}>
           <Route element={<RoleRoute allowedRoles={['SEEKER']} />}>
             <Route path="/seeker/dashboard" element={<SuspenseWrapper><SeekerDashboardPage /></SuspenseWrapper>} />
             <Route path="/seeker/applications" element={<SuspenseWrapper><MyApplicationsPage /></SuspenseWrapper>} />

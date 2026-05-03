@@ -1,12 +1,17 @@
 ﻿import { useEffect, useState } from 'react';
-import { analyticsAPI } from '@/api';
+import { analyticsAPI, jobsAPI } from '@/api';
 import { DashboardSkeleton } from '@/components/ui/Skeleton';
 import SEO from '@/components/SEO';
+import toast from 'react-hot-toast';
 import {
   BriefcaseIcon,
   DocumentTextIcon,
   EyeIcon,
   CheckCircleIcon,
+  PencilIcon,
+  TrashIcon,
+  UsersIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import {
   BarChart,
@@ -21,7 +26,8 @@ import {
   Cell,
   Legend,
 } from 'recharts';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import type { JobListItem, JobStatus } from '@/types';
 
 interface DashboardData {
   overview: {
@@ -37,9 +43,22 @@ interface DashboardData {
 
 const PIE_COLORS = ['#7c3aed', '#10b981', '#f59e0b', '#ef4444', '#3b82f6', '#ec4899'];
 
+const statusColors: Record<JobStatus, string> = {
+  DRAFT: 'bg-gray-100 text-gray-700',
+  ACTIVE: 'bg-emerald-100 text-emerald-700',
+  PAUSED: 'bg-amber-100 text-amber-700',
+  CLOSED: 'bg-red-100 text-red-700',
+  EXPIRED: 'bg-slate-100 text-slate-700',
+};
+
 export default function EmployerDashboardPage() {
+  const navigate = useNavigate();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState<JobListItem[]>([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     analyticsAPI
@@ -48,6 +67,42 @@ export default function EmployerDashboardPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const fetchJobs = async () => {
+    try {
+      const response = await jobsAPI.getMyJobs();
+      setJobs(response.results || []);
+    } catch {
+      toast.error('Failed to load your jobs');
+    } finally {
+      setJobsLoading(false);
+    }
+  };
+
+  const handleDelete = async (slug: string) => {
+    if (!confirm('Are you sure you want to delete this job? This action cannot be undone.')) {
+      return;
+    }
+    setDeletingId(slug);
+    try {
+      await jobsAPI.deleteJob(slug);
+      toast.success('Job deleted successfully');
+      setJobs((prev) => prev.filter((job) => job.slug !== slug));
+    } catch {
+      toast.error('Failed to delete job');
+    } finally {
+      setDeletingId(null);
+      setDeleteConfirm(null);
+    }
+  };
+
+  const handleViewApplications = (jobId: string) => {
+    navigate(`/employer/applications?job=${jobId}`);
+  };
 
   if (loading) {
     return <DashboardSkeleton />;
@@ -175,6 +230,100 @@ export default function EmployerDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Job Management Section */}
+      <div className="mt-6 bg-card rounded-xl p-6" style={{ boxShadow: 'var(--card-shadow-md)' }}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <h2 className="text-[15px] font-semibold text-ink-800">Manage your jobs</h2>
+          <Link to="/employer/jobs/create" className="btn-primary text-sm">
+            + Post new job
+          </Link>
+        </div>
+
+        {jobsLoading ? (
+          <div className="flex justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-t-transparent" />
+          </div>
+        ) : jobs.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-sm text-ink-400">No jobs posted yet.</p>
+            <Link to="/employer/jobs/create" className="btn-primary text-sm mt-4 inline-block">
+              Post your first job
+            </Link>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-micro text-ink-400 uppercase tracking-wider border-b border-ink-900/[0.04] dark:border-ink-300/[0.06]">
+                  <th className="pb-3 font-medium">Job Title</th>
+                  <th className="pb-3 font-medium">Status</th>
+                  <th className="pb-3 font-medium text-center">Views</th>
+                  <th className="pb-3 font-medium text-center">Applications</th>
+                  <th className="pb-3 font-medium text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="text-sm">
+                {jobs.map((job) => (
+                  <tr key={job.id} className="hover:bg-surface-50/50 transition-colors border-b border-ink-900/[0.03] dark:border-ink-300/[0.04]">
+                    <td className="py-3">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-ink-800">{job.title}</span>
+                        <span className="text-micro text-ink-400">{job.location} • {job.job_type.replace('_', ' ')}</span>
+                      </div>
+                    </td>
+                    <td className="py-3">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusColors[job.status]}`}>
+                        {job.status}
+                      </span>
+                    </td>
+                    <td className="py-3 text-center text-ink-500 tabular-nums">{job.views_count}</td>
+                    <td className="py-3 text-center">
+                      <button
+                        onClick={() => handleViewApplications(job.id)}
+                        className="inline-flex items-center gap-1 text-primary-600 hover:text-primary-700 font-medium"
+                      >
+                        <UsersIcon className="h-4 w-4" />
+                        {job.applications_count}
+                      </button>
+                    </td>
+                    <td className="py-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Link
+                          to={`/jobs/${job.slug}/edit`}
+                          className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-zinc-800 text-ink-500 hover:text-primary-600 transition-colors"
+                          title="Edit job"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </Link>
+                        <button
+                          onClick={() => handleViewApplications(job.id)}
+                          className="p-2 rounded-lg hover:bg-surface-100 dark:hover:bg-zinc-800 text-ink-500 hover:text-primary-600 transition-colors"
+                          title="View applications"
+                        >
+                          <UsersIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(job.slug)}
+                          disabled={deletingId === job.slug}
+                          className="p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 text-ink-500 hover:text-red-500 transition-colors disabled:opacity-50"
+                          title="Delete job"
+                        >
+                          {deletingId === job.slug ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-red-500 border-t-transparent" />
+                          ) : (
+                            <TrashIcon className="h-4 w-4" />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

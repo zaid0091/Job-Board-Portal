@@ -19,7 +19,7 @@ from rest_framework import viewsets, generics, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from core.permissions import IsEmployer, IsSeeker, IsJobOwner, IsVerifiedUser, ReadOnly
+from core.permissions import IsEmployer, IsSeeker, IsJobOwner, ReadOnly
 from core.pagination import StandardResultsPagination
 from core.throttles import JobCreateThrottle
 from core.mixins import ReadWriteSerializerMixin
@@ -52,11 +52,11 @@ class JobViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ["create"]:
-            return [permissions.IsAuthenticated(), IsEmployer(), IsVerifiedUser()]
+            return [permissions.IsAuthenticated(), IsEmployer()]
         elif self.action in ["update", "partial_update", "destroy", "applicants"]:
-            return [permissions.IsAuthenticated(), IsJobOwner(), IsVerifiedUser()]
+            return [permissions.IsAuthenticated(), IsJobOwner()]
         elif self.action in ["my_jobs"]:
-            return [permissions.IsAuthenticated(), IsEmployer(), IsVerifiedUser()]
+            return [permissions.IsAuthenticated(), IsEmployer()]
         return [permissions.AllowAny()]
 
     def get_throttles(self):

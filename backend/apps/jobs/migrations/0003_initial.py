@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddConstraint(
             model_name='job',
-            constraint=models.CheckConstraint(check=models.Q(('salary_min__lte', models.F('salary_max')), ('salary_min__isnull', True), ('salary_max__isnull', True), _connector='OR'), name='salary_min_lte_max'),
+            constraint=models.CheckConstraint(condition=models.Q(('salary_min__lte', models.F('salary_max')), ('salary_min__isnull', True), ('salary_max__isnull', True), _connector='OR'), name='salary_min_lte_max'),
         ),
         migrations.AlterUniqueTogether(
             name='savedjob',
