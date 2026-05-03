@@ -39,6 +39,7 @@ def set_auth_cookies(response, access_token, refresh_token):
         httponly=True,
         secure=secure_cookie,
         samesite="Lax",
+        path='/',
     )
     if refresh_token:
         response.set_cookie(
@@ -47,6 +48,7 @@ def set_auth_cookies(response, access_token, refresh_token):
             httponly=True,
             secure=secure_cookie,
             samesite="Lax",
+            path='/',
         )
     return response
 
@@ -121,58 +123,31 @@ class RegisterView(generics.CreateAPIView):
 
 
 class LogoutView(APIView):
-    """POST /api/v1/auth/logout/ — Blacklist refresh token."""
+    """POST /api/v1/auth/logout/ — Blacklist refresh token and clear cookies."""
 
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request):
-        try:
-            refresh_cookie = getattr(settings, "JWT_AUTH_REFRESH_COOKIE", "refresh")
-            refresh_token = request.COOKIES.get(refresh_cookie) or request.data.get(
-                "refresh"
-            )
+        refresh_cookie = getattr(settings, "JWT_AUTH_REFRESH_COOKIE", "refresh")
+        access_cookie = getattr(settings, "JWT_AUTH_COOKIE", "access")
+        secure_cookie = not settings.DEBUG
 
-            if not refresh_token:
-                response = Response(
-                    {"message": "Already logged out."}, status=status.HTTP_200_OK
-                )
-            else:
+        # Blacklist refresh token if present
+        refresh_token = request.COOKIES.get(refresh_cookie) or request.data.get("refresh")
+        if refresh_token:
+            try:
                 token = RefreshToken(refresh_token)
                 token.blacklist()
-                logger.info(f"User logged out: {request.user.email}")
-                response = Response(
-                    {"message": "Logout successful."}, status=status.HTTP_200_OK
-                )
+                logger.info(f"User logged out: {request.user.email if request.user else 'Unknown'}")
+            except Exception:
+                pass  # Token might already be blacklisted or invalid
 
-            secure_cookie = not settings.DEBUG
-            response.delete_cookie(
-                getattr(settings, "JWT_AUTH_COOKIE", "access"),
-                samesite="Lax",
-                secure=secure_cookie,
-            )
-            response.delete_cookie(
-                refresh_cookie,
-                samesite="Lax",
-                secure=secure_cookie,
-            )
-            return response
-        except Exception as e:
-            logger.error(f"Logout error: {str(e)}")
-            response = Response(
-                {"error": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST
-            )
-            secure_cookie = not settings.DEBUG
-            response.delete_cookie(
-                getattr(settings, "JWT_AUTH_COOKIE", "access"),
-                samesite="Lax",
-                secure=secure_cookie,
-            )
-            response.delete_cookie(
-                getattr(settings, "JWT_AUTH_REFRESH_COOKIE", "refresh"),
-                samesite="Lax",
-                secure=secure_cookie,
-            )
-            return response
+        # Clear cookies by setting them with empty value and max_age=0
+        response = Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
+        response.set_cookie(access_cookie, '', max_age=0, path='/', samesite="Lax", secure=secure_cookie, httponly=True)
+        response.set_cookie(refresh_cookie, '', max_age=0, path='/', samesite="Lax", secure=secure_cookie, httponly=True)
+
+        return response
 
 
 class CurrentUserView(generics.RetrieveAPIView):
