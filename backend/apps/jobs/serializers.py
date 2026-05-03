@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.core.cache import cache
 
 from apps.profiles.serializers import SkillSerializer, EmployerProfilePublicSerializer
 from core.sanitizers import sanitize_html
@@ -26,6 +27,7 @@ class JobListSerializer(serializers.ModelSerializer):
     salary_display = serializers.ReadOnlyField()
     days_remaining = serializers.ReadOnlyField()
     is_saved = serializers.SerializerMethodField()
+    views_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
@@ -36,6 +38,13 @@ class JobListSerializer(serializers.ModelSerializer):
             'views_count', 'applications_count', 'days_remaining',
             'is_saved', 'created_at',
         ]
+
+    def get_views_count(self, obj):
+        """Returns DB count + any unsynced views in Redis."""
+        # For listing, we might avoid excessive Redis calls, 
+        # but for accuracy we'll check.
+        buffered = cache.get(f"view_buffer:{obj.id}", 0)
+        return obj.views_count + int(buffered)
 
     def get_is_saved(self, obj):
         request = self.context.get('request')
@@ -54,6 +63,7 @@ class JobDetailSerializer(serializers.ModelSerializer):
     is_expired = serializers.ReadOnlyField()
     is_saved = serializers.SerializerMethodField()
     is_applied = serializers.SerializerMethodField()
+    views_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
@@ -68,6 +78,11 @@ class JobDetailSerializer(serializers.ModelSerializer):
             'applications_count', 'days_remaining', 'is_saved',
             'is_applied', 'created_at', 'updated_at',
         ]
+
+    def get_views_count(self, obj):
+        """Returns DB count + any unsynced views in Redis."""
+        buffered = cache.get(f"view_buffer:{obj.id}", 0)
+        return obj.views_count + int(buffered)
 
     def get_is_saved(self, obj):
         request = self.context.get('request')

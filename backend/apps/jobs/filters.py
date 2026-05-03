@@ -48,7 +48,7 @@ class JobFilter(django_filters.FilterSet):
     )
 
     # Employer
-    employer = django_filters.UUIDFilter(field_name='employer__user__id')
+    employer = django_filters.UUIDFilter(field_name='employer__id')
     company = django_filters.CharFilter(
         field_name='employer__company_name', lookup_expr='icontains'
     )

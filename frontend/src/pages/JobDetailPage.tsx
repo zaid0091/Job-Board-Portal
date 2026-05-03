@@ -1,9 +1,10 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { sanitizeHTML } from '@/utils/sanitize';
 import { useAppSelector } from '@/store/hooks';
 import { jobsAPI } from '@/api';
 import ApplicationForm from '@/components/jobs/ApplicationForm';
+import Modal from '@/components/ui/Modal';
 import { JobDetailSkeleton } from '@/components/ui/Skeleton';
 import SEO from '@/components/SEO';
 import {
@@ -105,10 +106,13 @@ export default function JobDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <h1 className="text-display-sm text-ink-900">{job.title}</h1>
-            <div className="mt-2 flex items-center text-ink-500">
-              <BuildingOffice2Icon className="h-4 w-4 mr-1.5" />
+            <Link 
+              to={`/employers/${job.employer.id}`} 
+              className="mt-2 flex items-center text-ink-500 hover:text-primary-600 transition-colors group"
+            >
+              <BuildingOffice2Icon className="h-4 w-4 mr-1.5 text-ink-400 group-hover:text-primary-500 transition-colors" />
               <span className="text-sm font-medium">{job.employer.company_name}</span>
-            </div>
+            </Link>
           </div>
           {isAuthenticated && user?.role === 'SEEKER' && (
             <button onClick={handleSaveToggle} className="text-ink-300 hover:text-primary-600 transition-colors">
@@ -160,39 +164,39 @@ export default function JobDetailPage() {
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-card rounded-2xl p-6" style={{ boxShadow: 'var(--card-shadow-md)' }}>
+          <div className="bg-card rounded-2xl p-6 overflow-hidden" style={{ boxShadow: 'var(--card-shadow-md)' }}>
             <h2 className="text-[15px] font-semibold text-ink-800 mb-4">Description</h2>
             <div
-              className="prose prose-sm max-w-none text-ink-500"
+              className="prose prose-sm max-w-none text-ink-500 text-justify break-words"
               dangerouslySetInnerHTML={{ __html: sanitizeHTML(job.description) }}
             />
           </div>
 
           {job.requirements && (
-            <div className="bg-card rounded-2xl p-6" style={{ boxShadow: 'var(--card-shadow-md)' }}>
+            <div className="bg-card rounded-2xl p-6 overflow-hidden" style={{ boxShadow: 'var(--card-shadow-md)' }}>
               <h2 className="text-[15px] font-semibold text-ink-800 mb-4">Requirements</h2>
               <div
-                className="prose prose-sm max-w-none text-ink-500"
+                className="prose prose-sm max-w-none text-ink-500 break-words"
                 dangerouslySetInnerHTML={{ __html: sanitizeHTML(job.requirements) }}
               />
             </div>
           )}
 
           {job.responsibilities && (
-            <div className="bg-card rounded-2xl p-6" style={{ boxShadow: 'var(--card-shadow-md)' }}>
+            <div className="bg-card rounded-2xl p-6 overflow-hidden" style={{ boxShadow: 'var(--card-shadow-md)' }}>
               <h2 className="text-[15px] font-semibold text-ink-800 mb-4">Responsibilities</h2>
               <div
-                className="prose prose-sm max-w-none text-ink-500"
+                className="prose prose-sm max-w-none text-ink-500 break-words"
                 dangerouslySetInnerHTML={{ __html: sanitizeHTML(job.responsibilities) }}
               />
             </div>
           )}
 
           {job.benefits && (
-            <div className="bg-card rounded-2xl p-6" style={{ boxShadow: 'var(--card-shadow-md)' }}>
+            <div className="bg-card rounded-2xl p-6 overflow-hidden" style={{ boxShadow: 'var(--card-shadow-md)' }}>
               <h2 className="text-[15px] font-semibold text-ink-800 mb-4">Benefits</h2>
               <div
-                className="prose prose-sm max-w-none text-ink-500"
+                className="prose prose-sm max-w-none text-ink-500 break-words"
                 dangerouslySetInnerHTML={{ __html: sanitizeHTML(job.benefits) }}
               />
             </div>
@@ -230,20 +234,29 @@ export default function JobDetailPage() {
                 >
                   Applied &middot; {applicationStatus}
                 </button>
-              ) : !showApplicationForm ? (
-                <button
-                  onClick={() => setShowApplicationForm(true)}
-                  className="btn-primary w-full py-2.5"
-                >
-                  Apply now
-                </button>
               ) : (
-                <ApplicationForm
-                  jobId={job.id}
-                  jobTitle={job.title}
-                  onSuccess={handleApplicationSuccess}
-                  onCancel={() => setShowApplicationForm(false)}
-                />
+                <>
+                  <button
+                    onClick={() => setShowApplicationForm(true)}
+                    className="btn-primary w-full py-2.5"
+                  >
+                    Apply now
+                  </button>
+                  
+                  <Modal
+                    isOpen={showApplicationForm}
+                    onClose={() => setShowApplicationForm(false)}
+                    title={`Apply for ${job.title}`}
+                    maxWidth="lg"
+                  >
+                    <ApplicationForm
+                      jobId={job.id}
+                      jobTitle={job.title}
+                      onSuccess={handleApplicationSuccess}
+                      onCancel={() => setShowApplicationForm(false)}
+                    />
+                  </Modal>
+                </>
               )}
             </div>
           )}

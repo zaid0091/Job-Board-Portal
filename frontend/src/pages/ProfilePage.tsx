@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { profilesAPI } from '@/api';
 import { fetchEmployerProfile, updateEmployerProfile, fetchSeekerProfile, updateSeekerProfile } from '@/store/slices/profileSlice';
@@ -43,9 +43,21 @@ function EmployerProfileSection() {
     company_size: '',
     industry: '',
     location: '',
+    founded_year: '',
   });
   const [country, setCountry] = useState('');
   const [region, setRegion] = useState('');
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLogoFile(file);
+      setLogoUrl(URL.createObjectURL(file));
+    }
+  };
 
   useEffect(() => {
     dispatch(fetchEmployerProfile());
@@ -60,7 +72,9 @@ function EmployerProfileSection() {
         company_size: employerProfile.company_size || '',
         industry: employerProfile.industry || '',
         location: employerProfile.location || '',
+        founded_year: employerProfile.founded_year?.toString() || '',
       });
+      setLogoUrl(employerProfile.company_logo || null);
       if (employerProfile.location) {
         const parts = employerProfile.location.split(', ');
         if (parts.length === 2) {
@@ -89,6 +103,9 @@ function EmployerProfileSection() {
           formData.append(key, String(value));
         }
       });
+      if (logoFile) {
+        formData.append('company_logo', logoFile);
+      }
       await dispatch(updateEmployerProfile(formData)).unwrap();
       toast.success('Profile updated');
     } catch (error: any) {
@@ -102,33 +119,74 @@ function EmployerProfileSection() {
 
   return (
     <form onSubmit={handleSubmit} className="bg-card rounded-xl p-6 sm:p-8 space-y-5" style={{ boxShadow: 'var(--card-shadow)' }}>
+      <div className="flex items-center gap-6 mb-2">
+        <div className="relative">
+          <img
+            src={logoUrl || '/default-company-logo.png'}
+            alt="Company Logo"
+            className="h-20 w-20 rounded-xl object-cover border border-ink-200 bg-surface-100 p-2"
+          />
+          <button
+            type="button"
+            onClick={() => logoInputRef.current?.click()}
+            className="absolute bottom-0 right-0 bg-primary-600 hover:bg-primary-700 text-white rounded-full p-1.5 shadow-lg border-2 border-white"
+            title="Change logo"
+            style={{ lineHeight: 0 }}
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536M9 13l6-6m2 2a2.828 2.828 0 11-4-4 2.828 2.828 0 014 4z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16 7v6a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h7a2 2 0 012 2z" />
+            </svg>
+            <input
+              ref={logoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleLogoChange}
+            />
+          </button>
+        </div>
         <div>
-          <label className="block text-[13px] font-medium text-ink-600 mb-1">Location</label>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <CountryDropdown
-                value={country}
-                onChange={(val) => {
-                  setCountry(val);
-                  setRegion('');
-                  setForm({ ...form, location: region && val ? `${region}, ${val}` : val });
-                }}
-                className="input-field"
-              />
-            </div>
-            <div>
-              <RegionDropdown
-                country={country}
-                value={region}
-                onChange={(val) => {
-                  setRegion(val);
-                  setForm({ ...form, location: `${val}, ${country}` });
-                }}
-                className="input-field"
-              />
-            </div>
+          <p className="text-[13px] text-ink-500">Company Logo (JPG, PNG, max 2MB)</p>
+        </div>
+      </div>
+      <div>
+        <label className="block text-[13px] font-medium text-ink-600 mb-1">Company Name</label>
+        <input
+          type="text"
+          className="input-field"
+          value={form.company_name}
+          onChange={(e) => setForm({ ...form, company_name: e.target.value })}
+          required
+        />
+      </div>
+      <div>
+        <label className="block text-[13px] font-medium text-ink-600 mb-1">Location</label>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <CountryDropdown
+              value={country}
+              onChange={(val) => {
+                setCountry(val);
+                setRegion('');
+                setForm({ ...form, location: region && val ? `${region}, ${val}` : val });
+              }}
+              className="input-field"
+            />
+          </div>
+          <div>
+            <RegionDropdown
+              country={country}
+              value={region}
+              onChange={(val) => {
+                setRegion(val);
+                setForm({ ...form, location: `${val}, ${country}` });
+              }}
+              className="input-field"
+            />
           </div>
         </div>
+      </div>
       <div>
         <label className="block text-[13px] font-medium text-ink-600 mb-1">Website</label>
         <input
@@ -147,32 +205,32 @@ function EmployerProfileSection() {
           onChange={(e) => setForm({ ...form, industry: e.target.value })}
         />
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <label className="block text-[13px] font-medium text-ink-600 mb-1">Company Size</label>
-          <select
-            className="input-field"
-            value={form.company_size}
-            onChange={(e) => setForm({ ...form, company_size: e.target.value })}
-          >
-            <option value="">Select</option>
-            <option value="1-10">1-10</option>
-            <option value="11-50">11-50</option>
-            <option value="51-200">51-200</option>
-            <option value="201-500">201-500</option>
-            <option value="501-1000">501-1000</option>
-            <option value="1001+">1001+</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-[13px] font-medium text-ink-600 mb-1">Location</label>
-          <input
-            type="text"
-            className="input-field"
-            value={form.location}
-            onChange={(e) => setForm({ ...form, location: e.target.value })}
-          />
-        </div>
+      <div>
+        <label className="block text-[13px] font-medium text-ink-600 mb-1">Company Size</label>
+        <select
+          className="input-field"
+          value={form.company_size}
+          onChange={(e) => setForm({ ...form, company_size: e.target.value })}
+        >
+          <option value="">Select</option>
+          <option value="1-10">1-10</option>
+          <option value="11-50">11-50</option>
+          <option value="51-200">51-200</option>
+          <option value="201-500">201-500</option>
+          <option value="501-1000">501-1000</option>
+          <option value="1001+">1001+</option>
+        </select>
+      </div>
+      <div>
+        <label className="block text-[13px] font-medium text-ink-600 mb-1">Founded Year</label>
+        <input
+          type="number"
+          min={1800}
+          max={new Date().getFullYear()}
+          className="input-field"
+          value={form.founded_year}
+          onChange={(e) => setForm({ ...form, founded_year: e.target.value })}
+        />
       </div>
       <div>
         <label className="block text-[13px] font-medium text-ink-600 mb-1">Company Description</label>

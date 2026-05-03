@@ -15,7 +15,7 @@ app.conf.beat_schedule = {
         'schedule': crontab(hour=0, minute=0),
     },
     'send-job-match-notifications': {
-        'task': 'apps.notifications.tasks.send_job_match_emails',
+        'task': 'apps.jobs.tasks.send_job_match_emails',
         'schedule': crontab(hour=9, minute=0),
     },
     'cleanup-expired-tokens': {
@@ -33,6 +33,10 @@ app.conf.beat_schedule = {
     'cleanup-expired-resume-parsing-artifacts': {
         'task': 'apps.profiles.tasks.cleanup_expired_resume_parsing_artifacts',
         'schedule': crontab(hour=4, minute=0),
+    },
+    'sync-job-views': {
+        'task': 'apps.jobs.tasks.sync_job_views',
+        'schedule': crontab(minute='*/5'),
     },
 }
 

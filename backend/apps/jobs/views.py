@@ -1,4 +1,7 @@
+import logging
 from django.core.cache import cache
+
+logger = logging.getLogger(__name__)
 
 # Example: cache job list for 5 minutes
 from django.http import JsonResponse
@@ -92,9 +95,45 @@ class JobViewSet(ReadWriteSerializerMixin, viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-        # Increment view count atomically
-        Job.objects.filter(pk=instance.pk).update(views_count=F("views_count") + 1)
-        instance.refresh_from_db()
+        
+        # Unique view tracking
+        # Identify viewer: User ID if logged in, otherwise IP address
+        if request.user.is_authenticated:
+            viewer_id = f"user_{request.user.id}"
+        else:
+            # Get real IP even if behind proxy
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                viewer_id = f"ip_{x_forwarded_for.split(',')[0].strip()}"
+            else:
+                viewer_id = f"ip_{request.META.get('REMOTE_ADDR')}"
+
+        # Uniqueness key in Redis (Permanent to prevent any future duplicate counts)
+        unique_key = f"unique_view:{instance.id}:{viewer_id}"
+        
+        # cache.add() returns True only if the key did NOT exist
+        is_new_view = False
+        try:
+            is_new_view = cache.add(unique_key, 1, timeout=None) # Permanent uniqueness
+        except Exception as e:
+            logger.error(f"Unique view check failed: {e}")
+            # If cache fails, we treat it as a new view but don't track uniqueness
+            is_new_view = True
+
+        if is_new_view:
+            # Buffer the view count increment
+            cache_key = f"view_buffer:{instance.id}"
+            try:
+                # Use cache.incr() if key exists, otherwise set to 1
+                if not cache.get(cache_key):
+                    cache.set(cache_key, 1, timeout=None)
+                else:
+                    cache.incr(cache_key)
+            except Exception as e:
+                # Fallback to direct DB write if Redis is down
+                Job.objects.filter(pk=instance.pk).update(views_count=F("views_count") + 1)
+                logger.warning(f"Redis view buffer failed, falling back to DB write: {e}")
+
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 

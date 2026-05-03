@@ -3,7 +3,7 @@ import { Skill } from './job';
 export interface EmployerProfile {
   id: string;
   company_name: string;
-  logo: string | null;
+  company_logo: string | null;
   company_website: string;
   company_size: string;
   industry: string;
@@ -12,6 +12,19 @@ export interface EmployerProfile {
   founded_year: number | null;
   is_verified: boolean;
   total_jobs_posted: number;
+  active_jobs_count: number;
+}
+
+export interface EmployerProfilePublic {
+  id: string;
+  company_name: string;
+  company_logo: string | null;
+  company_website: string;
+  company_size: string;
+  industry: string;
+  location: string;
+  description: string;
+  is_verified: boolean;
   active_jobs_count: number;
 }
 

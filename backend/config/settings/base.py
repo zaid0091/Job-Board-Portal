@@ -118,7 +118,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_RATES": {
         # Global defaults
-        "anon": "100/hour",
+        "anon": "1000/day",
         "user": "1000/hour",
         # Short-burst limits (layered on top of the above)
         "burst_anon": "30/minute",
@@ -177,10 +177,10 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 # CACHING (Redis)
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": os.environ.get("REDIS_URL", "redis://localhost:6379/0"),
         "OPTIONS": {
-            "db": "0",
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
         "KEY_PREFIX": "jobboard",
         "TIMEOUT": 300,

@@ -1,8 +1,9 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { profilesAPI } from '@/api';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { logoutUser } from '@/store/slices/authSlice';
+import { fetchEmployerProfile, fetchSeekerProfile } from '@/store/slices/profileSlice';
 import { fetchUnreadCount } from '@/store/slices/notificationsSlice';
 import { Bars2Icon, XMarkIcon, BellIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
@@ -14,37 +15,25 @@ export default function Navbar() {
   const [pastHero, setPastHero] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-
-  // Fetch avatar/logo for Navbar
-  useEffect(() => {
-    if (!isAuthenticated || !user) {
-      setAvatarUrl(null);
-      return;
-    }
-    let ignore = false;
-    const fetchProfile = async () => {
-      try {
-        if (user.role === 'SEEKER') {
-          const profile = await profilesAPI.getSeekerProfile();
-          if (!ignore) setAvatarUrl(profile.avatar || null);
-        } else if (user.role === 'EMPLOYER') {
-          const profile = await profilesAPI.getEmployerProfile();
-          if (!ignore) setAvatarUrl(profile.logo || null);
-        }
-      } catch {
-        if (!ignore) setAvatarUrl(null);
-      }
-    };
-    fetchProfile();
-    return () => {
-      ignore = true;
-    };
-  }, [isAuthenticated, user]);
-
-  const { unreadCount } = useAppSelector((state) => state.notifications);
+  const { employerProfile, seekerProfile } = useAppSelector((state) => state.profile);
   const dispatch = useAppDispatch();
   const location = useLocation();
+
+  const avatarUrl = user?.role === 'EMPLOYER' 
+    ? employerProfile?.company_logo 
+    : seekerProfile?.avatar;
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'SEEKER' && !seekerProfile) {
+        dispatch(fetchSeekerProfile());
+      } else if (user.role === 'EMPLOYER' && !employerProfile) {
+        dispatch(fetchEmployerProfile());
+      }
+    }
+  }, [isAuthenticated, user, dispatch, seekerProfile, employerProfile]);
+
+  const { unreadCount } = useAppSelector((state) => state.notifications);
 
   useEffect(() => {
     const onScroll = () => {

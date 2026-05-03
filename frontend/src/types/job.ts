@@ -44,13 +44,13 @@ export interface JobListItem {
 export interface EmployerPublicProfile {
   id: string;
   company_name: string;
-  logo: string | null;
-  website: string;
+  company_logo: string | null;
+  company_website: string;
   company_size: string;
   industry: string;
   location: string;
   description: string;
-  total_jobs_posted: number;
+  is_verified: boolean;
   active_jobs_count: number;
 }
 
@@ -119,5 +119,6 @@ export interface JobFilters {
   category_slug?: string;
   skills?: string;
   ordering?: string;
+  employer?: string;
   page?: number;
 }

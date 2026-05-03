@@ -19,8 +19,13 @@ export const profilesAPI = {
     return response.data;
   },
 
-  getEmployerPublicProfile: async (userId: string) => {
-    const response = await axiosInstance.get(`/profiles/employer/${userId}/`);
+  getEmployerPublic: async (id: string) => {
+    const response = await axiosInstance.get(`/profiles/employer/${id}/`);
+    return response.data;
+  },
+
+  getEmployerPublicProfile: async (id: string) => {
+    const response = await axiosInstance.get(`/profiles/employer/${id}/`);
     return response.data;
   },
 
