@@ -1,4 +1,6 @@
 from django.conf import settings
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchVectorField
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
@@ -134,6 +136,13 @@ class Job(UUIDModel, TimeStampedModel):
     views_count = models.PositiveIntegerField(default=0)
     applications_count = models.PositiveIntegerField(default=0)
 
+    # Full-text search
+    search_vector = SearchVectorField(
+        editable=False,
+        null=True,
+        help_text='PostgreSQL full-text search vector (auto-populated by triggers).'
+    )
+
     class Meta:
         verbose_name = _('job')
         verbose_name_plural = _('jobs')
@@ -147,6 +156,8 @@ class Job(UUIDModel, TimeStampedModel):
             models.Index(fields=['employer', 'status']),
             models.Index(fields=['-views_count']),
             models.Index(fields=['slug']),
+            # GIN index for full-text search
+            GinIndex(fields=['search_vector'], name='idx_job_search_vector'),
         ]
         constraints = [
             models.CheckConstraint(

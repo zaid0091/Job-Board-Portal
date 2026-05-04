@@ -103,7 +103,7 @@ export default function JobFiltersComponent({ filters, onFilterChange }: JobFilt
         <MagnifyingGlassIcon className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-ink-300" />
         <input
           type="text"
-          placeholder="Search jobs, companies, locations..."
+          placeholder="Search by title, skills, location, or company..."
           className="input-field pl-10"
           {...register('search')}
         />

@@ -281,6 +281,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# Use SQLite-compatible search fallback in development (set to True in development.py)
+USE_SQLITE_COMPATIBLE_SEARCH = False
+
 # LOGGING
 LOGGING = {
     "version": 1,

@@ -1,13 +1,15 @@
 import django_filters
-from django.db.models import Q
+from django.conf import settings
+from django.db import connection
+from django.db.models import Q, F, Case, When, FloatField
 
 from .models import Job
 
 
 class JobFilter(django_filters.FilterSet):
-    """Comprehensive filter for job listings."""
+    """Comprehensive filter for job listings with full-text search."""
 
-    # Text search
+    # Text search — uses PostgreSQL full-text search + trigram fuzzy fallback
     search = django_filters.CharFilter(method='filter_search', label='Search')
 
     # Choice filters
@@ -82,14 +84,47 @@ class JobFilter(django_filters.FilterSet):
             'employer', 'company',
         ]
 
+    @property
+    def _is_postgres(self):
+        return connection.vendor == 'postgresql'
+
     def filter_search(self, queryset, name, value):
-        """Full-text search on title, description, and company name."""
-        return queryset.filter(
-            Q(title__icontains=value) |
-            Q(description__icontains=value) |
-            Q(employer__company_name__icontains=value) |
-            Q(location__icontains=value)
-        )
+        """
+        Full-text search with ranking + trigram fuzzy fallback (PostgreSQL).
+        Falls back to icontains search for SQLite (development).
+
+        PostgreSQL strategy:
+        1. Annotate both FTS rank and trigram similarity on the same queryset
+        2. Use FTS match as primary filter, OR trigram match for typo tolerance
+        3. Order by FTS rank (weighted) + trigram similarity as tiebreaker
+        """
+        if not self._is_postgres:
+            # SQLite fallback: use icontains across title, description, company, location
+            return queryset.filter(
+                Q(title__icontains=value) |
+                Q(description__icontains=value) |
+                Q(employer__company_name__icontains=value) |
+                Q(location__icontains=value) |
+                Q(requirements__icontains=value)
+            ).distinct()
+
+        # PostgreSQL: full-text search with ranking + trigram fuzzy matching
+        from django.contrib.postgres.search import SearchQuery, SearchRank, TrigramSimilarity
+
+        query = SearchQuery(value, search_type='plainto_tsquery', config='english')
+
+        return queryset.annotate(
+            search_rank=SearchRank(F('search_vector'), query),
+            trigram_sim=TrigramSimilarity('title', value),
+        ).filter(
+            Q(search_rank__gt=0.0) | Q(trigram_sim__gte=0.15)
+        ).annotate(
+            relevance=Case(
+                When(search_rank__gt=0.0, then=F('search_rank') * 2 + F('trigram_sim')),
+                default=F('trigram_sim'),
+                output_field=FloatField(),
+            )
+        ).order_by('-relevance', '-trigram_sim')
 
     def filter_skills(self, queryset, name, value):
         """Filter by skill slugs (comma-separated)."""

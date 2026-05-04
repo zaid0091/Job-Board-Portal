@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { jobsAPI } from '@/api/jobsAPI';
-import { BriefcaseIcon, MapPinIcon, BuildingOfficeIcon, BookmarkIcon } from '@heroicons/react/24/outline';
+import { BriefcaseIcon, MapPinIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import SEO from '@/components/SEO';
 import EmptyState from '@/components/ui/EmptyState';

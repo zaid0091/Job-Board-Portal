@@ -33,8 +33,9 @@ DATABASES = {
     }
 }
 
-# Remove django.contrib.postgres for SQLite compatibility
-INSTALLED_APPS = [app for app in INSTALLED_APPS if app != "django.contrib.postgres"]  # noqa
+# Remove django.contrib.postgres for SQLite compatibility (but keep the import for SearchVectorField)
+# We need postgres for SearchVectorField type even with SQLite, so we keep it
+# INSTALLED_APPS = [app for app in INSTALLED_APPS if app != "django.contrib.postgres"]  # noqa
 
 # Use console email backend in development
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -77,6 +78,9 @@ CELERY_TASK_EAGER_PROPAGATES = True
 CELERY_BROKER_URL = "memory://"
 CELERY_RESULT_BACKEND = "cache"
 CELERY_CACHE_BACKEND = "memory"
+
+# Use SQLite-compatible search fallback in development
+USE_SQLITE_COMPATIBLE_SEARCH = True
 
 # Add browsable API renderer in development
 REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = [
