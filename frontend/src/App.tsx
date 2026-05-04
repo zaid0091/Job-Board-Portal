@@ -5,6 +5,7 @@ import { fetchCurrentUser, logout } from '@/store/slices/authSlice';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import AppRoutes from './routes';
 import Lenis from 'lenis';
+import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -30,6 +31,10 @@ function App() {
     }
 
     requestAnimationFrame(raf);
+
+    // Scroll to top on refresh
+    window.scrollTo(0, 0);
+    lenis.scrollTo(0, { immediate: true });
 
     return () => {
       lenis.destroy();
