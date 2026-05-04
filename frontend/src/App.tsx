@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCurrentUser, logout } from '@/store/slices/authSlice';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import AppRoutes from './routes';
+import Lenis from 'lenis';
 
 function App() {
   const dispatch = useAppDispatch();
@@ -12,6 +13,28 @@ function App() {
   const [authInitialized, setAuthInitialized] = useState(false);
 
   useWebSocket();
+
+  // Initialize Lenis smooth scroll
+  useEffect(() => {
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      gestureOrientation: 'vertical',
+      smoothWheel: true,
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     const authPages = ['/login', '/register', '/password/reset/request', '/password/reset/confirm'];
