@@ -5,6 +5,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import SEO from '@/components/SEO';
 import { formatDistanceToNow, format } from 'date-fns';
 import toast from 'react-hot-toast';
+import { ArrowLeftIcon, ChevronDownIcon, DocumentArrowDownIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import type { ApplicationListItem, ApplicationDetail, ApplicationStatus, PaginatedResponse } from '@/types';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -97,8 +98,8 @@ export default function EmployerApplicationsPage() {
       <SEO title="Applications" description="Review and manage candidate applications." />
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-display-sm text-ink-900">Applications</h1>
-        <Link to="/employer/dashboard" className="text-[13px] font-medium text-primary-600 hover:text-primary-500 transition-colors">
-          â† Back to Dashboard
+        <Link to="/employer/dashboard" className="inline-flex items-center gap-1 text-[13px] font-medium text-primary-600 hover:text-primary-500 transition-colors">
+          <ArrowLeftIcon className="h-3.5 w-3.5" /> Back to Dashboard
         </Link>
       </div>
 
@@ -177,7 +178,10 @@ export default function EmployerApplicationsPage() {
                         </div>
                       )}
 
-                      <span className={`text-ink-400 text-[13px] transition-transform ${isExpanded ? 'rotate-180' : ''}`}>â–¼</span>
+                      <ChevronDownIcon
+                        onClick={() => toggleExpand(app.id)}
+                        className={`h-4 w-4 text-ink-400 transition-transform duration-200 cursor-pointer hover:text-ink-600 ${isExpanded ? 'rotate-180' : ''}`}
+                      />
                     </div>
                   </div>
                 </div>
@@ -210,7 +214,7 @@ export default function EmployerApplicationsPage() {
                               className="inline-flex items-center gap-1.5 text-[13px] text-primary-600 hover:text-primary-700 bg-card rounded-lg px-3 py-2 transition-colors"
                               style={{ boxShadow: 'var(--card-shadow)' }}
                             >
-                              ðŸ“„ Download Resume
+                              <DocumentArrowDownIcon className="h-4 w-4" /> Download Resume
                             </a>
                           </div>
                         )}
@@ -241,7 +245,7 @@ export default function EmployerApplicationsPage() {
                               {detail.status_logs.map((log) => (
                                 <div key={log.id} className="text-micro text-ink-500 flex items-center gap-2">
                                   <span className={`px-1.5 py-0.5 rounded text-micro ${STATUS_COLORS[log.from_status] || ''}`}>{log.from_status}</span>
-                                  <span>â†’</span>
+                                  <span><ArrowRightIcon className="h-3.5 w-3.5" /></span>
                                   <span className={`px-1.5 py-0.5 rounded text-micro ${STATUS_COLORS[log.to_status] || ''}`}>{log.to_status}</span>
                                   <span className="text-ink-400">
                                     {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
