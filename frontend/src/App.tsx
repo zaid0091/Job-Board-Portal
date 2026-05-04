@@ -5,7 +5,7 @@ import { fetchCurrentUser, logout } from '@/store/slices/authSlice';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import AppRoutes from './routes';
 import Lenis from 'lenis';
-import { motion, AnimatePresence } from 'framer-motion';
+// import { motion, AnimatePresence } from 'framer-motion';
 
 function App() {
   const dispatch = useAppDispatch();

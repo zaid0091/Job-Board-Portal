@@ -8,22 +8,25 @@ interface PageTransitionProps {
 const pageVariants = {
   initial: {
     opacity: 0,
-    y: 12,
+    y: 20,
+    scale: 0.98,
   },
   enter: {
     opacity: 1,
     y: 0,
+    scale: 1,
     transition: {
-      duration: 0.35,
-      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+      duration: 0.45,
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
     },
   },
   exit: {
     opacity: 0,
-    y: -8,
+    y: -12,
+    scale: 0.98,
     transition: {
-      duration: 0.2,
-      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+      duration: 0.25,
+      ease: [0.16, 1, 0.3, 1] as [number, number, number, number],
     },
   },
 };

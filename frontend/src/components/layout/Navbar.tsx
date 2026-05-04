@@ -6,6 +6,7 @@ import { fetchEmployerProfile, fetchSeekerProfile } from '@/store/slices/profile
 import { fetchUnreadCount } from '@/store/slices/notificationsSlice';
 import { Bars2Icon, XMarkIcon, BellIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 // import Logo from '@/components/ui/Logo';
 
@@ -191,8 +192,15 @@ export default function Navbar() {
                     />
                   </button>
 
+                  <AnimatePresence>
                   {profileOpen && (
-                    <div className="absolute right-0 mt-1.5 w-44 bg-white dark:bg-zinc-900 border border-ink-900/[0.07] rounded-xl shadow-lg py-1 z-50">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -4 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -4 }}
+                      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                      className="absolute right-0 mt-1.5 w-44 bg-white dark:bg-zinc-900 border border-ink-900/[0.07] rounded-xl shadow-lg py-1 z-50"
+                    >
                       <div className="px-3 py-2 border-b border-ink-900/[0.06]">
                         <p className="text-[11px] text-ink-400 truncate">{user?.email}</p>
                       </div>
@@ -208,8 +216,9 @@ export default function Navbar() {
                       >
                         Sign out
                       </button>
-                    </div>
+                    </motion.div>
                   )}
+                  </AnimatePresence>
                 </div>
               </>
             ) : (
@@ -254,23 +263,47 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Menu */}
+      <AnimatePresence>
       {mobileMenuOpen && (
-        <div className="md:hidden premium-sidebar-scroll max-h-[calc(100vh-3.5rem)] overflow-y-auto bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-t border-ink-900/[0.06] px-4 py-3 flex flex-col gap-1">
-          {navLinks.map((link) => (
-            <Link
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="md:hidden premium-sidebar-scroll overflow-hidden bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-t border-ink-900/[0.06] px-4"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+            className="py-3 flex flex-col gap-1"
+          >
+          {navLinks.map((link, i) => (
+            <motion.div
               key={link.to}
-              to={link.to}
-              className={`px-3 py-2 rounded-lg text-[14px] font-medium transition-colors ${
-                isActive(link.match)
-                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
-                  : 'text-ink-700 hover:bg-surface-50 dark:text-zinc-300 dark:hover:bg-zinc-800'
-              }`}
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.25, delay: 0.08 + i * 0.04, ease: [0.16, 1, 0.3, 1] }}
             >
-              {link.label}
-            </Link>
+              <Link
+                to={link.to}
+                className={`block px-3 py-2 rounded-lg text-[14px] font-medium transition-colors ${
+                  isActive(link.match)
+                    ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
+                    : 'text-ink-700 hover:bg-surface-50 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                }`}
+              >
+                {link.label}
+              </Link>
+            </motion.div>
           ))}
 
-          <div className="border-t border-ink-900/[0.06] mt-1 pt-2 flex flex-col gap-1">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.2, delay: 0.15 + navLinks.length * 0.04 }}
+            className="border-t border-ink-900/[0.06] mt-1 pt-2 flex flex-col gap-1"
+          >
             {isAuthenticated ? (
               <>
                 <Link
@@ -314,9 +347,11 @@ export default function Navbar() {
                 </Link>
               </>
             )}
-          </div>
-        </div>
+          </motion.div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </nav>
   );
 }

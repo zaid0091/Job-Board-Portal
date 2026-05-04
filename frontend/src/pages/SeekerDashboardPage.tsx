@@ -17,6 +17,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import { motion } from 'framer-motion';
 
 interface SeekerDashboardData {
   overview: {
@@ -101,10 +102,18 @@ export default function SeekerDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {stats.map((stat) => (
-          <div key={stat.label} className="bg-card rounded-xl transition-all duration-200 ease-spring" style={{ boxShadow: 'var(--card-shadow)' }}>
+        {stats.map((stat, i) => (
+          <motion.div
+            key={stat.label}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.1 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+            whileHover={{ y: -4, scale: 1.02 }}
+            className="bg-card rounded-xl transition-shadow duration-200"
+            style={{ boxShadow: 'var(--card-shadow)' }}
+          >
             {stat.link ? (
-              <Link to={stat.link} className="block p-4 hover:shadow-md transition-shadow">
+              <Link to={stat.link} className="block p-4">
                 <div className="flex items-center gap-3">
                   <div className={`${stat.bg} p-2 rounded-lg`}>
                     <stat.icon className={`h-4 w-4 ${stat.iconColor}`} />
@@ -128,33 +137,51 @@ export default function SeekerDashboardPage() {
                 </div>
               </div>
             )}
-          </div>
+          </motion.div>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {data.hired_jobs.length > 0 && (
-          <div className="bg-card rounded-xl p-6 lg:col-span-2" style={{ boxShadow: 'var(--card-shadow-md)' }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="bg-card rounded-xl p-6 lg:col-span-2"
+            style={{ boxShadow: 'var(--card-shadow-md)' }}
+          >
             <h2 className="text-[15px] font-semibold text-ink-800 mb-4">Hired</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {data.hired_jobs.map((hj) => (
-                <Link
+              {data.hired_jobs.map((hj, i) => (
+                <motion.div
                   key={hj.id}
-                  to={`/jobs/${hj.job__slug}`}
-                  className="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-50/60 hover:bg-emerald-50 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50 transition-colors ring-1 ring-emerald-500/10 dark:ring-emerald-400/20"
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.35 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
                 >
-                  <CheckCircleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-[13px] font-semibold text-emerald-900 dark:text-emerald-300 truncate">{hj.job__title}</p>
-                    <p className="text-micro text-emerald-700 dark:text-emerald-400">{hj.job__employer__company_name}</p>
-                  </div>
-                </Link>
+                  <Link
+                    to={`/jobs/${hj.job__slug}`}
+                    className="flex items-center gap-3 p-3.5 rounded-xl bg-emerald-50/60 hover:bg-emerald-50 dark:bg-emerald-950/30 dark:hover:bg-emerald-950/50 transition-colors ring-1 ring-emerald-500/10 dark:ring-emerald-400/20"
+                  >
+                    <CheckCircleIcon className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold text-emerald-900 dark:text-emerald-300 truncate">{hj.job__title}</p>
+                      <p className="text-micro text-emerald-700 dark:text-emerald-400">{hj.job__employer__company_name}</p>
+                    </div>
+                  </Link>
+                </motion.div>
               ))}
             </div>
-          </div>
+          </motion.div>
         )}
 
-        <div className="bg-card rounded-xl p-6" style={{ boxShadow: 'var(--card-shadow-md)' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="bg-card rounded-xl p-6"
+          style={{ boxShadow: 'var(--card-shadow-md)' }}
+        >
           <h2 className="text-[15px] font-semibold text-ink-800 mb-4">Applications by status</h2>
           {Object.keys(data.applications_by_status).length > 0 ? (
             <ResponsiveContainer width="100%" height={280}>
@@ -181,30 +208,43 @@ export default function SeekerDashboardPage() {
           ) : (
             <p className="text-sm text-ink-300 text-center py-12">No applications yet</p>
           )}
-        </div>
+        </motion.div>
 
-        <div className="bg-card rounded-xl p-6" style={{ boxShadow: 'var(--card-shadow-md)' }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="bg-card rounded-xl p-6"
+          style={{ boxShadow: 'var(--card-shadow-md)' }}
+        >
           <h2 className="text-[15px] font-semibold text-ink-800 mb-4">Recent applications</h2>
           {data.recent_applications.length > 0 ? (
             <div className="space-y-2">
-              {data.recent_applications.map((app) => (
-                <Link key={app.id} to={`/jobs/${app.job__slug}`} className="flex items-center justify-between p-3 bg-surface-50/60 rounded-lg hover:bg-surface-100/60 transition-colors">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[13px] font-medium text-ink-800 truncate">{app.job__title}</p>
-                    <p className="text-micro text-ink-400">{app.job__employer__company_name}</p>
-                  </div>
-                  <span
-                    className={`px-2 py-0.5 rounded-md text-micro font-medium ml-3 flex-shrink-0 ${STATUS_COLORS[app.status] || 'bg-surface-100 text-ink-500'}`}
-                  >
-                    {app.status}
-                  </span>
-                </Link>
+              {data.recent_applications.map((app, i) => (
+                <motion.div
+                  key={app.id}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.45 + i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <Link to={`/jobs/${app.job__slug}`} className="flex items-center justify-between p-3 bg-surface-50/60 rounded-lg hover:bg-surface-100/60 transition-colors">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[13px] font-medium text-ink-800 truncate">{app.job__title}</p>
+                      <p className="text-micro text-ink-400">{app.job__employer__company_name}</p>
+                    </div>
+                    <span
+                      className={`px-2 py-0.5 rounded-md text-micro font-medium ml-3 flex-shrink-0 ${STATUS_COLORS[app.status] || 'bg-surface-100 text-ink-500'}`}
+                    >
+                      {app.status}
+                    </span>
+                  </Link>
+                </motion.div>
               ))}
             </div>
           ) : (
             <p className="text-sm text-ink-300 text-center py-12">No applications yet</p>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

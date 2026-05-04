@@ -14,6 +14,7 @@ import {
   EyeIcon,
   EyeSlashIcon,
 } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const registerSchema = z
   .object({
@@ -65,30 +66,67 @@ export default function RegisterPage() {
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 sm:py-16">
       <SEO title="Register" description="Create your JobBoard account and start your career journey." />
-      <div className="w-full max-w-sm animate-fade-in">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-sm"
+      >
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary-600 mb-4">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center mb-8"
+        >
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.15, type: 'spring', stiffness: 200 }}
+            className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary-600 mb-4"
+          >
             <UserPlusIcon className="h-5 w-5 text-white" />
-          </div>
+          </motion.div>
           <h1 className="text-heading text-ink-900">Create an account</h1>
           <p className="mt-1.5 text-sm text-ink-400">Get started in under a minute</p>
-        </div>
+        </motion.div>
 
         {/* Form */}
-        <div className="bg-card rounded-2xl p-6 sm:p-8" style={{ boxShadow: 'var(--card-shadow-lg)' }}>
-          {error && (
-            <div className="mb-5 p-3 bg-red-50 dark:bg-red-950/30 rounded-xl text-red-600 dark:text-red-400 text-[13px] font-medium" style={{ boxShadow: '0 0 0 1px rgba(239,68,68,0.1)' }}>
-              {error}
-            </div>
-          )}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="bg-card rounded-2xl p-6 sm:p-8"
+          style={{ boxShadow: 'var(--card-shadow-lg)' }}
+        >
+          <AnimatePresence mode="wait">
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="mb-5 p-3 bg-red-50 dark:bg-red-950/30 rounded-xl text-red-600 dark:text-red-400 text-[13px] font-medium"
+                style={{ boxShadow: '0 0 0 1px rgba(239,68,68,0.1)' }}
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Role selection */}
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            >
               <label className="block text-[13px] font-medium text-ink-700 mb-2">I want to</label>
               <div className="grid grid-cols-2 gap-2">
-                <label
+                <motion.label
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
                   className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-xl cursor-pointer transition-all duration-200 ${
                     selectedRole === 'SEEKER'
                       ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-300'
@@ -99,8 +137,11 @@ export default function RegisterPage() {
                   <input type="radio" value="SEEKER" className="sr-only" {...register('role')} />
                   <MagnifyingGlassIcon className="h-5 w-5" />
                   <span className="text-[13px] font-semibold">Find a job</span>
-                </label>
-                <label
+                </motion.label>
+                <motion.label
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.15 }}
                   className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-xl cursor-pointer transition-all duration-200 ${
                     selectedRole === 'EMPLOYER'
                       ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-300'
@@ -111,12 +152,17 @@ export default function RegisterPage() {
                   <input type="radio" value="EMPLOYER" className="sr-only" {...register('role')} />
                   <BuildingOffice2Icon className="h-5 w-5" />
                   <span className="text-[13px] font-semibold">Hire talent</span>
-                </label>
+                </motion.label>
               </div>
               {errors.role && <p className="mt-1 text-[13px] text-red-500">{errors.role.message}</p>}
-            </div>
+            </motion.div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <motion.div
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.35, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="grid grid-cols-2 gap-3"
+            >
               <div>
                 <label htmlFor="first_name" className="block text-[13px] font-medium text-ink-700 mb-1.5">
                   First name
@@ -149,9 +195,13 @@ export default function RegisterPage() {
                   <p className="mt-1 text-[13px] text-red-500">{errors.last_name.message}</p>
                 )}
               </div>
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.35, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            >
               <label htmlFor="reg-email" className="block text-[13px] font-medium text-ink-700 mb-1.5">
                 Email
               </label>
@@ -166,9 +216,13 @@ export default function RegisterPage() {
               {errors.email && (
                 <p className="mt-1 text-[13px] text-red-500">{errors.email.message}</p>
               )}
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.35, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            >
               <label htmlFor="username" className="block text-[13px] font-medium text-ink-700 mb-1.5">
                 Username
               </label>
@@ -183,9 +237,13 @@ export default function RegisterPage() {
               {errors.username && (
                 <p className="mt-1 text-[13px] text-red-500">{errors.username.message}</p>
               )}
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.35, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            >
               <label htmlFor="reg-password" className="block text-[13px] font-medium text-ink-700 mb-1.5">
                 Password
               </label>
@@ -198,24 +256,48 @@ export default function RegisterPage() {
                   className="input-field pr-10"
                   {...register('password')}
                 />
-                <button
+                <motion.button
                   type="button"
+                  whileTap={{ scale: 0.85 }}
+                  transition={{ duration: 0.1 }}
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-ink-300 hover:text-ink-500 transition-colors"
                 >
-                  {showPassword ? (
-                    <EyeSlashIcon className="h-4 w-4" />
-                  ) : (
-                    <EyeIcon className="h-4 w-4" />
-                  )}
-                </button>
+                  <AnimatePresence mode="wait">
+                    {showPassword ? (
+                      <motion.div
+                        key="hide"
+                        initial={{ opacity: 0, rotate: -15 }}
+                        animate={{ opacity: 1, rotate: 0 }}
+                        exit={{ opacity: 0, rotate: 15 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <EyeSlashIcon className="h-4 w-4" />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="show"
+                        initial={{ opacity: 0, rotate: 15 }}
+                        animate={{ opacity: 1, rotate: 0 }}
+                        exit={{ opacity: 0, rotate: -15 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
               </div>
               {errors.password && (
                 <p className="mt-1 text-[13px] text-red-500">{errors.password.message}</p>
               )}
-            </div>
+            </motion.div>
 
-            <div>
+            <motion.div
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.35, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            >
               <label
                 htmlFor="password_confirm"
                 className="block text-[13px] font-medium text-ink-700 mb-1.5"
@@ -233,27 +315,38 @@ export default function RegisterPage() {
               {errors.password_confirm && (
                 <p className="mt-1 text-[13px] text-red-500">{errors.password_confirm.message}</p>
               )}
-            </div>
+            </motion.div>
 
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="btn-primary w-full py-2.5 flex items-center justify-center"
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
             >
-              {isLoading ? <LoadingSpinner size="sm" /> : 'Create account'}
-            </button>
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="btn-primary w-full py-2.5 flex items-center justify-center"
+              >
+                {isLoading ? <LoadingSpinner size="sm" /> : 'Create account'}
+              </button>
+            </motion.div>
           </form>
 
-          <div className="mt-6 pt-5 text-center border-t border-ink-900/[0.04] dark:border-ink-300/[0.06]">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3, delay: 0.6 }}
+            className="mt-6 pt-5 text-center border-t border-ink-900/[0.04] dark:border-ink-300/[0.06]"
+          >
             <p className="text-[13px] text-ink-400">
               Already have an account?{' '}
               <Link to="/login" className="font-medium text-ink-800 hover:text-primary-600 transition-colors">
                 Sign in
               </Link>
             </p>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

@@ -282,12 +282,23 @@ html.theme-transition *::after {
   .bg-card {
     background-color: rgb(var(--bg-card));
   }
+  .text-micro {
+    font-size: 0.625rem;
+    line-height: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
 }
 
 /* Lenis smooth scroll styles */
 html.lenis,
 html.lenis body {
   height: auto;
+}
+
+#root {
+  position: relative;
 }
 
 .lenis.lenis-smooth {

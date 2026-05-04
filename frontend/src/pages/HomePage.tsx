@@ -145,7 +145,14 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" duration={0.8}>
             <div className="text-center max-w-xl mx-auto">
-              <p className="text-micro text-primary-600 uppercase tracking-widest">Platform</p>
+              <div className="relative inline-flex items-center px-6 py-2 bg-primary-950/20 border border-primary-900/50 mb-6">
+                {/* Corner pixels */}
+                <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
+                <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
+                <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
+                <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
+                <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary-200">Platform</p>
+              </div>
               <h2 className="mt-3 text-display-sm text-ink-900">
                 Built for modern hiring
               </h2>
@@ -209,7 +216,14 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" duration={0.8}>
             <div className="text-center max-w-xl mx-auto">
-              <p className="text-micro text-primary-600 uppercase tracking-widest">Process</p>
+              <div className="relative inline-flex items-center px-6 py-2 bg-primary-950/20 border border-primary-900/50 mb-6">
+                {/* Corner pixels */}
+                <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
+                <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
+                <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
+                <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
+                <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary-200">Process</p>
+              </div>
               <h2 className="mt-3 text-display-sm text-ink-900">
                 Three steps to your next role
               </h2>

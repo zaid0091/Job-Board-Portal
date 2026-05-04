@@ -6,6 +6,7 @@ import SEO from '@/components/SEO';
 import { formatDistanceToNow, format } from 'date-fns';
 import toast from 'react-hot-toast';
 import { ArrowLeftIcon, ChevronDownIcon, DocumentArrowDownIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { ApplicationListItem, ApplicationDetail, ApplicationStatus, PaginatedResponse } from '@/types';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -110,16 +111,19 @@ export default function EmployerApplicationsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {applications.map((app) => {
+          {applications.map((app, i) => {
             const transitions = STATUS_TRANSITIONS[app.status] ?? [];
             const isTerminal = ['HIRED', 'REJECTED', 'WITHDRAWN'].includes(app.status);
             const isExpanded = expandedId === app.id;
             const detail = details[app.id];
 
             return (
-              <div
+              <motion.div
                 key={app.id}
-                className="bg-card rounded-xl transition-shadow duration-200 ease-spring"
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                className="bg-card rounded-xl transition-shadow duration-200"
                 style={{ boxShadow: 'var(--card-shadow)' }}
               >
                 <div
@@ -187,8 +191,16 @@ export default function EmployerApplicationsPage() {
                 </div>
 
                 {/* Expanded detail section */}
+                <AnimatePresence>
                 {isExpanded && (
-                  <div className="px-5 py-4 bg-surface-50/60 space-y-4 rounded-b-xl border-t border-ink-900/[0.04] dark:border-ink-300/[0.06]">
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-5 py-4 bg-surface-50/60 space-y-4 rounded-b-xl border-t border-ink-900/[0.04] dark:border-ink-300/[0.06]">
                     {loadingDetail === app.id ? (
                       <div className="flex justify-center py-4">
                         <LoadingSpinner size="sm" />
@@ -261,9 +273,11 @@ export default function EmployerApplicationsPage() {
                         )}
                       </>
                     ) : null}
-                  </div>
+                    </div>
+                  </motion.div>
                 )}
-              </div>
+                </AnimatePresence>
+              </motion.div>
             );
           })}
         </div>

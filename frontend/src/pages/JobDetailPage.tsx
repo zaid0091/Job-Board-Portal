@@ -19,6 +19,7 @@ import {
 import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid';
 import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
+import { motion } from 'framer-motion';
 import type { JobDetail } from '@/types';
 
 export default function JobDetailPage() {
@@ -102,7 +103,13 @@ export default function JobDetailPage() {
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
       <SEO title={job.title} description={`${job.job_type} position at ${job.employer?.company_name || 'a top company'}`} />
       {/* Header */}
-      <div className="bg-card rounded-2xl p-6 sm:p-8" style={{ boxShadow: 'var(--card-shadow-md)' }}>
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+        className="bg-card rounded-2xl p-6 sm:p-8"
+        style={{ boxShadow: 'var(--card-shadow-md)' }}
+      >
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
             <h1 className="text-display-sm text-ink-900">{job.title}</h1>
@@ -115,17 +122,28 @@ export default function JobDetailPage() {
             </Link>
           </div>
           {isAuthenticated && user?.role === 'SEEKER' && (
-            <button onClick={handleSaveToggle} className="text-ink-300 hover:text-primary-600 transition-colors">
+            <motion.button
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.9 }}
+              transition={{ duration: 0.15 }}
+              onClick={handleSaveToggle}
+              className="text-ink-300 hover:text-primary-600 transition-colors"
+            >
               {isSaved ? (
                 <BookmarkSolid className="h-6 w-6 text-primary-600" />
               ) : (
                 <BookmarkOutline className="h-6 w-6" />
               )}
-            </button>
+            </motion.button>
           )}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.15 }}
+          className="mt-4 flex flex-wrap gap-2"
+        >
           <span className="inline-flex items-center text-micro px-2 py-0.5 rounded-md bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-400 font-medium">
             <BriefcaseIcon className="h-3 w-3 mr-1 inline" />
             {job.job_type.replace('_', ' ')}
@@ -143,9 +161,14 @@ export default function JobDetailPage() {
               {salary}
             </span>
           )}
-        </div>
+        </motion.div>
 
-        <div className="mt-4 flex flex-wrap gap-4 text-[13px] text-ink-400">
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          className="mt-4 flex flex-wrap gap-4 text-[13px] text-ink-400"
+        >
           <span className="flex items-center">
             <CalendarIcon className="h-3.5 w-3.5 mr-1" />
             Posted {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
@@ -158,10 +181,15 @@ export default function JobDetailPage() {
           )}
           <span>{job.applications_count} application{job.applications_count !== 1 ? 's' : ''}</span>
           <span>{job.views_count} view{job.views_count !== 1 ? 's' : ''}</span>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+        className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
         {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
           <div className="bg-card rounded-2xl p-6 overflow-hidden" style={{ boxShadow: 'var(--card-shadow-md)' }}>
@@ -270,7 +298,7 @@ export default function JobDetailPage() {
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

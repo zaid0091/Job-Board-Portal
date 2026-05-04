@@ -5,6 +5,7 @@ import { BriefcaseIcon, MapPinIcon, BuildingOfficeIcon } from '@heroicons/react/
 import { BookmarkIcon as BookmarkSolidIcon } from '@heroicons/react/24/solid';
 import SEO from '@/components/SEO';
 import EmptyState from '@/components/ui/EmptyState';
+import { motion } from 'framer-motion';
 
 interface SavedJobItem {
   id: string;
@@ -143,12 +144,16 @@ export default function SavedJobsPage() {
       </div>
 
       <div className="grid gap-4">
-        {savedJobs.map((saved) => {
+        {savedJobs.map((saved, i) => {
           const job = saved.job;
           return (
-            <div
+            <motion.div
               key={saved.id}
-              className="bg-card rounded-xl p-5 transition-all duration-200 ease-spring hover:shadow-md"
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+              whileHover={{ y: -2, scale: 1.005 }}
+              className="bg-card rounded-xl p-5 transition-shadow duration-200"
               style={{ boxShadow: 'var(--card-shadow)' }}
             >
               <div className="flex items-start justify-between gap-4">
@@ -202,7 +207,7 @@ export default function SavedJobsPage() {
                   <BookmarkSolidIcon className="h-5 w-5" />
                 </button>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

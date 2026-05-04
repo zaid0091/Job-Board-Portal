@@ -9,6 +9,7 @@ import SEO from '@/components/SEO';
 import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
 import type { Notification } from '@/types';
+import { motion } from 'framer-motion';
 
 function getNotificationLink(notification: Notification): string | null {
   if (!notification.related_object_id) return null;
@@ -100,11 +101,15 @@ export default function NotificationsPage() {
         />
       ) : (
         <div className="space-y-3">
-          {items.map((notification) => {
+          {items.map((notification, i) => {
             const link = getNotificationLink(notification);
             return (
-              <div
+              <motion.div
                 key={notification.id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={link ? { scale: 1.01, x: 4 } : undefined}
                 className={`bg-card rounded-xl p-4 sm:p-5 transition-all duration-200 ease-spring ${
                   !notification.is_read ? 'border-l-[3px] border-l-primary-500' : ''
                 } ${link ? 'cursor-pointer hover:bg-surface-50/50' : ''}`}
@@ -126,7 +131,7 @@ export default function NotificationsPage() {
                   {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
                 </span>
               </div>
-            </div>
+            </motion.div>
             );
           })}
         </div>
