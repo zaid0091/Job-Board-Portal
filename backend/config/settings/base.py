@@ -23,15 +23,16 @@ DJANGO_APPS = [
 ]
 
 THIRD_PARTY_APPS = [
-    "rest_framework",
-    "rest_framework_simplejwt",
-    "rest_framework_simplejwt.token_blacklist",
-    "django_filters",
-    "corsheaders",
-    "drf_spectacular",
-    "storages",
-    "django_celery_beat",
-    "django_celery_results",
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'django_filters',
+    'corsheaders',
+    'drf_spectacular',
+    'storages',
+    'django_celery_beat',
+    'django_celery_results',
+    'channels',
 ]
 
 LOCAL_APPS = [
@@ -173,6 +174,19 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Security Headers for Google OAuth
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
+
+# ASGI Application (Django Channels)
+ASGI_APPLICATION = 'config.asgi.application'
+
+# Channels Layer (Redis-based in production, overridden in dev)
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [os.environ.get('CHANNEL_LAYERS_REDIS_URL', os.environ.get('REDIS_URL', 'redis://localhost:6379/2'))],
+        },
+    },
+}
 
 # CACHING (Redis)
 CACHES = {

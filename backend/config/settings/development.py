@@ -82,6 +82,13 @@ CELERY_CACHE_BACKEND = "memory"
 # Use SQLite-compatible search fallback in development
 USE_SQLITE_COMPATIBLE_SEARCH = True
 
+# In-memory channel layer for development (no Redis needed)
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
+
 # Add browsable API renderer in development
 REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = [
     "rest_framework.renderers.JSONRenderer",

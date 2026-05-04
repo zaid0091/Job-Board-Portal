@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCurrentUser, logout } from '@/store/slices/authSlice';
+import { useWebSocket } from '@/hooks/useWebSocket';
 import AppRoutes from './routes';
 
 function App() {
@@ -9,6 +10,8 @@ function App() {
   const location = useLocation();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [authInitialized, setAuthInitialized] = useState(false);
+
+  useWebSocket();
 
   useEffect(() => {
     const authPages = ['/login', '/register', '/password/reset/request', '/password/reset/confirm'];
