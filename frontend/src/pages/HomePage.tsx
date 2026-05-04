@@ -107,12 +107,12 @@ export default function HomePage() {
 
           {/* Metrics strip */}
           <ScrollReveal direction="up" delay={0.2} duration={1}>
-            <div className="mt-20 flex items-center justify-center">
-              <div className="inline-flex items-center divide-x divide-white/[0.06] bg-white/[0.03] border border-white/[0.06] rounded-2xl backdrop-blur-sm px-1">
+            <div className="mt-20 flex items-center justify-center px-4 sm:px-0">
+              <div className="inline-flex items-center divide-x divide-white/[0.06] bg-white/[0.03] border border-white/[0.06] rounded-2xl backdrop-blur-sm px-1 overflow-x-auto no-scrollbar max-w-full">
                 {stats.map((stat) => (
-                  <div key={stat.label} className="px-6 sm:px-8 py-4 text-center">
+                  <div key={stat.label} className="px-4 sm:px-8 py-4 text-center min-w-fit">
                     <div className="text-lg sm:text-xl font-semibold text-white tabular-nums">{stat.value}</div>
-                    <div className="text-[11px] font-medium text-white/30 uppercase tracking-wider mt-0.5">{stat.label}</div>
+                    <div className="text-[10px] sm:text-[11px] font-medium text-white/30 uppercase tracking-wider mt-0.5 whitespace-nowrap">{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -128,9 +128,16 @@ export default function HomePage() {
       <section className="py-12 border-b border-ink-900/[0.04] dark:border-ink-300/[0.06]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" distance={10}>
-            <p className="text-center text-micro text-ink-300 uppercase tracking-widest mb-6">
-              Trusted by teams at
-            </p>
+            <div className="flex justify-center mb-8">
+              <div className="relative inline-flex items-center px-6 py-2 bg-primary-50/50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-900/50">
+                {/* Corner pixels */}
+                <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary-700 dark:text-primary-200">Trusted by teams at</p>
+              </div>
+            </div>
             <div className="flex items-center justify-center gap-10 sm:gap-16 flex-wrap grayscale">
               {['Google', 'Microsoft', 'Amazon', 'Meta', 'Apple'].map((name) => (
                 <span key={name} className="text-lg sm:text-xl font-bold text-ink-300 select-none">{name}</span>
@@ -145,13 +152,13 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" duration={0.8}>
             <div className="text-center max-w-xl mx-auto">
-              <div className="relative inline-flex items-center px-6 py-2 bg-primary-950/20 border border-primary-900/50 mb-6">
+              <div className="relative inline-flex items-center px-6 py-2 bg-primary-50/50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-900/50 mb-6">
                 {/* Corner pixels */}
-                <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
-                <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
-                <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
-                <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
-                <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary-200">Platform</p>
+                <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary-700 dark:text-primary-200">Platform</p>
               </div>
               <h2 className="mt-3 text-display-sm text-ink-900">
                 Built for modern hiring
@@ -216,13 +223,13 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" duration={0.8}>
             <div className="text-center max-w-xl mx-auto">
-              <div className="relative inline-flex items-center px-6 py-2 bg-primary-950/20 border border-primary-900/50 mb-6">
+              <div className="relative inline-flex items-center px-6 py-2 bg-primary-50/50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-900/50 mb-6">
                 {/* Corner pixels */}
-                <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
-                <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
-                <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
-                <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-400 z-10" />
-                <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary-200">Process</p>
+                <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary-700 dark:text-primary-200">Process</p>
               </div>
               <h2 className="mt-3 text-display-sm text-ink-900">
                 Three steps to your next role

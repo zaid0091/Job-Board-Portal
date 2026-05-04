@@ -10,7 +10,14 @@ export default function AboutPage() {
       <SEO title="About" description="Learn about JobBoard — our mission, values, and the team behind the platform." />
       <section className="py-20 sm:py-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
-          <p className="text-micro text-primary-600 uppercase tracking-widest">About us</p>
+          <div className="relative inline-flex items-center px-6 py-2 bg-primary-50/50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-900/50 mb-6">
+            {/* Corner pixels */}
+            <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+            <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+            <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+            <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+            <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary-700 dark:text-primary-200">About us</p>
+          </div>
           <h1 className="mt-3 text-display-sm sm:text-display text-ink-900">
             Making hiring human again
           </h1>

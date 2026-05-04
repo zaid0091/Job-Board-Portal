@@ -1,34 +1,15 @@
-﻿import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+﻿import { useEffect, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchNotifications, markAllRead } from '@/store/slices/notificationsSlice';
 import { notificationsAPI } from '@/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import EmptyState from '@/components/ui/EmptyState';
 import SEO from '@/components/SEO';
-import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
-import type { Notification } from '@/types';
-import { motion } from 'framer-motion';
-
-function getNotificationLink(notification: Notification): string | null {
-  if (!notification.related_object_id) return null;
-
-  switch (notification.related_content_type) {
-    case 'application':
-      return '/seeker/applications';
-    case 'job':
-      return `/jobs/${notification.related_object_id}`;
-    case 'job_application':
-      return `/employer/applications`;
-    default:
-      return null;
-  }
-}
+import NotificationItem from '@/components/notifications/NotificationItem';
 
 export default function NotificationsPage() {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
   const { notifications, isLoading } = useAppSelector((state) => state.notifications);
 
   const items = notifications?.results ?? [];
@@ -37,8 +18,7 @@ export default function NotificationsPage() {
     dispatch(fetchNotifications(1));
   }, [dispatch]);
 
-  const handleMarkAllRead = async () => {
-    // Optimistic update: mark all as read in UI immediately
+  const handleMarkAllRead = useCallback(async () => {
     const prev = items.map((n) => ({ ...n }));
     const newItems = items.map((n) => ({ ...n, is_read: true }));
     dispatch({ type: 'notifications/fakeOptimistic', payload: newItems });
@@ -48,28 +28,20 @@ export default function NotificationsPage() {
       dispatch({ type: 'notifications/fakeOptimistic', payload: prev });
       toast.error('Failed to mark all as read');
     }
-  };
+  }, [items, dispatch]);
 
-  const handleNotificationClick = async (notification: Notification) => {
-    const link = getNotificationLink(notification);
-
-    if (!notification.is_read) {
-      const newItems = items.map((n) =>
-        n.id === notification.id ? { ...n, is_read: true } : n
-      );
-      dispatch({ type: 'notifications/fakeOptimistic', payload: newItems });
-      try {
-        await notificationsAPI.markAsRead(notification.id);
-      } catch {
-        dispatch(fetchNotifications(1));
-        toast.error('Failed to mark as read');
-      }
+  const handleMarkRead = useCallback(async (id: string) => {
+    const newItems = items.map((n) =>
+      n.id === id ? { ...n, is_read: true } : n
+    );
+    dispatch({ type: 'notifications/fakeOptimistic', payload: newItems });
+    try {
+      await notificationsAPI.markAsRead(id);
+    } catch {
+      dispatch(fetchNotifications(1));
+      toast.error('Failed to mark as read');
     }
-
-    if (link) {
-      navigate(link);
-    }
-  };
+  }, [items, dispatch]);
 
   if (isLoading) {
     return (
@@ -101,39 +73,13 @@ export default function NotificationsPage() {
         />
       ) : (
         <div className="space-y-3">
-          {items.map((notification, i) => {
-            const link = getNotificationLink(notification);
-            return (
-              <motion.div
-                key={notification.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i * 0.05, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={link ? { scale: 1.01, x: 4 } : undefined}
-                className={`bg-card rounded-xl p-4 sm:p-5 transition-all duration-200 ease-spring ${
-                  !notification.is_read ? 'border-l-[3px] border-l-primary-500' : ''
-                } ${link ? 'cursor-pointer hover:bg-surface-50/50' : ''}`}
-                style={{ boxShadow: 'var(--card-shadow)' }}
-                onClick={() => handleNotificationClick(notification)}
-              >
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p
-                    className={`text-[13px] ${
-                      !notification.is_read ? 'font-semibold text-ink-900' : 'text-ink-600'
-                    }`}
-                  >
-                    {notification.title}
-                  </p>
-                  <p className="text-[13px] text-ink-500 mt-1">{notification.message}</p>
-                </div>
-                <span className="text-micro text-ink-400 whitespace-nowrap ml-4">
-                  {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                </span>
-              </div>
-            </motion.div>
-            );
-          })}
+          {items.map((notification) => (
+            <NotificationItem
+              key={notification.id}
+              notification={notification}
+              onMarkRead={handleMarkRead}
+            />
+          ))}
         </div>
       )}
     </div>

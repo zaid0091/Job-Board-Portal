@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+﻿import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { analyticsAPI } from '@/api';
 import { DashboardSkeleton } from '@/components/ui/Skeleton';
@@ -81,12 +81,22 @@ export default function SeekerDashboardPage() {
     );
   }
 
-  const stats = [
+  const stats = useMemo(() => [
     { label: 'Applications', value: data.overview.total_applications, icon: DocumentTextIcon, bg: 'bg-blue-50 dark:bg-blue-950/40', iconColor: 'text-blue-600 dark:text-blue-400' },
     { label: 'Hired', value: data.overview.hired_count, icon: CheckCircleIcon, bg: 'bg-emerald-50 dark:bg-emerald-950/40', iconColor: 'text-emerald-600 dark:text-emerald-400' },
     { label: 'Saved jobs', value: data.overview.saved_jobs, icon: BookmarkIcon, bg: 'bg-primary-50 dark:bg-primary-950/40', iconColor: 'text-primary-600 dark:text-primary-400', link: '/seeker/saved-jobs' },
     { label: 'Response rate', value: `${data.overview.response_rate}%`, icon: ClockIcon, bg: 'bg-amber-50 dark:bg-amber-950/40', iconColor: 'text-amber-600 dark:text-amber-400' },
-  ];
+  ], [data.overview]);
+
+  const pieData = useMemo(() =>
+    Object.entries(data.applications_by_status).map(([status, count]) => ({ status, count })),
+    [data.applications_by_status]
+  );
+
+  const pieKeys = useMemo(() =>
+    Object.keys(data.applications_by_status),
+    [data.applications_by_status]
+  );
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
@@ -186,20 +196,20 @@ export default function SeekerDashboardPage() {
           {Object.keys(data.applications_by_status).length > 0 ? (
             <ResponsiveContainer width="100%" height={280}>
               <PieChart>
-                <Pie
-                  data={Object.entries(data.applications_by_status).map(([status, count]) => ({ status, count }))}
-                  dataKey="count"
-                  nameKey="status"
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={90}
-                  innerRadius={50}
-                  paddingAngle={2}
-                  label
-                >
-                  {Object.keys(data.applications_by_status).map((_, index) => (
-                    <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                  ))}
+              <Pie
+                data={pieData}
+                dataKey="count"
+                nameKey="status"
+                cx="50%"
+                cy="50%"
+                outerRadius={90}
+                innerRadius={50}
+                paddingAngle={2}
+                label
+              >
+                {pieKeys.map((_, index) => (
+                  <Cell key={index} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                ))}
                 </Pie>
                 <Tooltip contentStyle={{ borderRadius: '0.75rem', border: 'none', boxShadow: 'var(--card-shadow-lg)', fontSize: 13, backgroundColor: 'rgb(var(--surface-50))', color: 'rgb(var(--ink-800))' }} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />

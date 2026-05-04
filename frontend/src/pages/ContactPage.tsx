@@ -1,4 +1,4 @@
-﻿import { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import emailjs from '@emailjs/browser';
 import { EnvelopeIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import SEO from '@/components/SEO';
@@ -33,7 +33,16 @@ export default function ContactPage() {
       <section className="py-20 sm:py-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-xl mx-auto">
-            <p className="text-micro text-primary-600 uppercase tracking-widest">Contact</p>
+            <div className="flex justify-center mb-6">
+              <div className="relative inline-flex items-center px-6 py-2 bg-primary-50/50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-900/50">
+                {/* Corner pixels */}
+                <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
+                <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary-700 dark:text-primary-200">Contact</p>
+              </div>
+            </div>
             <h1 className="mt-3 text-display-sm sm:text-display text-ink-900">
               Get in touch
             </h1>

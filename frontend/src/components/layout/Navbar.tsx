@@ -180,6 +180,7 @@ export default function Navbar() {
                       <img
                         src={avatarUrl}
                         alt="avatar"
+                        loading="lazy"
                         className="h-6 w-6 rounded-full object-cover ring-1 ring-ink-900/10"
                       />
                     ) : (

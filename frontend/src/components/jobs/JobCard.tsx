@@ -1,4 +1,5 @@
-﻿import { Link } from 'react-router-dom';
+﻿import { memo } from 'react';
+import { Link } from 'react-router-dom';
 import { MapPinIcon, ClockIcon, CurrencyDollarIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 import { formatDistanceToNow } from 'date-fns';
@@ -27,7 +28,7 @@ const jobTypeLabel: Record<string, string> = {
   TEMPORARY: 'Temporary',
 };
 
-export default function JobCard({ job }: JobCardProps) {
+export default memo(function JobCard({ job }: JobCardProps) {
   return (
     <motion.div
       whileHover={{ y: -4, scale: 1.01 }}
@@ -53,6 +54,7 @@ export default function JobCard({ job }: JobCardProps) {
               <img
                 src={job.employer_logo}
                 alt={job.employer_name}
+                loading="lazy"
                 className="h-10 w-10 rounded-lg object-cover flex-shrink-0"
                 style={{ boxShadow: 'var(--card-shadow)' }}
               />
@@ -118,4 +120,4 @@ export default function JobCard({ job }: JobCardProps) {
       </Link>
     </motion.div>
   );
-}
+});
