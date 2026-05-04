@@ -9,18 +9,15 @@ if os.environ.get("ENVIRONMENT") == "production" or "production" in _environment
         "Set ENVIRONMENT=development or use config.settings.production."
     )
 
+from .base import *  # noqa
+
 # Enable local memory cache for development
-# Enable Redis cache for development
 CACHES = {
     "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
     }
 }
-from .base import *  # noqa
 
 DEBUG = True
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
@@ -76,7 +73,10 @@ CORS_ALLOW_HEADERS = [
 
 # Run Celery tasks synchronously in development (no broker needed)
 CELERY_TASK_ALWAYS_EAGER = True
-CELERY_TASK_EAGER_PROPAGATES = False
+CELERY_TASK_EAGER_PROPAGATES = True
+CELERY_BROKER_URL = "memory://"
+CELERY_RESULT_BACKEND = "cache"
+CELERY_CACHE_BACKEND = "memory"
 
 # Add browsable API renderer in development
 REST_FRAMEWORK["DEFAULT_RENDERER_CLASSES"] = [

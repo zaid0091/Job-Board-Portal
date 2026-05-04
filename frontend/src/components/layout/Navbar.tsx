@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { profilesAPI } from '@/api';
 import { Link, useLocation } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { logoutUser } from '@/store/slices/authSlice';
@@ -82,12 +81,13 @@ export default function Navbar() {
     ...(isAuthenticated && user?.role === 'EMPLOYER'
       ? [{ to: '/employer/dashboard', label: 'Dashboard', match: '/employer' }]
       : []),
-    ...(isAuthenticated && user?.role === 'SEEKER'
-      ? [
-          { to: '/seeker/dashboard', label: 'Dashboard', match: '/seeker/dashboard' },
-          { to: '/seeker/applications', label: 'Applications', match: '/seeker/applications' },
-        ]
-      : []),
+      ...(isAuthenticated && user?.role === 'SEEKER'
+        ? [
+            { to: '/seeker/dashboard', label: 'Dashboard', match: '/seeker/dashboard' },
+            { to: '/seeker/applications', label: 'Applications', match: '/seeker/applications' },
+            { to: '/seeker/saved-jobs', label: 'Saved Jobs', match: '/seeker/saved-jobs' },
+          ]
+        : []),
   ];
 
   return (

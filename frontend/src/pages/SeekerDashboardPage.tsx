@@ -83,7 +83,7 @@ export default function SeekerDashboardPage() {
   const stats = [
     { label: 'Applications', value: data.overview.total_applications, icon: DocumentTextIcon, bg: 'bg-blue-50 dark:bg-blue-950/40', iconColor: 'text-blue-600 dark:text-blue-400' },
     { label: 'Hired', value: data.overview.hired_count, icon: CheckCircleIcon, bg: 'bg-emerald-50 dark:bg-emerald-950/40', iconColor: 'text-emerald-600 dark:text-emerald-400' },
-    { label: 'Saved jobs', value: data.overview.saved_jobs, icon: BookmarkIcon, bg: 'bg-primary-50 dark:bg-primary-950/40', iconColor: 'text-primary-600 dark:text-primary-400' },
+    { label: 'Saved jobs', value: data.overview.saved_jobs, icon: BookmarkIcon, bg: 'bg-primary-50 dark:bg-primary-950/40', iconColor: 'text-primary-600 dark:text-primary-400', link: '/seeker/saved-jobs' },
     { label: 'Response rate', value: `${data.overview.response_rate}%`, icon: ClockIcon, bg: 'bg-amber-50 dark:bg-amber-950/40', iconColor: 'text-amber-600 dark:text-amber-400' },
   ];
 
@@ -102,16 +102,32 @@ export default function SeekerDashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map((stat) => (
-          <div key={stat.label} className="bg-card rounded-xl p-4 transition-all duration-200 ease-spring" style={{ boxShadow: 'var(--card-shadow)' }}>
-            <div className="flex items-center gap-3">
-              <div className={`${stat.bg} p-2 rounded-lg`}>
-                <stat.icon className={`h-4 w-4 ${stat.iconColor}`} />
+          <div key={stat.label} className="bg-card rounded-xl transition-all duration-200 ease-spring" style={{ boxShadow: 'var(--card-shadow)' }}>
+            {stat.link ? (
+              <Link to={stat.link} className="block p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-3">
+                  <div className={`${stat.bg} p-2 rounded-lg`}>
+                    <stat.icon className={`h-4 w-4 ${stat.iconColor}`} />
+                  </div>
+                  <div>
+                    <p className="text-micro text-ink-400">{stat.label}</p>
+                    <p className="text-xl font-semibold text-ink-800 tabular-nums">{stat.value}</p>
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <div className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className={`${stat.bg} p-2 rounded-lg`}>
+                    <stat.icon className={`h-4 w-4 ${stat.iconColor}`} />
+                  </div>
+                  <div>
+                    <p className="text-micro text-ink-400">{stat.label}</p>
+                    <p className="text-xl font-semibold text-ink-800 tabular-nums">{stat.value}</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-micro text-ink-400">{stat.label}</p>
-                <p className="text-xl font-semibold text-ink-800 tabular-nums">{stat.value}</p>
-              </div>
-            </div>
+            )}
           </div>
         ))}
       </div>

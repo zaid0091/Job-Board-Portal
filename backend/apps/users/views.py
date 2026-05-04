@@ -109,7 +109,15 @@ class RegisterView(generics.CreateAPIView):
 
         refresh = RefreshToken.for_user(user)
 
-        logger.info(f"New user registered: {user.email}")
+        from django.conf import settings
+        from .tasks import send_welcome_email_task
+        try:
+            if settings.DEBUG:
+                send_welcome_email_task.apply(args=[user.email, user.username])
+            else:
+                send_welcome_email_task.delay(user.email, user.username)
+        except Exception as e:
+            logger.error(f"Failed to queue/send welcome email for {user.email}: {e}")
 
         response = Response(
             {
@@ -334,9 +342,18 @@ class GoogleLoginView(APIView):
                 }
             )
             
-            if not created and not user.is_verified:
-                user.is_verified = True
-                user.save()
+            if created:
+                logger.info(f"Triggering welcome email for new Google user: {user.email}")
+                from .tasks import send_welcome_email_task
+                try:
+                    send_welcome_email_task.delay(user.email, user.username)
+                except Exception as e:
+                    logger.error(f"Failed to queue welcome email for Google user {user.email}: {e}")
+            else:
+                logger.info(f"Google user {user.email} already exists, skipping welcome email")
+                if not user.is_verified:
+                    user.is_verified = True
+                    user.save()
                 
             refresh = RefreshToken.for_user(user)
             

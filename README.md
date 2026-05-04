@@ -54,7 +54,7 @@ A comprehensive, full-stack Job Board Portal designed for seamless recruitment a
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/yourusername/job-board-portal.git
+   git clone https://github.com/zaid0091/job-board-portal.git
    cd job-board-portal
    ```
 
@@ -63,10 +63,18 @@ A comprehensive, full-stack Job Board Portal designed for seamless recruitment a
    cd backend
    python -m venv venv
    source venv/bin/activate  # Windows: venv\Scripts\activate
-   pip install -r requirements.txt
+   pip install -r requirements/base.txt  # Use base.txt for full dependencies
    cp .env.example .env  # Update variables in .env
    python manage.py migrate
    python manage.py runserver
+   ```
+
+4. **Running Background Tasks (Celery):**
+   In a separate terminal:
+   ```bash
+   cd backend
+   # Ensure Redis is running first
+   celery -A config worker -l info
    ```
 
 3. **Frontend Configuration:**

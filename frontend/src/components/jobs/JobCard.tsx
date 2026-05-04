@@ -91,12 +91,22 @@ export default function JobCard({ job }: JobCardProps) {
         </span>
       </div>
 
-      {job.days_remaining !== null && job.days_remaining <= 7 && (
+      {job.days_remaining !== null && job.days_remaining < 0 && (
         <p className="mt-3 text-micro font-medium text-red-500 flex items-center gap-1">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-          {job.days_remaining === 0
-            ? 'Expires today'
-            : `Expires in ${job.days_remaining} day${job.days_remaining > 1 ? 's' : ''}`}
+          Expired
+        </p>
+      )}
+      {job.days_remaining !== null && job.days_remaining === 0 && (
+        <p className="mt-3 text-micro font-medium text-red-500 flex items-center gap-1">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          Expires today
+        </p>
+      )}
+      {job.days_remaining !== null && job.days_remaining > 0 && job.days_remaining <= 7 && (
+        <p className="mt-3 text-micro font-medium text-red-500 flex items-center gap-1">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          Expires in {job.days_remaining} day{job.days_remaining > 1 ? 's' : ''}
         </p>
       )}
     </Link>

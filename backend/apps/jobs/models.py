@@ -181,9 +181,9 @@ class Job(UUIDModel, TimeStampedModel):
 
     @property
     def days_remaining(self):
-        if self.expires_at:
-            delta = self.expires_at - timezone.now()
-            return max(0, delta.days)
+        if self.application_deadline:
+            delta = self.application_deadline - timezone.now()
+            return delta.days
         return None
 
     @property

@@ -24,6 +24,7 @@ const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const TermsPage = lazy(() => import('@/pages/TermsPage'));
 const RequestResetPasswordPage = lazy(() => import('@/pages/RequestResetPasswordPage'));
 const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'));
+const SavedJobsPage = lazy(() => import('@/pages/SavedJobsPage'));
 const CompanyDetailPage = lazy(() => import('@/pages/CompanyDetailPage'));
 
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
@@ -83,6 +84,7 @@ export default function AppRoutes({ authInitialized }: AppRoutesProps) {
           <Route element={<RoleRoute allowedRoles={['SEEKER']} />}>
             <Route path="/seeker/dashboard" element={<SuspenseWrapper><SeekerDashboardPage /></SuspenseWrapper>} />
             <Route path="/seeker/applications" element={<SuspenseWrapper><MyApplicationsPage /></SuspenseWrapper>} />
+            <Route path="/seeker/saved-jobs" element={<SuspenseWrapper><SavedJobsPage /></SuspenseWrapper>} />
             <Route path="/seeker/profile" element={<SuspenseWrapper><ProfilePage /></SuspenseWrapper>} />
           </Route>
         </Route>

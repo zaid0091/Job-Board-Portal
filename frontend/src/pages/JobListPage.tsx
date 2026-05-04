@@ -82,6 +82,10 @@ export default function JobListPage() {
     return () => observer.disconnect();
   }, [hasMore, isLoadingMore, isLoading, loadMore]);
 
+  const hasActiveFilters = useMemo(() => {
+    return Object.entries(filters).some(([_, value]) => value !== undefined && value !== '' && value !== false);
+  }, [filters]);
+
   // Progress percentage for the bar
   const progress = useMemo(() => {
     if (totalCount === 0) return 0;
@@ -91,11 +95,24 @@ export default function JobListPage() {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
       <SEO title="Jobs" description="Browse open positions and find your next career opportunity." />
-      <div className="mb-8">
-        <h1 className="text-display-sm text-ink-900">Positions</h1>
-        <p className="text-sm text-ink-400 mt-1">
-          {totalCount} role{totalCount !== 1 ? 's' : ''} available
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-8">
+        <div>
+          <h1 className="text-display-sm text-ink-900">Positions</h1>
+          <p className="text-sm text-ink-400 mt-1">
+            {totalCount} role{totalCount !== 1 ? 's' : ''} available
+          </p>
+        </div>
+        {hasActiveFilters && (
+          <button
+            onClick={handleClearFilters}
+            className="text-[13px] font-medium text-ink-500 hover:text-primary-600 transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-950/30"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Clear filters
+          </button>
+        )}
       </div>
 
       <JobFilters

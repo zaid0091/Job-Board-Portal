@@ -1,52 +1,38 @@
-from celery import shared_task
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.conf import settings
-from django.utils import timezone
 import logging
+from celery import shared_task
 
 logger = logging.getLogger(__name__)
 
-
-@shared_task(bind=True, max_retries=3, default_retry_delay=60)
-def send_welcome_email(self, user_id):
-    """Send welcome email to newly registered user."""
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
-
+@shared_task(bind=True, max_retries=3)
+def send_welcome_email_task(self, to_email, username):
+    """
+    Background task to send a welcome email to a new user.
+    """
+    logger.info(f"Starting welcome email task for {to_email}")
     try:
-        user = User.objects.get(id=user_id)
-        subject = 'Welcome to JobBoard!'
-        html_message = render_to_string('emails/welcome.html', {
-            'user': user,
-            'site_url': settings.FRONTEND_URL,
-        })
-
-        send_mail(
-            subject=subject,
-            message='',
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[user.email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-
-        logger.info(f'Welcome email sent to {user.email}')
-
-    except User.DoesNotExist:
-        logger.error(f'User {user_id} not found for welcome email')
+        from core.email_services import send_welcome_email
+        success = send_welcome_email(to_email, username)
+        if not success:
+            logger.error(f"send_welcome_email returned False for {to_email}")
+            raise Exception("Email service returned False")
+        logger.info(f"Welcome email task completed successfully for {to_email}")
+        return True
     except Exception as exc:
-        logger.error(f'Failed to send welcome email: {str(exc)}')
-        raise self.retry(exc=exc)
-
+        logger.error(f"Error sending welcome email to {to_email}: {exc}")
+        raise self.retry(exc=exc, countdown=60)
 
 @shared_task
 def cleanup_expired_tokens():
-    """Remove expired JWT tokens from the database."""
-    from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
-
-    now = timezone.now()
-    expired_tokens = OutstandingToken.objects.filter(expires_at__lt=now)
-    count = expired_tokens.count()
-    expired_tokens.delete()
-    logger.info(f'Cleaned up {count} expired tokens')
+    """
+    Delete expired password reset tokens from the database.
+    Runs periodically via Celery Beat.
+    """
+    from .models import PasswordResetToken
+    from django.utils import timezone
+    
+    deleted_count, _ = PasswordResetToken.objects.filter(
+        expires_at__lt=timezone.now()
+    ).delete()
+    
+    logger.info(f"Deleted {deleted_count} expired password reset tokens.")
+    return deleted_count
