@@ -3,6 +3,11 @@ import { useAppSelector } from '@/store/hooks';
 import { usePlatformStats } from '@/hooks/usePlatformStats';
 import SEO from '@/components/SEO';
 import ScrollReveal from '@/components/ui/ScrollReveal';
+import Parallax from '@/components/ui/Parallax';
+import PerspectiveCard from '@/components/ui/PerspectiveCard';
+import PremiumCard from '@/components/ui/PremiumCard';
+import TextReveal from '@/components/ui/TextReveal';
+import Magnetic from '@/components/ui/Magnetic';
 import {
   ArrowRightIcon,
   ArrowUpRightIcon,
@@ -24,8 +29,8 @@ export default function HomePage() {
         {/* Grid overlay */}
         <div className="absolute inset-0 bg-grid-pattern-dark bg-grid opacity-40" />
         {/* Gradient orbs */}
-        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary-600/20 dark:bg-primary-500/25 rounded-full blur-[120px]" />
-        <div className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-primary-400/10 dark:bg-primary-400/15 rounded-full blur-[100px]" />
+        <Parallax offset={100} className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary-600/20 dark:bg-primary-500/25 rounded-full blur-[120px]" />
+        <Parallax offset={-80} className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-primary-400/10 dark:bg-primary-400/15 rounded-full blur-[100px]" />
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-28 sm:py-36 lg:py-44">
           <ScrollReveal direction="up" duration={1} distance={20}>
@@ -60,34 +65,41 @@ export default function HomePage() {
               </p>
 
               <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link
-                  to="/jobs"
-                  className="group relative inline-flex items-center gap-2.5 px-7 py-3.5 text-sm font-semibold text-white rounded-xl overflow-hidden bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_32px_rgba(124,58,237,0.4)] active:scale-[0.98]"
-                >
-                  <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <span className="absolute -inset-1 bg-gradient-to-r from-primary-400 via-primary-500 to-primary-400 rounded-xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-300 -z-10 animate-pulse" />
-                  <span className="relative">Explore positions</span>
-                  <ArrowRightIcon className="relative h-4 w-4" style={{ animation: 'nudge-right 1.5s ease-in-out infinite' }} />
-                </Link>
-                {!isAuthenticated && (
+                <Magnetic strength={50}>
                   <Link
-                    to="/register"
-                    className="group relative inline-flex items-center gap-2 px-7 py-3.5 text-sm font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] bg-white/[0.08] border border-white/[0.15] hover:border-white/[0.3] backdrop-blur-sm text-white hover:shadow-[0_0_24px_rgba(255,255,255,0.1)]"
+                    to="/jobs"
+                    className="group relative inline-flex items-center gap-2.5 px-7 py-3.5 text-sm font-semibold text-white rounded-xl overflow-hidden bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-400 hover:to-primary-500 transition-all duration-300 hover:scale-[1.03] hover:shadow-[0_0_32px_rgba(124,58,237,0.4)] active:scale-[0.98]"
                   >
-                    <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
-                    <span className="relative flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Create account
-                    </span>
+                    <span className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <span className="absolute -inset-1 bg-gradient-to-r from-primary-400 via-primary-500 to-primary-400 rounded-xl blur-lg opacity-40 group-hover:opacity-60 transition-opacity duration-300 -z-10 animate-pulse" />
+                    <span className="relative">Explore positions</span>
+                    <ArrowRightIcon className="relative h-4 w-4" style={{ animation: 'nudge-right 1.5s ease-in-out infinite' }} />
                   </Link>
+                </Magnetic>
+                
+                {!isAuthenticated && (
+                  <Magnetic strength={30}>
+                    <Link
+                      to="/register"
+                      className="group relative inline-flex items-center gap-2 px-7 py-3.5 text-sm font-semibold rounded-xl overflow-hidden transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] bg-white/[0.08] border border-white/[0.15] hover:border-white/[0.3] backdrop-blur-sm text-white hover:shadow-[0_0_24px_rgba(255,255,255,0.1)]"
+                    >
+                      <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
+                      <span className="relative flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Create account
+                      </span>
+                    </Link>
+                  </Magnetic>
                 )}
                 {isAuthenticated && user?.role === 'EMPLOYER' && (
-                  <Link
-                    to="/employer/jobs/create"
-                    className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white/80 hover:text-white border border-white/[0.1] hover:border-white/[0.2] rounded-xl hover:bg-white/[0.04] transition-all duration-150"
-                  >
-                    Post a position
-                  </Link>
+                  <Magnetic strength={20}>
+                    <Link
+                      to="/employer/jobs/create"
+                      className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white/80 hover:text-white border border-white/[0.1] hover:border-white/[0.2] rounded-xl hover:bg-white/[0.04] transition-all duration-150"
+                    >
+                      Post a position
+                    </Link>
+                  </Magnetic>
                 )}
               </div>
             </div>
@@ -176,16 +188,16 @@ export default function HomePage() {
                 desc: 'Your data stays yours. We never share candidate information without explicit consent.',
               },
             ].map((f, i) => (
-              <ScrollReveal key={f.title} delay={i * 0.1} distance={20}>
-                <div
-                  className="group h-full relative p-6 rounded-2xl border border-ink-900/[0.06] hover:border-ink-900/[0.12] transition-all duration-200"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-primary-50 dark:bg-primary-950/40 flex items-center justify-center mb-4 group-hover:bg-primary-100 dark:group-hover:bg-primary-950/60 transition-colors">
-                    <f.icon className="h-[18px] w-[18px] text-primary-600" />
+              <ScrollReveal key={f.title} delay={i * 0.1} distance={30} direction="up" className="h-full">
+                <PremiumCard className="h-full">
+                  <div className="p-6">
+                    <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-950/40 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                      <f.icon className="h-5 w-5 text-primary-600" />
+                    </div>
+                    <h3 className="text-[15px] font-semibold text-ink-800 mb-2">{f.title}</h3>
+                    <p className="text-sm text-ink-400 leading-relaxed">{f.desc}</p>
                   </div>
-                  <h3 className="text-[15px] font-semibold text-ink-800">{f.title}</h3>
-                  <p className="mt-1.5 text-sm text-ink-400 leading-relaxed">{f.desc}</p>
-                </div>
+                </PremiumCard>
               </ScrollReveal>
             ))}
           </div>
