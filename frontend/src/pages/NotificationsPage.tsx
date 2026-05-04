@@ -1,4 +1,5 @@
 ﻿import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchNotifications, markAllRead } from '@/store/slices/notificationsSlice';
 import { notificationsAPI } from '@/api';
@@ -7,9 +8,26 @@ import EmptyState from '@/components/ui/EmptyState';
 import SEO from '@/components/SEO';
 import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
+import type { Notification } from '@/types';
+
+function getNotificationLink(notification: Notification): string | null {
+  if (!notification.related_object_id) return null;
+
+  switch (notification.related_content_type) {
+    case 'application':
+      return '/seeker/applications';
+    case 'job':
+      return `/jobs/${notification.related_object_id}`;
+    case 'job_application':
+      return `/employer/applications`;
+    default:
+      return null;
+  }
+}
 
 export default function NotificationsPage() {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { notifications, isLoading } = useAppSelector((state) => state.notifications);
 
   const items = notifications?.results ?? [];
@@ -31,18 +49,24 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleMarkRead = async (id: string) => {
-    // Optimistic update: mark as read in UI immediately
-    const prev = items.find((n) => n.id === id)?.is_read;
-    if (prev) return; // already read
-    const newItems = items.map((n) => n.id === id ? { ...n, is_read: true } : n);
-    dispatch({ type: 'notifications/fakeOptimistic', payload: newItems });
-    try {
-      await notificationsAPI.markAsRead(id);
-    } catch {
-      // revert
-      dispatch(fetchNotifications(1));
-      toast.error('Failed to mark as read');
+  const handleNotificationClick = async (notification: Notification) => {
+    const link = getNotificationLink(notification);
+
+    if (!notification.is_read) {
+      const newItems = items.map((n) =>
+        n.id === notification.id ? { ...n, is_read: true } : n
+      );
+      dispatch({ type: 'notifications/fakeOptimistic', payload: newItems });
+      try {
+        await notificationsAPI.markAsRead(notification.id);
+      } catch {
+        dispatch(fetchNotifications(1));
+        toast.error('Failed to mark as read');
+      }
+    }
+
+    if (link) {
+      navigate(link);
     }
   };
 
@@ -76,15 +100,17 @@ export default function NotificationsPage() {
         />
       ) : (
         <div className="space-y-3">
-          {items.map((notification) => (
-            <div
-              key={notification.id}
-              className={`bg-card rounded-xl p-4 sm:p-5 cursor-pointer transition-all duration-200 ease-spring ${
-                !notification.is_read ? 'border-l-[3px] border-l-primary-500' : ''
-              }`}
-              style={{ boxShadow: 'var(--card-shadow)' }}
-              onClick={() => !notification.is_read && handleMarkRead(notification.id)}
-            >
+          {items.map((notification) => {
+            const link = getNotificationLink(notification);
+            return (
+              <div
+                key={notification.id}
+                className={`bg-card rounded-xl p-4 sm:p-5 transition-all duration-200 ease-spring ${
+                  !notification.is_read ? 'border-l-[3px] border-l-primary-500' : ''
+                } ${link ? 'cursor-pointer hover:bg-surface-50/50' : ''}`}
+                style={{ boxShadow: 'var(--card-shadow)' }}
+                onClick={() => handleNotificationClick(notification)}
+              >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <p
@@ -101,7 +127,8 @@ export default function NotificationsPage() {
                 </span>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

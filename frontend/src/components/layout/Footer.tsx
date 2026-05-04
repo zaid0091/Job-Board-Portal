@@ -1,19 +1,23 @@
 import { Link } from 'react-router-dom';
+import Logo from '../ui/Logo';
 
 export default function Footer() {
   return (
     <footer className="border-t border-ink-900/[0.04] dark:border-ink-300/[0.06] mt-auto" style={{ backgroundColor: 'rgb(var(--bg-page))' }}>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
-        <div className="py-12 sm:py-14 grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+      <div className="max-w-[1600px] mx-auto">
+        {/* Huge Logo Hero */}
+        <div className="pt-24 pb-12 flex justify-center border-b border-ink-900/[0.04] dark:border-ink-300/[0.06] mb-12 px-2 overflow-hidden">
+          <Logo size="huge" />
+        </div>
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-14 grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand */}
           <div className="col-span-2 lg:col-span-1">
-            <Link to="/" className="inline-flex items-center gap-2">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-sm">
-                <span className="text-white font-bold text-[11px]">JB</span>
-              </div>
-              <span className="text-[15px] font-semibold text-ink-800">JobBoard</span>
-            </Link>
-            <p className="mt-3 text-[13px] leading-relaxed text-ink-400 max-w-[240px]">
+            <div className="flex items-center gap-2.5 mb-3">
+              <img src="/logo.png" alt="Jobly" className="h-8 w-8 object-contain" />
+              <p className="text-[16px] font-medium text-ink-800">Jobly</p>
+            </div>
+            <p className="text-[14px] leading-relaxed text-ink-400 max-w-[240px]">
               Connecting exceptional talent with companies that value what they do.
             </p>
           </div>
@@ -47,14 +51,16 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="py-5 border-t border-ink-900/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-[11px] text-ink-300">
-            &copy; {new Date().getFullYear()} JobBoard. All rights reserved.
-          </p>
-          <div className="flex items-center gap-5">
-            <Link to="/privacy" className="text-[11px] text-ink-300 hover:text-ink-500 transition-colors">Privacy</Link>
-            <Link to="/terms" className="text-[11px] text-ink-300 hover:text-ink-500 transition-colors">Terms</Link>
-            <a href="#" className="text-[11px] text-ink-300 hover:text-ink-500 transition-colors">Cookies</a>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="py-5 border-t border-ink-900/[0.04] flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-[11px] text-ink-300">
+              &copy; {new Date().getFullYear()} Jobly. All rights reserved.
+            </p>
+            <div className="flex items-center gap-5">
+              <Link to="/privacy" className="text-[11px] text-ink-300 hover:text-ink-800 transition-colors">Privacy</Link>
+              <Link to="/terms" className="text-[11px] text-ink-300 hover:text-ink-800 transition-colors">Terms</Link>
+              <a href="#" className="text-[11px] text-ink-300 hover:text-ink-800 transition-colors">Cookies</a>
+            </div>
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { fetchUnreadCount } from '@/store/slices/notificationsSlice';
 import { Bars2Icon, XMarkIcon, BellIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+// import Logo from '@/components/ui/Logo';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -99,17 +100,22 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
-            {/* <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-xs leading-none">JB</span>
-            </div> */}
+          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 group">
+            <div className="relative">
+              <img 
+                src="/logo.png" 
+                alt="Jobly" 
+                className="h-10 w-10 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3" 
+              />
+              <div className="absolute inset-0 bg-primary-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </div>
             <span
-              className={`text-[17px] font-semibold tracking-tight transition-colors duration-300 ${
-                onHero ? 'text-white' : 'text-ink-800'
+              className={`text-xl font-bold tracking-tight transition-colors duration-300 ${
+                onHero ? 'text-white' : 'text-ink-900'
               }`}
-              style={{ fontFamily: "'Fredoka', sans-serif" }}
+              style={{ fontFamily: "'Inter', sans-serif" }}
             >
-              JobBoard
+              Jobly
             </span>
           </Link>
 

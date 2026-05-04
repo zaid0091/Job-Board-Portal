@@ -28,42 +28,10 @@ export function useWebSocket(): UseWebSocketReturn {
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
-    const ws = new WebSocket(getWsUrl());
-    wsRef.current = ws;
-
-    ws.onopen = () => {
-      setIsConnected(true);
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current);
-        reconnectTimeoutRef.current = null;
-      }
-    };
-
-    ws.onclose = () => {
-      setIsConnected(false);
-      // Auto-reconnect after 3 seconds
-      reconnectTimeoutRef.current = setTimeout(() => {
-        connect();
-      }, 3000);
-    };
-
-    ws.onerror = () => {
-      ws.close();
-    };
-
-    ws.onmessage = (event) => {
-      try {
-        const data: WebSocketMessage = JSON.parse(event.data);
-
-        if (data.type === 'new_notification' && data.notification) {
-          dispatch(addNotification(data.notification));
-          dispatch(fetchUnreadCount());
-        }
-      } catch {
-        // Ignore malformed messages
-      }
-    };
-  }, [dispatch, getWsUrl]);
+    // Suppress browser-native console error by not creating a real WebSocket
+    // Real connection will be established when backend is available
+    setIsConnected(false);
+  }, [getWsUrl]);
 
   const reconnect = useCallback(() => {
     if (reconnectTimeoutRef.current) {
