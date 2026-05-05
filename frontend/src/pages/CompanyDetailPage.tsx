@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { profilesAPI, jobsAPI } from '@/api';
 import JobCard from '@/components/jobs/JobCard';
@@ -14,12 +14,34 @@ import {
 import toast from 'react-hot-toast';
 import type { EmployerProfilePublic, JobListItem } from '@/types';
 
+const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://jobly.com';
+
 export default function CompanyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [company, setCompany] = useState<EmployerProfilePublic | null>(null);
   const [jobs, setJobs] = useState<JobListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingJobs, setLoadingJobs] = useState(true);
+
+  const jsonLd = useMemo(() => {
+    if (!company) return null;
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: company.company_name,
+      description: company.description.replace(/<[^>]*>/g, ''),
+      url: company.company_website || `${SITE_URL}/employers/${company.id}`,
+      logo: company.company_logo ? `${SITE_URL}${company.company_logo}` : undefined,
+      sameAs: company.company_website ? [company.company_website] : [],
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: company.location,
+      },
+      numberOfEmployees: company.company_size || undefined,
+      industry: company.industry || undefined,
+    };
+  }, [company]);
 
   useEffect(() => {
     if (!id) return;
@@ -71,7 +93,9 @@ export default function CompanyDetailPage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
       <SEO 
         title={company.company_name} 
-        description={`Learn more about ${company.company_name} and their open positions on JobBoard.`} 
+        description={`${company.company_name} — ${company.active_jobs_count} open position${company.active_jobs_count !== 1 ? 's' : ''} on Jobly. ${company.industry || ''} company based in ${company.location}.`.trim()}
+        canonical={`/employers/${company.id}`}
+        jsonLd={jsonLd}
       />
       
       {/* Company Header */}

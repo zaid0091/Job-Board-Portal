@@ -11,7 +11,6 @@ import {
   PencilIcon,
   TrashIcon,
   UsersIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import {
   BarChart,
@@ -57,7 +56,6 @@ export default function EmployerDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [jobs, setJobs] = useState<JobListItem[]>([]);
   const [jobsLoading, setJobsLoading] = useState(true);
-  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -96,7 +94,6 @@ export default function EmployerDashboardPage() {
       toast.error('Failed to delete job');
     } finally {
       setDeletingId(null);
-      setDeleteConfirm(null);
     }
   };
 
@@ -125,7 +122,7 @@ export default function EmployerDashboardPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-      <SEO title="Dashboard" description="Manage your job postings and track applications." />
+      <SEO title="Dashboard" description="Manage your job postings and track applications." noindex />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-display-sm text-ink-900">Dashboard</h1>

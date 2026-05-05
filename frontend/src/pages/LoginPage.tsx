@@ -57,7 +57,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 sm:py-16">
-      <SEO title="Login" description="Sign in to your JobBoard account." />
+      <SEO title="Login" description="Sign in to your Jobly account to apply for jobs or manage your listings." canonical="/login" />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

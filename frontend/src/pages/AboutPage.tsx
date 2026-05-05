@@ -7,7 +7,7 @@ export default function AboutPage() {
   const { stats } = usePlatformStats();
   return (
     <div>
-      <SEO title="About" description="Learn about JobBoard — our mission, values, and the team behind the platform." />
+      <SEO title="About" description="Learn about Jobly — our mission, values, and the team behind the platform." canonical="/about" />
       <section className="py-20 sm:py-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="relative inline-flex items-center px-6 py-2 bg-primary-50/50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-900/50 mb-6">

@@ -65,7 +65,7 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 sm:py-16">
-      <SEO title="Register" description="Create your JobBoard account and start your career journey." />
+      <SEO title="Register" description="Create your Jobly account and start your career journey or post your first job listing." canonical="/register" />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

@@ -64,7 +64,7 @@ export default function MyApplicationsPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-      <SEO title="My Applications" description="Track the status of your job applications." />
+      <SEO title="My Applications" description="Track the status of your job applications." noindex />
       <h1 className="text-display-sm text-ink-900 mb-8">Applications</h1>
 
       {results.length === 0 ? (

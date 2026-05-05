@@ -4,9 +4,7 @@ import { usePlatformStats } from '@/hooks/usePlatformStats';
 import SEO from '@/components/SEO';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import Parallax from '@/components/ui/Parallax';
-import PerspectiveCard from '@/components/ui/PerspectiveCard';
 import PremiumCard from '@/components/ui/PremiumCard';
-import TextReveal from '@/components/ui/TextReveal';
 import Magnetic from '@/components/ui/Magnetic';
 import {
   ArrowRightIcon,
@@ -23,7 +21,11 @@ export default function HomePage() {
 
   return (
     <div>
-      <SEO description="Find your dream job or hire top talent. Browse thousands of job listings across industries." />
+      <SEO
+        title="Find Your Dream Job or Hire Top Talent"
+        description="A curated platform connecting top-tier professionals with companies that value talent. No noise, just the right fit."
+        canonical="/"
+      />
       {/* ——— Hero ——— */}
       <section className="relative bg-gradient-to-b from-primary-950 via-zinc-950 to-zinc-950 dark:from-primary-950/80 dark:via-zinc-900 dark:to-zinc-900 overflow-hidden -mt-14 [mask-image:linear-gradient(to_bottom,black_calc(100%-80px),transparent_100%)]">
         {/* Grid overlay */}

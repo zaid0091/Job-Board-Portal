@@ -17,12 +17,11 @@ type ApplicationFormData = z.infer<typeof applicationSchema>;
 
 interface ApplicationFormProps {
   jobId: string;
-  jobTitle: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export default function ApplicationForm({ jobId, jobTitle, onSuccess, onCancel }: ApplicationFormProps) {
+export default function ApplicationForm({ jobId, onSuccess, onCancel }: ApplicationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
 

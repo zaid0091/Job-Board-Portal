@@ -18,12 +18,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["email"] = user.email
         token["username"] = user.username
         token["role"] = user.role
-        token["is_verified"] = user.is_verified
         return token
 
     def validate(self, attrs):
         data = super().validate(attrs)
-        # Nest tokens under 'tokens' key to match frontend AuthResponse type
         tokens = {
             "access": data.pop("access"),
             "refresh": data.pop("refresh"),
@@ -34,7 +32,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             "email": self.user.email,
             "username": self.user.username,
             "role": self.user.role,
-            "is_verified": self.user.is_verified,
             "full_name": self.user.get_full_name(),
         }
         return data
@@ -91,6 +88,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         user = User(**validated_data)
         user.set_password(password)
+        user.is_verified = True
         user.save()
 
         return user
@@ -108,7 +106,6 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "username",
             "role",
-            "is_verified",
             "full_name",
             "date_joined",
         ]

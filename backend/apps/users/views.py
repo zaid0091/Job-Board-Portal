@@ -351,9 +351,6 @@ class GoogleLoginView(APIView):
                     logger.error(f"Failed to queue welcome email for Google user {user.email}: {e}")
             else:
                 logger.info(f"Google user {user.email} already exists, skipping welcome email")
-                if not user.is_verified:
-                    user.is_verified = True
-                    user.save()
                 
             refresh = RefreshToken.for_user(user)
             

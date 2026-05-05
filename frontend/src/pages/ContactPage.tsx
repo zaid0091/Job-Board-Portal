@@ -29,7 +29,7 @@ export default function ContactPage() {
   };
   return (
     <div>
-      <SEO title="Contact" description="Get in touch with the JobBoard team. We'd love to hear from you." />
+      <SEO title="Contact" description="Get in touch with the Jobly team. We'd love to hear from you." canonical="/contact" />
       <section className="py-20 sm:py-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-xl mx-auto">

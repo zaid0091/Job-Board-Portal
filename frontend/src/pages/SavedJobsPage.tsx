@@ -128,7 +128,7 @@ export default function SavedJobsPage() {
   if (savedJobs.length === 0) {
     return (
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-        <SEO title="Saved Jobs" description="Jobs you have bookmarked for later." />
+        <SEO title="Saved Jobs" description="Jobs you have bookmarked for later." noindex />
         <EmptyState
           title="No saved jobs"
           description="Browse jobs and bookmark positions you're interested in."
@@ -144,7 +144,7 @@ export default function SavedJobsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-      <SEO title="Saved Jobs" description="Jobs you have bookmarked for later." />
+      <SEO title="Saved Jobs" description="Jobs you have bookmarked for later." noindex />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-display-sm text-ink-900">Saved Jobs</h1>

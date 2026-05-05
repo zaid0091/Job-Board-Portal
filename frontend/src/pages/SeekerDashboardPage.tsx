@@ -69,6 +69,26 @@ export default function SeekerDashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const stats = useMemo(() => {
+    if (!data) return [];
+    return [
+      { label: 'Applications', value: data.overview.total_applications, icon: DocumentTextIcon, bg: 'bg-blue-50 dark:bg-blue-950/40', iconColor: 'text-blue-600 dark:text-blue-400' },
+      { label: 'Hired', value: data.overview.hired_count, icon: CheckCircleIcon, bg: 'bg-emerald-50 dark:bg-emerald-950/40', iconColor: 'text-emerald-600 dark:text-emerald-400' },
+      { label: 'Saved jobs', value: data.overview.saved_jobs, icon: BookmarkIcon, bg: 'bg-primary-50 dark:bg-primary-950/40', iconColor: 'text-primary-600 dark:text-primary-400', link: '/seeker/saved-jobs' },
+      { label: 'Response rate', value: `${data.overview.response_rate}%`, icon: ClockIcon, bg: 'bg-amber-50 dark:bg-amber-950/40', iconColor: 'text-amber-600 dark:text-amber-400' },
+    ];
+  }, [data]);
+
+  const pieData = useMemo(() => {
+    if (!data) return [];
+    return Object.entries(data.applications_by_status).map(([status, count]) => ({ status, count }));
+  }, [data]);
+
+  const pieKeys = useMemo(() => {
+    if (!data) return [];
+    return Object.keys(data.applications_by_status);
+  }, [data]);
+
   if (loading) {
     return <DashboardSkeleton />;
   }
@@ -81,26 +101,9 @@ export default function SeekerDashboardPage() {
     );
   }
 
-  const stats = useMemo(() => [
-    { label: 'Applications', value: data.overview.total_applications, icon: DocumentTextIcon, bg: 'bg-blue-50 dark:bg-blue-950/40', iconColor: 'text-blue-600 dark:text-blue-400' },
-    { label: 'Hired', value: data.overview.hired_count, icon: CheckCircleIcon, bg: 'bg-emerald-50 dark:bg-emerald-950/40', iconColor: 'text-emerald-600 dark:text-emerald-400' },
-    { label: 'Saved jobs', value: data.overview.saved_jobs, icon: BookmarkIcon, bg: 'bg-primary-50 dark:bg-primary-950/40', iconColor: 'text-primary-600 dark:text-primary-400', link: '/seeker/saved-jobs' },
-    { label: 'Response rate', value: `${data.overview.response_rate}%`, icon: ClockIcon, bg: 'bg-amber-50 dark:bg-amber-950/40', iconColor: 'text-amber-600 dark:text-amber-400' },
-  ], [data.overview]);
-
-  const pieData = useMemo(() =>
-    Object.entries(data.applications_by_status).map(([status, count]) => ({ status, count })),
-    [data.applications_by_status]
-  );
-
-  const pieKeys = useMemo(() =>
-    Object.keys(data.applications_by_status),
-    [data.applications_by_status]
-  );
-
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-      <SEO title="Dashboard" description="Track your job search progress and applications." />
+      <SEO title="Dashboard" description="Track your job search progress and applications." noindex />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-display-sm text-ink-900">Dashboard</h1>

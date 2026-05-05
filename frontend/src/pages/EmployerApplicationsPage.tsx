@@ -54,7 +54,7 @@ export default function EmployerApplicationsPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-      <SEO title="Applications" description="Review and manage candidate applications." />
+      <SEO title="Applications" description="Review and manage candidate applications." noindex />
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-display-sm text-ink-900">Applications</h1>
         <Link to="/employer/dashboard" className="inline-flex items-center gap-1 text-[13px] font-medium text-primary-600 hover:text-primary-500 transition-colors">

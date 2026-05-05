@@ -8,6 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 DEBUG = False
 ALLOWED_HOSTS = []
+SITE_URL = os.environ.get("SITE_URL", "https://jobly.com")
 
 ROOT_URLCONF = "config.urls"
 

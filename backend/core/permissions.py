@@ -88,15 +88,3 @@ class ReadOnly(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return request.method in permissions.SAFE_METHODS
-
-
-class IsVerifiedUser(permissions.BasePermission):
-    """Only verified users can perform this action."""
-    message = 'Please verify your email address first.'
-
-    def has_permission(self, request, view):
-        return (
-            request.user
-            and request.user.is_authenticated
-            and request.user.is_verified
-        )

@@ -163,7 +163,7 @@ export default function EditJobPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-      <SEO title={`Edit Job - ${job.title}`} description="Edit your job listing." />
+      <SEO title={`Edit Job - ${job.title}`} description="Edit your job listing." noindex />
       <h1 className="text-display-sm text-ink-900 mb-8">Edit position</h1>
 
       <UnsavedChangesModal

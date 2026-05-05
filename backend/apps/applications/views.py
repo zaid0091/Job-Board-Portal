@@ -3,7 +3,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from core.permissions import IsSeeker, IsApplicationOwner, IsJobOwner, IsVerifiedUser
+from core.permissions import IsSeeker, IsApplicationOwner, IsJobOwner
 from core.pagination import StandardResultsPagination
 from core.throttles import ApplicationCreateThrottle
 
@@ -27,7 +27,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == "create":
-            return [permissions.IsAuthenticated(), IsSeeker(), IsVerifiedUser()]
+            return [permissions.IsAuthenticated(), IsSeeker()]
         elif self.action in ["update_status"]:
             return [
                 permissions.IsAuthenticated(),
@@ -37,7 +37,6 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             return [
                 permissions.IsAuthenticated(),
                 IsApplicationOwner(),
-                IsVerifiedUser(),
             ]
         return [permissions.IsAuthenticated()]
 

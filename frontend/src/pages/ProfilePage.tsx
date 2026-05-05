@@ -25,7 +25,7 @@ export default function ProfilePage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-      <SEO title="Profile" />
+      <SEO title="Profile" noindex />
       <h1 className="text-display-sm text-ink-900 mb-8">Profile</h1>
       {isEmployer ? <EmployerProfileSection /> : <SeekerProfileSection />}
     </div>

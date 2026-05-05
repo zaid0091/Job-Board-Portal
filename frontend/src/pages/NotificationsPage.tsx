@@ -53,7 +53,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
-      <SEO title="Notifications" />
+      <SEO title="Notifications" noindex />
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-display-sm text-ink-900">Notifications</h1>
         {items.length > 0 && (

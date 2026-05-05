@@ -3,7 +3,7 @@ import SEO from '@/components/SEO';
 export default function TermsPage() {
   return (
     <div>
-      <SEO title="Terms of Service" description="Review the terms and conditions for using JobBoard." />
+      <SEO title="Terms of Service" description="Review the terms and conditions for using Jobly." canonical="/terms" />
       <section className="py-20 sm:py-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <p className="text-micro text-primary-600 uppercase tracking-widest">Legal</p>

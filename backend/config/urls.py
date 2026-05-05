@@ -2,9 +2,14 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from apps.jobs.seo_views import generate_sitemap, generate_robots_txt
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # SEO endpoints (must be before API catch-all)
+    path('sitemap.xml', generate_sitemap, name='sitemap'),
+    path('robots.txt', generate_robots_txt, name='robots'),
 
     # API v1
     path('api/v1/', include([

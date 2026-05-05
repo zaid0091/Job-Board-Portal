@@ -94,7 +94,11 @@ export default function JobListPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-      <SEO title="Jobs" description="Browse open positions and find your next career opportunity." />
+      <SEO
+        title="Browse Open Positions"
+        description="Explore thousands of curated job listings across industries. Find remote, full-time, part-time, and contract positions."
+        canonical="/jobs"
+      />
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-8">
         <div>
           <h1 className="text-display-sm text-ink-900">Positions</h1>

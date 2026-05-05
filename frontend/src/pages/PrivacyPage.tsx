@@ -3,7 +3,7 @@ import SEO from '@/components/SEO';
 export default function PrivacyPage() {
   return (
     <div>
-      <SEO title="Privacy Policy" description="Read our privacy policy to understand how we handle your data." />
+      <SEO title="Privacy Policy" description="Read our privacy policy to understand how we handle your data." canonical="/privacy" />
       <section className="py-20 sm:py-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <p className="text-micro text-primary-600 uppercase tracking-widest">Legal</p>

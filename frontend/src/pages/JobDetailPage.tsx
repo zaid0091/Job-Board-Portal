@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { sanitizeHTML } from '@/utils/sanitize';
 import { useAppSelector } from '@/store/hooks';
@@ -22,6 +22,17 @@ import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import type { JobDetail } from '@/types';
 
+const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://jobly.com';
+
+const jobTypeToSchemaType: Record<string, string> = {
+  FULL_TIME: 'FULL_TIME',
+  PART_TIME: 'PART_TIME',
+  CONTRACT: 'CONTRACTOR',
+  INTERNSHIP: 'INTERN',
+  FREELANCE: 'CONTRACTOR',
+  TEMPORARY: 'TEMPORARY',
+};
+
 export default function JobDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
@@ -30,6 +41,54 @@ export default function JobDetailPage() {
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [applicationStatus, setApplicationStatus] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+
+  const jsonLd = useMemo(() => {
+    if (!job) return null;
+
+    const base = {
+      '@context': 'https://schema.org',
+      '@type': 'JobPosting',
+      title: job.title,
+      description: job.description.replace(/<[^>]*>/g, ''),
+      datePosted: job.created_at,
+      validThrough: job.expires_at || job.application_deadline || undefined,
+      employmentType: jobTypeToSchemaType[job.job_type] || job.job_type,
+      hiringOrganization: {
+        '@type': 'Organization',
+        name: job.employer.company_name,
+        url: job.employer.company_website || undefined,
+        logo: job.employer.company_logo ? `${SITE_URL}${job.employer.company_logo}` : undefined,
+        sameAs: job.employer.company_website || undefined,
+      },
+      jobLocation: {
+        '@type': 'Place',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: job.location,
+          addressCountry: 'US',
+        },
+      },
+      applicantLocationRequirements: job.is_remote ? 'REMOTE' : undefined,
+      skills: job.skills_required?.map((s) => s.name).join(', ') || undefined,
+      experienceRequirements: job.experience_level || undefined,
+    };
+
+    if (job.salary_min && job.salary_max && job.show_salary) {
+      const currency = job.salary_currency || 'USD';
+      (base as Record<string, unknown>).baseSalary = {
+        '@type': 'MonetaryAmount',
+        currency,
+        value: {
+          '@type': 'QuantitativeValue',
+          minValue: Number(job.salary_min),
+          maxValue: Number(job.salary_max),
+          unitText: 'YEAR',
+        },
+      };
+    }
+
+    return base;
+  }, [job]);
 
   useEffect(() => {
     if (!slug) return;
@@ -101,7 +160,15 @@ export default function JobDetailPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
-      <SEO title={job.title} description={`${job.job_type} position at ${job.employer?.company_name || 'a top company'}`} />
+      <SEO
+        title={job.title}
+        description={`${job.job_type.replace('_', ' ')} position at ${job.employer?.company_name || 'a top company'} — ${job.is_remote ? 'Remote' : job.location}`}
+        canonical={`/jobs/${job.slug}`}
+        type="article"
+        jsonLd={jsonLd}
+        articlePublishedTime={job.created_at}
+        articleModifiedTime={job.updated_at}
+      />
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 16 }}
@@ -279,7 +346,6 @@ export default function JobDetailPage() {
                   >
                     <ApplicationForm
                       jobId={job.id}
-                      jobTitle={job.title}
                       onSuccess={handleApplicationSuccess}
                       onCancel={() => setShowApplicationForm(false)}
                     />
