@@ -24,17 +24,17 @@ export default function HomePage() {
   return (
     <div>
       <SEO description="Find your dream job or hire top talent. Browse thousands of job listings across industries." />
-      {/* â”€â”€â”€ Hero â”€â”€â”€ */}
-      <section className="relative bg-gradient-to-b from-primary-950 via-zinc-950 to-zinc-950 dark:from-primary-950/80 dark:via-zinc-900 dark:to-zinc-900 overflow-hidden -mt-14">
+      {/* ——— Hero ——— */}
+      <section className="relative bg-gradient-to-b from-primary-950 via-zinc-950 to-zinc-950 dark:from-primary-950/80 dark:via-zinc-900 dark:to-zinc-900 overflow-hidden -mt-14 [mask-image:linear-gradient(to_bottom,black_calc(100%-80px),transparent_100%)]">
         {/* Grid overlay */}
-        <div className="absolute inset-0 bg-grid-pattern-dark bg-grid opacity-40" />
+        <div className="absolute inset-0 bg-grid-white opacity-20" />
         {/* Gradient orbs */}
         <Parallax offset={100} className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary-600/20 dark:bg-primary-500/25 rounded-full blur-[120px]" />
         <Parallax offset={-80} className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-primary-400/10 dark:bg-primary-400/15 rounded-full blur-[100px]" />
 
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-28 sm:py-36 lg:py-44">
-          <ScrollReveal direction="up" duration={1} distance={20}>
-            <div className="text-center">
+          <ScrollReveal direction="up" duration={1} distance={20} className="[perspective:1000px]">
+            <div className="text-center [transform-style:preserve-3d]">
               {/* Eyebrow */}
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm mb-8">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-shimmer" />
@@ -124,7 +124,7 @@ export default function HomePage() {
         <div className="absolute bottom-0 left-0 right-0 h-24" style={{ background: 'linear-gradient(to top, rgb(var(--bg-page)), transparent)' }} />
       </section>
 
-      {/* â”€â”€â”€ Logo cloud (trust) â”€â”€â”€ */}
+      {/* ——— Logo cloud (trust) ——— */}
       <section className="py-12 border-b border-ink-900/[0.04] dark:border-ink-300/[0.06]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" distance={10}>
@@ -147,7 +147,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* â”€â”€â”€ Features â”€â”€â”€ */}
+      {/* ——— Features ——— */}
       <section className="py-24 sm:py-32">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" duration={0.8}>
@@ -202,13 +202,13 @@ export default function HomePage() {
                 desc: 'Your data stays yours. We never share candidate information without explicit consent.',
               },
             ].map((f, i) => (
-              <ScrollReveal key={f.title} delay={i * 0.1} distance={30} direction="up" className="h-full">
-                <PremiumCard className="h-full">
-                  <div className="p-6">
-                    <div className="w-10 h-10 rounded-xl bg-primary-50 dark:bg-primary-950/40 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                      <f.icon className="h-5 w-5 text-primary-600" />
+              <ScrollReveal key={f.title} delay={i * 0.1} distance={40} direction="up" className="h-full [perspective:1000px]">
+                <PremiumCard className="h-full transform transition-all duration-700 hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(124,58,237,0.15)] [transform-style:preserve-3d] hover:[transform:rotateX(5deg)_rotateY(5deg)]">
+                  <div className="p-8">
+                    <div className="w-12 h-12 rounded-2xl bg-primary-50 dark:bg-primary-950/40 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                      <f.icon className="h-6 w-6 text-primary-600" />
                     </div>
-                    <h3 className="text-[15px] font-semibold text-ink-800 mb-2">{f.title}</h3>
+                    <h3 className="text-lg font-bold text-ink-800 mb-3">{f.title}</h3>
                     <p className="text-sm text-ink-400 leading-relaxed">{f.desc}</p>
                   </div>
                 </PremiumCard>
@@ -259,10 +259,18 @@ export default function HomePage() {
               },
             ].map((item, i) => (
               <ScrollReveal key={item.step} delay={i * 0.15} distance={20}>
-                <div className="group h-full relative p-6 rounded-2xl border border-ink-900/[0.06] hover:border-ink-900/[0.12] bg-card hover:bg-surface-50/50 dark:hover:bg-surface-100/50 transition-all duration-200">
-                  <span className="text-micro text-primary-500 group-hover:text-primary-600 transition-colors">{item.step}</span>
-                  <h3 className="mt-3 text-[15px] font-semibold text-ink-800">{item.title}</h3>
-                  <p className="mt-1.5 text-sm text-ink-400 leading-relaxed">{item.desc}</p>
+                <div className="group h-full relative p-8 rounded-2xl border border-ink-900/[0.06] hover:border-primary-500/20 bg-card hover:bg-primary-50/[0.02] dark:hover:bg-primary-950/[0.02] transition-all duration-500 overflow-hidden">
+                  {/* Hover Decoration */}
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary-500/5 blur-3xl -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700 pointer-events-none" />
+                  
+                  <div className="relative">
+                    <span className="inline-block text-[42px] font-black text-ink-900/5 group-hover:text-primary-600/10 transition-colors duration-500 leading-none mb-4">{item.step}</span>
+                    <h3 className="text-lg font-bold text-ink-900 group-hover:text-primary-600 transition-colors duration-300">{item.title}</h3>
+                    <p className="mt-3 text-sm text-ink-400 leading-relaxed">{item.desc}</p>
+                  </div>
+                  
+                  {/* Bottom Line Decoration */}
+                  <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-primary-600 group-hover:w-full transition-all duration-700 ease-out" />
                 </div>
               </ScrollReveal>
             ))}

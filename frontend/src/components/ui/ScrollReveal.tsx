@@ -23,40 +23,46 @@ export default function ScrollReveal({
   className,
   delay = 0,
   direction = "up",
-  duration = 0.8,
-  distance = 30,
+  duration = 1,
+  distance = 40,
   once = true,
   threshold = 0.1,
 }: ScrollRevealProps) {
   const directions = {
-    up: { y: distance },
-    down: { y: -distance },
-    left: { x: distance },
-    right: { x: -distance },
+    up: { y: distance, rotateX: 10 },
+    down: { y: -distance, rotateX: -10 },
+    left: { x: distance, rotateY: -10 },
+    right: { x: -distance, rotateY: 10 },
     none: {},
   };
 
   return (
-    <motion.div
-      className={className}
-      style={{ width, position: 'relative' }}
-      initial={{ 
-        opacity: 0, 
-        ...(direction !== 'none' ? directions[direction] : {}) 
-      }}
-      whileInView={{ 
-        opacity: 1, 
-        x: 0, 
-        y: 0 
-      }}
-      viewport={{ once, amount: threshold }}
-      transition={{ 
-        duration: duration, 
-        delay: delay,
-        ease: [0.21, 0.47, 0.32, 0.98], // Buttery smooth ease-out
-      }}
-    >
-      {children}
-    </motion.div>
+    <div style={{ perspective: "1200px" }}>
+      <motion.div
+        className={className}
+        style={{ width, position: 'relative', transformStyle: "preserve-3d" }}
+        initial={{ 
+          opacity: 0, 
+          scale: 0.95,
+          ...(direction !== 'none' ? directions[direction] : {}) 
+        }}
+        whileInView={{ 
+          opacity: 1, 
+          scale: 1,
+          x: 0, 
+          y: 0,
+          rotateX: 0,
+          rotateY: 0
+        }}
+        viewport={{ once, amount: threshold }}
+        transition={{ 
+          duration: duration, 
+          delay: delay,
+          ease: [0.16, 1, 0.3, 1], // Advanced exponential ease-out
+        }}
+      >
+        {children}
+      </motion.div>
+    </div>
   );
 }
