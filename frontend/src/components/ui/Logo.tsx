@@ -31,7 +31,7 @@ const Logo: React.FC<LogoProps> = ({ className = "", size = 'md', light = false 
     sm: 'text-2xl',
     md: 'text-4xl',
     lg: 'text-6xl',
-    huge: 'text-[15vw] sm:text-[18vw] md:text-[22vw] leading-none tracking-[-0.05em]'
+    huge: 'text-[15vw] sm:text-[18vw] md:text-[22vw] leading-none tracking-[-0.01em]'
   };
 
   // Enhanced radial gradient with larger radius and softer falloff

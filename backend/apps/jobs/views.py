@@ -3,7 +3,6 @@ from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
 
-# Example: cache job list for 5 minutes
 from django.http import JsonResponse
 
 
@@ -16,8 +15,6 @@ def cached_job_list(request):
 
 
 from django.db.models import F
-from django.utils.decorators import method_decorator
-from django.views.decorators.cache import cache_page
 from rest_framework import viewsets, generics, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -186,9 +183,14 @@ class JobCategoryListView(generics.ListAPIView):
     permission_classes = [permissions.AllowAny]
     pagination_class = None
 
-    @method_decorator(cache_page(60 * 60))  # Cache for 1 hour
     def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
+        cached = cache.get('categories')
+        if cached is not None:
+            return Response(cached)
+
+        response = super().list(request, *args, **kwargs)
+        cache.set('categories', response.data, timeout=60 * 60)  # Cache for 1 hour
+        return response
 
 
 class SavedJobViewSet(viewsets.ModelViewSet):

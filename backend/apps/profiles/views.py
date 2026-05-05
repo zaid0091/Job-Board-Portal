@@ -3,6 +3,7 @@ import logging
 from datetime import date, timedelta
 
 from django.conf import settings
+from django.core.cache import cache
 from django.db import transaction
 from django.utils import timezone
 from django.utils.dateparse import parse_date
@@ -87,12 +88,22 @@ class EducationViewSet(viewsets.ModelViewSet):
 
 
 class SkillListView(generics.ListAPIView):
-    """GET /api/v1/profiles/skills/ — List all skills."""
+    """GET /api/v1/profiles/skills/ — List all skills with caching."""
     serializer_class = SkillSerializer
     permission_classes = [permissions.AllowAny]
     queryset = Skill.objects.all()
     search_fields = ['name']
     pagination_class = None
+
+    def list(self, request, *args, **kwargs):
+        cached = cache.get('skills')
+        if cached is not None:
+            from rest_framework.response import Response
+            return Response(cached)
+
+        response = super().list(request, *args, **kwargs)
+        cache.set('skills', response.data, timeout=60 * 60 * 24)  # Cache for 24 hours
+        return response
 
 
 class ResumeParseCreateView(APIView):

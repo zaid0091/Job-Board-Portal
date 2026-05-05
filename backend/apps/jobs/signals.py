@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 
@@ -15,6 +16,10 @@ def update_category_job_count_on_save(sender, instance, **kwargs):
         instance.category.job_count = active_count
         instance.category.save(update_fields=['job_count'])
 
+    # Invalidate platform stats and category cache
+    cache.delete('platform_stats')
+    cache.delete('categories')
+
 
 @receiver(post_delete, sender=Job)
 def update_category_job_count_on_delete(sender, instance, **kwargs):
@@ -31,3 +36,7 @@ def update_category_job_count_on_delete(sender, instance, **kwargs):
             category.save(update_fields=['job_count'])
         except Exception:
             pass
+
+    # Invalidate platform stats and category cache
+    cache.delete('platform_stats')
+    cache.delete('categories')
