@@ -111,10 +111,9 @@ export default function Navbar() {
               <div className="absolute inset-0 bg-primary-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </div>
             <span
-              className={`text-xl font-bold tracking-tight transition-colors duration-300 ${
+              className={`text-2xl font-melanin tracking-[.1em] transition-colors duration-300 ${
                 onHero ? 'text-white' : 'text-ink-900'
               }`}
-              style={{ fontFamily: "'Inter', sans-serif" }}
             >
               Jobly
             </span>

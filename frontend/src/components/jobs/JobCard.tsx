@@ -41,6 +41,10 @@ export default memo(function JobCard({ job }: JobCardProps) {
           job.is_featured
             ? 'bg-primary-50 dark:bg-primary-950/30'
             : 'bg-card hover:bg-surface-50/50 dark:hover:bg-surface-100/50'
+        } ${
+          job.days_remaining !== null && job.days_remaining < 0
+            ? 'opacity-70'
+            : ''
         }`}
         style={{
           boxShadow: job.is_featured

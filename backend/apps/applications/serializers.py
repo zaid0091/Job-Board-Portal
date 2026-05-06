@@ -88,11 +88,15 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         return strip_all_html(value) if value else value
 
     def validate_job(self, value):
+        from django.utils import timezone
         from apps.jobs.models import Job
+
         if value.status != Job.Status.ACTIVE:
             raise serializers.ValidationError('This job is not accepting applications.')
         if value.is_expired:
             raise serializers.ValidationError('This job has expired.')
+        if value.application_deadline and value.application_deadline < timezone.now():
+            raise serializers.ValidationError('The application deadline for this job has passed.')
         return value
 
     def create(self, validated_data):

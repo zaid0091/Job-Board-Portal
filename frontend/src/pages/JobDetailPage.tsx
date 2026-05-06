@@ -90,6 +90,14 @@ export default function JobDetailPage() {
     return base;
   }, [job]);
 
+  const isExpired = useMemo(() => {
+    if (!job) return false;
+    if (job.application_deadline) {
+      return new Date(job.application_deadline) < new Date();
+    }
+    return job.is_expired || false;
+  }, [job]);
+
   useEffect(() => {
     if (!slug) return;
     setLoading(true);
@@ -241,9 +249,9 @@ export default function JobDetailPage() {
             Posted {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
           </span>
           {job.application_deadline && (
-            <span className="flex items-center">
+            <span className={`flex items-center ${isExpired ? 'text-red-500 dark:text-red-400 font-medium' : ''}`}>
               <ClockIcon className="h-3.5 w-3.5 mr-1" />
-              Deadline: {new Date(job.application_deadline).toLocaleDateString()}
+              {isExpired ? 'Expired: ' : 'Deadline: '}{new Date(job.application_deadline).toLocaleDateString()}
             </span>
           )}
           <span>{job.applications_count} application{job.applications_count !== 1 ? 's' : ''}</span>
@@ -328,6 +336,13 @@ export default function JobDetailPage() {
                   className="btn-primary w-full py-2.5 opacity-60 cursor-not-allowed"
                 >
                   Applied &middot; {applicationStatus}
+                </button>
+              ) : isExpired ? (
+                <button
+                  disabled
+                  className="w-full py-2.5 rounded-xl text-sm font-medium bg-ink-100 text-ink-400 dark:bg-ink-800 dark:text-ink-500 cursor-not-allowed"
+                >
+                  Application deadline has passed
                 </button>
               ) : (
                 <>
