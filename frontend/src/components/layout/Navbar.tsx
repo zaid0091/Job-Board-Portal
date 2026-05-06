@@ -101,7 +101,7 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 group">
+          <Link to="/" className="flex items-center gap-1 flex-shrink-0 group">
             <div className="relative">
               <img 
                 src="/logo.png" 
@@ -110,8 +110,9 @@ export default function Navbar() {
               />
               <div className="absolute inset-0 bg-primary-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </div>
+            <div className={`h-8 w-[2px] mx-2 transition-colors duration-300 ${onHero ? 'bg-white' : 'bg-ink-900/30'}`} />
             <span
-              className={`text-2xl font-melanin tracking-[.1em] transition-colors duration-300 ${
+              className={`text-2xl font-courier tracking-normal transition-colors duration-300 ${
                 onHero ? 'text-white' : 'text-ink-900'
               }`}
             >

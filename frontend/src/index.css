@@ -321,6 +321,9 @@ html.theme-transition *::after {
   .font-cerova {
     font-family: 'Cerova', sans-serif;
   }
+  .font-courier {
+    font-family: 'Courier Prime', monospace;
+  }
 }
 
 /* Lenis smooth scroll styles */
