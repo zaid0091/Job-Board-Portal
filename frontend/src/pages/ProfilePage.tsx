@@ -660,7 +660,7 @@ function SeekerProfileSection() {
         />
       </div>
       <div>
-        <label className="block text-[13px] font-medium text-ink-600 mb-1">Website</label>
+        <label className="block text-[13px] font-medium text-ink-600 mb-1">Portfolio Website</label>
         <input
           type="url"
           className="input-field"

@@ -40,6 +40,7 @@ def set_auth_cookies(response, access_token, refresh_token):
         secure=secure_cookie,
         samesite="Lax",
         path='/',
+        max_age=int(settings.SIMPLE_JWT.get("ACCESS_TOKEN_LIFETIME").total_seconds()),
     )
     if refresh_token:
         response.set_cookie(
@@ -49,6 +50,7 @@ def set_auth_cookies(response, access_token, refresh_token):
             secure=secure_cookie,
             samesite="Lax",
             path='/',
+            max_age=int(settings.SIMPLE_JWT.get("REFRESH_TOKEN_LIFETIME").total_seconds()),
         )
     return response
 
@@ -103,14 +105,30 @@ class RegisterView(generics.CreateAPIView):
     throttle_classes = [RegistrationRateThrottle]
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-
-        refresh = RefreshToken.for_user(user)
-
+        import time
         from django.conf import settings
         from .tasks import send_welcome_email_task
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        email_exists = serializer.validated_data.pop("_email_exists", False)
+
+        if email_exists:
+            # Silently return a generic success response to prevent
+            # username enumeration. Do NOT create a user or issue tokens.
+            # Add constant delay to prevent timing-based detection.
+            time.sleep(0.5)
+            return Response(
+                {
+                    "message": "If this email is not already registered, an account has been created.",
+                },
+                status=status.HTTP_201_CREATED,
+            )
+
+        user = serializer.save()
+        refresh = RefreshToken.for_user(user)
+
         try:
             if settings.DEBUG:
                 send_welcome_email_task.apply(args=[user.email, user.username])
@@ -216,6 +234,7 @@ class PasswordResetRequestView(APIView):
     throttle_classes = [PasswordResetThrottle]
 
     def post(self, request):
+        import time
         serializer = PasswordResetRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -224,6 +243,8 @@ class PasswordResetRequestView(APIView):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
+            # Add constant delay to prevent timing-based enumeration
+            time.sleep(0.5)
             return Response(
                 {
                     "message": "If an account with that email exists, we have sent a password reset link."

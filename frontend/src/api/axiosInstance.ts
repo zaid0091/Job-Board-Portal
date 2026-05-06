@@ -2,7 +2,6 @@ import axios from 'axios';
 import type { AppDispatch, RootState } from '@/store';
 import { logout } from '@/store/slices/authSlice';
 
-// Lazy store accessor to avoid circular dependency
 let _store: { getState: () => RootState; dispatch: AppDispatch } | null = null;
 export const injectStore = (s: typeof _store) => { _store = s; };
 const getStore = () => {
@@ -37,15 +36,66 @@ const processQueue = (error: unknown) => {
   failedQueue = [];
 };
 
+function isAccessTokenExpired(): boolean {
+  try {
+    const cookies = document.cookie.split('; ');
+    const accessCookie = cookies.find((c) => c.startsWith('access='));
+    if (!accessCookie) return true;
+    const token = accessCookie.split('=')[1];
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const now = Math.floor(Date.now() / 1000);
+    // Consider expired if less than 30 seconds remaining
+    return payload.exp - now < 30;
+  } catch {
+    return true;
+  }
+}
+
+async function refreshToken(): Promise<void> {
+  await axiosInstance.post('/auth/token/refresh/', {});
+}
+
+axiosInstance.interceptors.request.use(
+  async (config) => {
+    const skipPaths = ['/auth/login/', '/auth/register/', '/auth/google/', '/auth/token/refresh/', '/auth/logout/'];
+    if (skipPaths.some((p) => config.url?.includes(p))) return config;
+
+    if (isAccessTokenExpired()) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then(() => config)
+          .catch((err) => Promise.reject(err));
+      }
+
+      isRefreshing = true;
+      try {
+        await refreshToken();
+        processQueue(null);
+      } catch (refreshError) {
+        processQueue(refreshError);
+        getStore().dispatch(logout());
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-
-    // Skip refresh logic for logout and token refresh endpoints
     const isAuthEndpoint = originalRequest.url?.includes('/auth/');
 
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
+      originalRequest._retry = true;
+
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -54,13 +104,9 @@ axiosInstance.interceptors.response.use(
           .catch((err) => Promise.reject(err));
       }
 
-      originalRequest._retry = true;
       isRefreshing = true;
-
       try {
-        // Use the same axios instance for refresh to ensure cookies are sent
-        await axiosInstance.post('/auth/token/refresh/', {});
-        
+        await refreshToken();
         processQueue(null);
         return axiosInstance(originalRequest);
       } catch (refreshError) {
