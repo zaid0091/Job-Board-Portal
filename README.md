@@ -104,4 +104,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-Built with ❤️ by [Antigravity AI](https://github.com/google-deepmind)
+Built with ❤️ by [Zaid](https://github.com/zaid0091)
