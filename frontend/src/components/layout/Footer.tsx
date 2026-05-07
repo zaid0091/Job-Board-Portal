@@ -13,10 +13,14 @@ export default function Footer() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-14 grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
           {/* Brand */}
           <div className="col-span-2 lg:col-span-1">
-            <div className="flex items-center gap-2.5 mb-3">
-              <img src="/logo.png" alt="Jobly" className="h-8 w-8 object-contain" />
-              <p className="text-[16px] font-medium text-ink-800">Jobly</p>
-            </div>
+            <Link className="flex items-center gap-1 flex-shrink-0 group mb-3" to="/">
+              <div className="relative">
+                <img src="/logo.png" alt="Jobly" className="h-10 w-10 object-contain transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3" />
+                <div className="absolute inset-0 bg-primary-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              </div>
+              <div className="h-8 w-[2px] mx-2 transition-colors duration-300 bg-ink-900/30"></div>
+              <span className="text-2xl font-courier tracking-normal transition-colors duration-300 text-ink-900">Jobly</span>
+            </Link>
             <p className="text-[14px] leading-relaxed text-ink-400 max-w-[240px]">
               Connecting exceptional talent with companies that value what they do.
             </p>
