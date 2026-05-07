@@ -29,7 +29,7 @@ export default function ScrollScale({
   threshold = 0.2,
 }: ScrollScaleProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once, margin: '-80px' });
+  const isInView = useInView(ref, { once, margin: '-80px', amount: threshold });
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start end', 'end center'],

@@ -12,8 +12,7 @@ import { ThemeProvider } from './hooks/useTheme';
 import './index.css';
 
 const GOOGLE_CLIENT_ID =
-  import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-  '471380820430-t1svgevqrt7ndl0r7hncad8f8d2k30r1.apps.googleusercontent.com';
+  import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 // Break circular dependency: store -> slices -> api -> axiosInstance -> store
 injectStore(store);

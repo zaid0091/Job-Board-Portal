@@ -2,10 +2,18 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
 from apps.jobs.seo_views import generate_sitemap, generate_robots_txt
+
+def health_check(request):
+    """Health check endpoint for Render / load balancers."""
+    return JsonResponse({'status': 'ok'})
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # Health check (used by Render)
+    path('api/v1/health/', health_check, name='health'),
 
     # SEO endpoints (must be before API catch-all)
     path('sitemap.xml', generate_sitemap, name='sitemap'),
