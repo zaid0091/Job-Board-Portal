@@ -9,7 +9,7 @@ import Magnetic from '@/components/ui/Magnetic';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
 import ScrollScale from '@/components/ui/ScrollScale';
 import LineReveal from '@/components/ui/LineReveal';
-import StickyScrollSection from '@/components/ui/StickyScrollSection';
+
 import {
   ArrowRightIcon,
   ArrowUpRightIcon,
@@ -180,16 +180,22 @@ export default function HomePage() {
               </div>
             </div>
             <div className="flex items-center justify-center gap-10 sm:gap-16 flex-wrap grayscale">
-              {['Google', 'Microsoft', 'Amazon', 'Meta', 'Apple'].map((name, i) => (
+              {[
+                { name: 'Google', className: "font-['Product_Sans',sans-serif] tracking-tighter" },
+                { name: 'Microsoft', className: "font-['Segoe_UI',sans-serif] font-semibold tracking-tight" },
+                { name: 'amazon', className: "font-['Amazon_Ember',sans-serif] font-bold tracking-tighter translate-y-0.5" },
+                { name: 'Meta', className: "font-['Helvetica_Neue',sans-serif] font-medium tracking-tight" },
+                { name: 'Apple', className: "font-['San_Francisco',sans-serif] font-semibold tracking-tight" }
+              ].map((company, i) => (
                 <motion.span
-                  key={name}
+                  key={company.name}
                   initial={{ opacity: 0, y: 15 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-50px' }}
                   transition={{ duration: 0.4, delay: i * 0.08, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-lg sm:text-xl font-bold text-ink-300 select-none"
+                  className={`text-xl sm:text-2xl text-ink-300 select-none ${company.className}`}
                 >
-                  {name}
+                  {company.name}
                 </motion.span>
               ))}
             </div>
