@@ -40,7 +40,7 @@ function isAccessTokenExpired(): boolean {
   try {
     const cookies = document.cookie.split('; ');
     const accessCookie = cookies.find((c) => c.startsWith('access='));
-    if (!accessCookie) return true;
+    if (!accessCookie) return false;
     const token = accessCookie.split('=')[1];
     const payload = JSON.parse(atob(token.split('.')[1]));
     const now = Math.floor(Date.now() / 1000);

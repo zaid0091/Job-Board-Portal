@@ -66,8 +66,7 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     await dispatch(logoutUser());
-    // Force redirect to login page after logout
-    window.location.href = '/login';
+    window.location.href = '/';
   };
 
   const isActive = (match: string) => location.pathname.startsWith(match);
