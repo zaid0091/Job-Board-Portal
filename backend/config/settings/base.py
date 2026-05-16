@@ -147,13 +147,39 @@ REST_FRAMEWORK = {
 }
 
 # JWT SETTINGS
+# Load RS256 keys. If missing in dev, fallback to dynamically generated ones to prevent crashes.
+JWT_PRIVATE_KEY = os.environ.get("JWT_PRIVATE_KEY")
+JWT_PUBLIC_KEY = os.environ.get("JWT_PUBLIC_KEY")
+
+if not JWT_PRIVATE_KEY or not JWT_PUBLIC_KEY:
+    if os.environ.get("ENVIRONMENT") != "production":
+        # Dev fallback: Generate a temporary in-memory RSA key pair
+        from cryptography.hazmat.primitives.asymmetric import rsa
+        from cryptography.hazmat.primitives import serialization
+        import logging
+        logging.getLogger('django').warning("JWT keys missing in environment. Using temporary in-memory keys for development.")
+        _temp_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        JWT_PRIVATE_KEY = _temp_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()
+        ).decode('utf-8')
+        JWT_PUBLIC_KEY = _temp_key.public_key().public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo
+        ).decode('utf-8')
+    else:
+        raise ValueError("JWT_PRIVATE_KEY and JWT_PUBLIC_KEY must be set in production")
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": True,
-    "ALGORITHM": "HS256",
+    "ALGORITHM": "RS256",
+    "SIGNING_KEY": JWT_PRIVATE_KEY,
+    "VERIFYING_KEY": JWT_PUBLIC_KEY,
     "AUTH_HEADER_TYPES": ("Bearer",),
     "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",
     "USER_ID_FIELD": "id",
