@@ -71,7 +71,9 @@ export default function Navbar() {
 
   const isActive = (match: string) => location.pathname.startsWith(match);
   const isHome = location.pathname === '/';
-  const onHero = isHome && !pastHero;
+  const isAbout = location.pathname === '/about';
+  const hasTransparentHero = isHome || isAbout;
+  const onHero = hasTransparentHero && !pastHero;
 
   const navLinks = [
     { to: '/jobs', label: 'Jobs', match: '/jobs' },
@@ -92,7 +94,7 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        (scrolled && !isHome) || pastHero
+        (scrolled && !hasTransparentHero) || pastHero
           ? 'bg-white/60 dark:bg-zinc-950/70 backdrop-blur-2xl border-b border-ink-900/[0.06] shadow-sm'
           : 'bg-transparent'
       }`}

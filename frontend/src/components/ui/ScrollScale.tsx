@@ -14,6 +14,8 @@ interface ScrollScaleProps {
   threshold?: number;
   /** Accepted for API compatibility; scroll animations are position-driven. */
   duration?: number;
+  /** Accepted for API compatibility. */
+  delay?: number;
 }
 
 export default function ScrollScale({
