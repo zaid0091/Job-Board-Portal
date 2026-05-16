@@ -1,4 +1,4 @@
-﻿import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { applicationsAPI } from '@/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -53,12 +53,17 @@ export default function EmployerApplicationsPage() {
   const applications = data?.results ?? [];
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
       <SEO title="Applications" description="Review and manage candidate applications." noindex />
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-display-sm text-ink-900">Applications</h1>
-        <Link to="/employer/dashboard" className="inline-flex items-center gap-1 text-[13px] font-medium text-primary-600 hover:text-primary-500 transition-colors">
-          <ArrowLeftIcon className="h-3.5 w-3.5" /> Back to Dashboard
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div className="flex items-center gap-4">
+          <div className="w-1.5 h-10 bg-primary-500 rounded-full shadow-[0_0_15px_rgba(124,58,237,0.4)]" />
+          <h1 className="text-display-md font-black text-ink-900 dark:text-white tracking-tight">
+            Candidate <span className="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent italic">Applications</span>
+          </h1>
+        </div>
+        <Link to="/employer/dashboard" className="inline-flex items-center gap-2 px-6 py-3 bg-zinc-100 dark:bg-zinc-800 text-ink-700 dark:text-white font-black uppercase tracking-widest text-[10px] rounded-xl transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200/50 dark:border-zinc-700/50">
+          <ArrowLeftIcon className="h-4 w-4" /> Back to Dashboard
         </Link>
       </div>
 

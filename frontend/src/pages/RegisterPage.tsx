@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,8 +13,16 @@ import {
   BuildingOffice2Icon,
   EyeIcon,
   EyeSlashIcon,
+  EnvelopeIcon,
+  LockClosedIcon,
+  UserIcon,
+  ArrowLeftIcon,
+  IdentificationIcon
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
+import PremiumCard from '@/components/ui/PremiumCard';
+import ScrollReveal from '@/components/ui/ScrollReveal';
+import Parallax from '@/components/ui/Parallax';
 
 const registerSchema = z
   .object({
@@ -49,6 +57,7 @@ export default function RegisterPage() {
     handleSubmit,
     formState: { errors },
     watch,
+    setValue,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: { role: 'SEEKER' },
@@ -64,289 +73,217 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 sm:py-16">
+    <div className="min-h-screen flex bg-zinc-950 overflow-hidden">
       <SEO title="Register" description="Create your Jobly account and start your career journey or post your first job listing." canonical="/register" />
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-sm"
-      >
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mb-8"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.15, type: 'spring', stiffness: 200 }}
-            className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary-600 mb-4"
-          >
-            <UserPlusIcon className="h-5 w-5 text-white" />
-          </motion.div>
-          <h1 className="text-heading text-ink-900">Create an account</h1>
-          <p className="mt-1.5 text-sm text-ink-400">Get started in under a minute</p>
-        </motion.div>
+      
+      {/* --- Left Column: Visual Brand --- */}
+      <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 overflow-hidden border-r border-white/5">
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-bl from-zinc-950 via-zinc-950 to-primary-950" />
+        <div className="absolute inset-0 bg-grid-white opacity-[0.03]" />
+        
+        <Parallax offset={-100} className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-primary-600/20 rounded-full blur-[140px]" />
+        <Parallax offset={120} className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px]" />
 
-        {/* Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="bg-card rounded-2xl p-6 sm:p-8"
-          style={{ boxShadow: 'var(--card-shadow-lg)' }}
-        >
-          <AnimatePresence mode="wait">
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.25 }}
-                className="mb-5 p-3 bg-red-50 dark:bg-red-950/30 rounded-xl text-red-600 dark:text-red-400 text-[13px] font-medium"
-                style={{ boxShadow: '0 0 0 1px rgba(239,68,68,0.1)' }}
-              >
-                {error}
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <Link to="/" className="relative flex items-center gap-2 group z-10">
+          <img src="/logo.png" alt="Logo" className="h-10 w-10 transition-transform duration-500 group-hover:scale-110" />
+          <span className="text-2xl font-bold text-white tracking-tighter">Jobly</span>
+        </Link>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Role selection */}
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <label className="block text-[13px] font-medium text-ink-700 mb-2">I want to</label>
-              <div className="grid grid-cols-2 gap-2">
-                <motion.label
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ duration: 0.15 }}
-                  className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-xl cursor-pointer transition-all duration-200 ${
-                    selectedRole === 'SEEKER'
-                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-300'
-                      : 'bg-surface-50 text-ink-400 hover:bg-surface-100'
-                  }`}
-                  style={{ boxShadow: selectedRole === 'SEEKER' ? '0 0 0 1.5px rgba(124,58,237,0.3)' : 'var(--card-shadow)' }}
+        <div className="relative z-10">
+          <ScrollReveal direction="up">
+            <h2 className="text-display text-white font-extrabold tracking-tighter leading-tight">
+              Start your <br />
+              <span className="text-primary-400">new chapter</span>
+            </h2>
+            <p className="mt-6 text-xl text-white/50 max-w-md leading-relaxed">
+              Join thousands of professionals and top-tier companies finding their match 
+              on the most advanced talent ecosystem.
+            </p>
+          </ScrollReveal>
+        </div>
+
+        <div className="relative z-10">
+          <p className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">
+            Professional Grade &bull; Human Centered
+          </p>
+        </div>
+      </div>
+
+      {/* --- Right Column: Form --- */}
+      <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-24 bg-white dark:bg-zinc-950 relative overflow-y-auto">
+        <div className="lg:hidden absolute inset-0 bg-gradient-to-b from-primary-950/20 via-transparent to-transparent pointer-events-none" />
+
+        <div className="w-full max-w-md mx-auto relative z-10 py-8">
+          <ScrollReveal direction="up">
+            <div className="flex items-center gap-4 mb-8">
+              <Link to="/" className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
+                <ArrowLeftIcon className="h-4 w-4 text-ink-900 dark:text-white" />
+              </Link>
+              <h1 className="text-2xl font-bold text-ink-900 dark:text-white tracking-tight">Create Account</h1>
+            </div>
+          </ScrollReveal>
+
+          <PremiumCard className="p-8 sm:p-10 border-ink-900/[0.04] dark:border-white/[0.04]">
+            <AnimatePresence mode="wait">
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-6 p-4 bg-red-50 dark:bg-red-950/30 rounded-xl text-red-600 dark:text-red-400 text-sm font-medium border border-red-100 dark:border-red-900/30"
                 >
-                  <input type="radio" value="SEEKER" className="sr-only" {...register('role')} />
-                  <MagnifyingGlassIcon className="h-5 w-5" />
-                  <span className="text-[13px] font-semibold">Find a job</span>
-                </motion.label>
-                <motion.label
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ duration: 0.15 }}
-                  className={`flex flex-col items-center justify-center gap-1.5 p-3.5 rounded-xl cursor-pointer transition-all duration-200 ${
-                    selectedRole === 'EMPLOYER'
-                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-300'
-                      : 'bg-surface-50 text-ink-400 hover:bg-surface-100'
-                  }`}
-                  style={{ boxShadow: selectedRole === 'EMPLOYER' ? '0 0 0 1.5px rgba(124,58,237,0.3)' : 'var(--card-shadow)' }}
-                >
-                  <input type="radio" value="EMPLOYER" className="sr-only" {...register('role')} />
-                  <BuildingOffice2Icon className="h-5 w-5" />
-                  <span className="text-[13px] font-semibold">Hire talent</span>
-                </motion.label>
-              </div>
-              {errors.role && <p className="mt-1 text-[13px] text-red-500">{errors.role.message}</p>}
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.35, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="grid grid-cols-2 gap-3"
-            >
-              <div>
-                <label htmlFor="first_name" className="block text-[13px] font-medium text-ink-700 mb-1.5">
-                  First name
-                </label>
-                <input
-                  id="first_name"
-                  type="text"
-                  autoComplete="given-name"
-                  placeholder="John"
-                  className="input-field"
-                  {...register('first_name')}
-                />
-                {errors.first_name && (
-                  <p className="mt-1 text-[13px] text-red-500">{errors.first_name.message}</p>
-                )}
-              </div>
-              <div>
-                <label htmlFor="last_name" className="block text-[13px] font-medium text-ink-700 mb-1.5">
-                  Last name
-                </label>
-                <input
-                  id="last_name"
-                  type="text"
-                  autoComplete="family-name"
-                  placeholder="Doe"
-                  className="input-field"
-                  {...register('last_name')}
-                />
-                {errors.last_name && (
-                  <p className="mt-1 text-[13px] text-red-500">{errors.last_name.message}</p>
-                )}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.35, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <label htmlFor="reg-email" className="block text-[13px] font-medium text-ink-700 mb-1.5">
-                Email
-              </label>
-              <input
-                id="reg-email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                className="input-field"
-                {...register('email')}
-              />
-              {errors.email && (
-                <p className="mt-1 text-[13px] text-red-500">{errors.email.message}</p>
+                  {error}
+                </motion.div>
               )}
-            </motion.div>
+            </AnimatePresence>
 
-            <motion.div
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.35, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <label htmlFor="username" className="block text-[13px] font-medium text-ink-700 mb-1.5">
-                Username
-              </label>
-              <input
-                id="username"
-                type="text"
-                autoComplete="username"
-                placeholder="johndoe"
-                className="input-field"
-                {...register('username')}
-              />
-              {errors.username && (
-                <p className="mt-1 text-[13px] text-red-500">{errors.username.message}</p>
-              )}
-            </motion.div>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              {/* Role Selection */}
+              <div className="space-y-3">
+                <label className="text-[13px] font-semibold text-ink-700 dark:text-ink-300">I want to...</label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setValue('role', 'SEEKER')}
+                    className={`flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all duration-300 ${
+                      selectedRole === 'SEEKER'
+                        ? 'border-primary-500 bg-primary-500/5 text-primary-600'
+                        : 'border-zinc-100 dark:border-zinc-800 text-ink-400 hover:border-zinc-200 dark:hover:border-zinc-700'
+                    }`}
+                  >
+                    <MagnifyingGlassIcon className="h-6 w-6" />
+                    <span className="text-[12px] font-bold uppercase tracking-wider">Find a Job</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setValue('role', 'EMPLOYER')}
+                    className={`flex flex-col items-center gap-3 p-4 rounded-2xl border-2 transition-all duration-300 ${
+                      selectedRole === 'EMPLOYER'
+                        ? 'border-primary-500 bg-primary-500/5 text-primary-600'
+                        : 'border-zinc-100 dark:border-zinc-800 text-ink-400 hover:border-zinc-200 dark:hover:border-zinc-700'
+                    }`}
+                  >
+                    <BuildingOffice2Icon className="h-6 w-6" />
+                    <span className="text-[12px] font-bold uppercase tracking-wider">Hire Talent</span>
+                  </button>
+                </div>
+              </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.35, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <label htmlFor="reg-password" className="block text-[13px] font-medium text-ink-700 mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="reg-password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  placeholder="Min. 8 characters"
-                  className="input-field pr-10"
-                  {...register('password')}
-                />
-                <motion.button
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[13px] font-semibold text-ink-700 dark:text-ink-300">First Name</label>
+                  <input
+                    type="text"
+                    placeholder="John"
+                    className="input-field bg-zinc-50 dark:bg-zinc-900/50"
+                    {...register('first_name')}
+                  />
+                  {errors.first_name && <p className="text-[11px] text-red-500 font-medium">{errors.first_name.message}</p>}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[13px] font-semibold text-ink-700 dark:text-ink-300">Last Name</label>
+                  <input
+                    type="text"
+                    placeholder="Doe"
+                    className="input-field bg-zinc-50 dark:bg-zinc-900/50"
+                    {...register('last_name')}
+                  />
+                  {errors.last_name && <p className="text-[11px] text-red-500 font-medium">{errors.last_name.message}</p>}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[13px] font-semibold text-ink-700 dark:text-ink-300">Username</label>
+                <div className="relative group">
+                  <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-ink-300 group-focus-within:text-primary-500 transition-colors" />
+                  <input
+                    type="text"
+                    placeholder="johndoe"
+                    className="input-field pl-12 bg-zinc-50 dark:bg-zinc-900/50"
+                    {...register('username')}
+                  />
+                </div>
+                {errors.username && <p className="text-[11px] text-red-500 font-medium pl-1">{errors.username.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[13px] font-semibold text-ink-700 dark:text-ink-300">Email Address</label>
+                <div className="relative group">
+                  <EnvelopeIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-ink-300 group-focus-within:text-primary-500 transition-colors" />
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    className="input-field pl-12 bg-zinc-50 dark:bg-zinc-900/50"
+                    {...register('email')}
+                  />
+                </div>
+                {errors.email && <p className="text-[11px] text-red-500 font-medium pl-1">{errors.email.message}</p>}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[13px] font-semibold text-ink-700 dark:text-ink-300">Password</label>
+                  <div className="relative group">
+                    <LockClosedIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-ink-300 group-focus-within:text-primary-500 transition-colors" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      className="input-field pl-12 pr-4 bg-zinc-50 dark:bg-zinc-900/50"
+                      {...register('password')}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[13px] font-semibold text-ink-700 dark:text-ink-300">Confirm</label>
+                  <div className="relative group">
+                    <LockClosedIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-ink-300 group-focus-within:text-primary-500 transition-colors" />
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="••••••••"
+                      className="input-field pl-12 pr-4 bg-zinc-50 dark:bg-zinc-900/50"
+                      {...register('password_confirm')}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="flex justify-between items-center px-1">
+                <div className="flex-1">
+                  {errors.password && <p className="text-[11px] text-red-500 font-medium leading-tight">{errors.password.message}</p>}
+                  {errors.password_confirm && <p className="text-[11px] text-red-500 font-medium leading-tight">{errors.password_confirm.message}</p>}
+                </div>
+                <button
                   type="button"
-                  whileTap={{ scale: 0.85 }}
-                  transition={{ duration: 0.1 }}
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-ink-300 hover:text-ink-500 transition-colors"
+                  className="text-[12px] font-bold text-ink-400 hover:text-primary-600 transition-colors ml-4"
                 >
-                  <AnimatePresence mode="wait">
-                    {showPassword ? (
-                      <motion.div
-                        key="hide"
-                        initial={{ opacity: 0, rotate: -15 }}
-                        animate={{ opacity: 1, rotate: 0 }}
-                        exit={{ opacity: 0, rotate: 15 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <EyeSlashIcon className="h-4 w-4" />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="show"
-                        initial={{ opacity: 0, rotate: 15 }}
-                        animate={{ opacity: 1, rotate: 0 }}
-                        exit={{ opacity: 0, rotate: -15 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.button>
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
               </div>
-              {errors.password && (
-                <p className="mt-1 text-[13px] text-red-500">{errors.password.message}</p>
-              )}
-            </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.35, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <label
-                htmlFor="password_confirm"
-                className="block text-[13px] font-medium text-ink-700 mb-1.5"
-              >
-                Confirm password
-              </label>
-              <input
-                id="password_confirm"
-                type="password"
-                autoComplete="new-password"
-                placeholder="Re-enter password"
-                className="input-field"
-                {...register('password_confirm')}
-              />
-              {errors.password_confirm && (
-                <p className="mt-1 text-[13px] text-red-500">{errors.password_confirm.message}</p>
-              )}
-            </motion.div>
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="group relative w-full px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-xl shadow-primary-600/20 overflow-hidden disabled:opacity-50"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                  <span className="relative flex items-center justify-center gap-2">
+                    {isLoading ? <LoadingSpinner size="sm" /> : 'Create Account'}
+                  </span>
+                </button>
+              </div>
+            </form>
 
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: 0.55, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="btn-primary w-full py-2.5 flex items-center justify-center"
-              >
-                {isLoading ? <LoadingSpinner size="sm" /> : 'Create account'}
-              </button>
-            </motion.div>
-          </form>
-
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, delay: 0.6 }}
-            className="mt-6 pt-5 text-center border-t border-ink-900/[0.04] dark:border-ink-300/[0.06]"
-          >
-            <p className="text-[13px] text-ink-400">
+            <p className="mt-10 text-center text-[14px] text-ink-400">
               Already have an account?{' '}
-              <Link to="/login" className="font-medium text-ink-800 hover:text-primary-600 transition-colors">
+              <Link to="/login" className="font-bold text-primary-600 hover:text-primary-700 transition-colors underline underline-offset-4 decoration-primary-500/30 hover:decoration-primary-500">
                 Sign in
               </Link>
             </p>
-          </motion.div>
-        </motion.div>
-      </motion.div>
+          </PremiumCard>
+        </div>
+      </div>
     </div>
   );
 }

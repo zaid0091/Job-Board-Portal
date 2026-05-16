@@ -79,6 +79,7 @@ def get_seeker_dashboard_data(user):
             'id', 'status', 'created_at',
             'job__title', 'job__slug',
             'job__employer__company_name',
+            'job__employer__id',
         )
     )
 
@@ -94,6 +95,7 @@ def get_seeker_dashboard_data(user):
             'id', 'updated_at',
             'job__title', 'job__slug',
             'job__employer__company_name',
+            'job__employer__id',
         )
     )
 

@@ -1,8 +1,8 @@
-body {
+/* body {
   user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
-}
+} */
 
 @font-face {
   font-family: 'Melanin';
@@ -37,6 +37,11 @@ body {
 @keyframes scale-in {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
 }
 
 .animate-fade-in {

@@ -1,4 +1,4 @@
-﻿import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchNotifications, markAllRead } from '@/store/slices/notificationsSlice';
 import { notificationsAPI } from '@/api';
@@ -52,14 +52,24 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+    <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
       <SEO title="Notifications" noindex />
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-display-sm text-ink-900">Notifications</h1>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div className="flex items-center gap-4">
+          <div className="w-1.5 h-10 bg-primary-500 rounded-full shadow-[0_0_15px_rgba(124,58,237,0.4)]" />
+          <div>
+            <h1 className="text-display-md font-black text-ink-900 dark:text-white tracking-tight">
+              Activity <span className="bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent italic">Stream</span>
+            </h1>
+            <p className="text-sm text-ink-400 mt-1 uppercase tracking-widest font-bold">
+              Stay updated with your latest interactions
+            </p>
+          </div>
+        </div>
         {items.length > 0 && (
           <button
             onClick={handleMarkAllRead}
-            className="text-[13px] text-primary-600 hover:text-primary-500 font-medium transition-colors"
+            className="px-6 py-3 bg-zinc-100 dark:bg-zinc-800 text-ink-700 dark:text-white font-black uppercase tracking-widest text-[10px] rounded-xl transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700 border border-zinc-200/50 dark:border-zinc-700/50"
           >
             Mark all as read
           </button>

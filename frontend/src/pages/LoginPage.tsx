@@ -9,8 +9,12 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loginUser, googleLoginUser } from '@/store/slices/authSlice';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import SEO from '@/components/SEO';
-import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, LockClosedIcon, EyeIcon, EyeSlashIcon, ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
+import PremiumCard from '@/components/ui/PremiumCard';
+import ScrollReveal from '@/components/ui/ScrollReveal';
+import Parallax from '@/components/ui/Parallax';
+import Magnetic from '@/components/ui/Magnetic';
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -56,217 +60,156 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 sm:py-16">
+    <div className="min-h-screen flex bg-zinc-950 overflow-hidden">
       <SEO title="Login" description="Sign in to your Jobly account to apply for jobs or manage your listings." canonical="/login" />
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-sm"
-      >
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mb-8"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.15, type: 'spring', stiffness: 200 }}
-            className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-primary-600 mb-4"
-          >
-            <LockClosedIcon className="h-5 w-5 text-white" />
-          </motion.div>
-          <h1 className="text-heading text-ink-900">Welcome back</h1>
-          <p className="mt-1.5 text-sm text-ink-400">Sign in to your account to continue</p>
-        </motion.div>
+      
+      {/* --- Left Column: Visual Brand --- */}
+      <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 overflow-hidden border-r border-white/5">
+        {/* Animated Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-950 via-zinc-950 to-zinc-950" />
+        <div className="absolute inset-0 bg-grid-white opacity-[0.03]" />
+        
+        <Parallax offset={100} className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary-600/20 rounded-full blur-[140px]" />
+        <Parallax offset={-80} className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-[120px]" />
 
-        {/* Form */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="bg-card rounded-2xl p-6 sm:p-8"
-          style={{ boxShadow: 'var(--card-shadow-lg)' }}
-        >
-          <AnimatePresence mode="wait">
-            {error && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.25 }}
-                className="mb-5 p-3 bg-red-50 dark:bg-red-950/30 rounded-xl text-red-600 dark:text-red-400 text-[13px] font-medium"
-                style={{ boxShadow: '0 0 0 1px rgba(239,68,68,0.1)' }}
-              >
-                {error}
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <Link to="/" className="relative flex items-center gap-2 group z-10">
+          <img src="/logo.png" alt="Logo" className="h-10 w-10 transition-transform duration-500 group-hover:scale-110" />
+          <span className="text-2xl font-bold text-white tracking-tighter">Jobly</span>
+        </Link>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.35, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <label htmlFor="email" className="block text-[13px] font-medium text-ink-700 mb-1.5">
-                Email
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <EnvelopeIcon className="h-4 w-4 text-ink-300" />
-                </div>
-                <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  className="input-field pl-9"
-                  {...register('email')}
-                />
-              </div>
-              {errors.email && (
-                <motion.p
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-1 text-[13px] text-red-500"
-                >
-                  {errors.email.message}
-                </motion.p>
-              )}
-            </motion.div>
+        <div className="relative z-10">
+          <ScrollReveal direction="up">
+            <h2 className="text-display text-white font-extrabold tracking-tighter leading-tight">
+              Unlock your <br />
+              <span className="text-primary-400">professional potential</span>
+            </h2>
+            <p className="mt-6 text-xl text-white/50 max-w-md leading-relaxed">
+              Connect with high-growth companies and manage your career journey with 
+              next-generation hiring tools.
+            </p>
+          </ScrollReveal>
+        </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: -12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.35, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <label htmlFor="password" className="block text-[13px] font-medium text-ink-700 mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <LockClosedIcon className="h-4 w-4 text-ink-300" />
-                </div>
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  placeholder="Enter your password"
-                  className="input-field pl-9 pr-10"
-                  {...register('password')}
-                />
-                <motion.button
-                  type="button"
-                  whileTap={{ scale: 0.85 }}
-                  transition={{ duration: 0.1 }}
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-ink-300 hover:text-ink-500 transition-colors"
-                >
-                  <AnimatePresence mode="wait">
-                    {showPassword ? (
-                      <motion.div
-                        key="hide"
-                        initial={{ opacity: 0, rotate: -15 }}
-                        animate={{ opacity: 1, rotate: 0 }}
-                        exit={{ opacity: 0, rotate: 15 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <EyeSlashIcon className="h-4 w-4" />
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="show"
-                        initial={{ opacity: 0, rotate: 15 }}
-                        animate={{ opacity: 1, rotate: 0 }}
-                        exit={{ opacity: 0, rotate: -15 }}
-                        transition={{ duration: 0.15 }}
-                      >
-                        <EyeIcon className="h-4 w-4" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.button>
-              </div>
-              {errors.password && (
-                <motion.p
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-1 text-[13px] text-red-500"
-                >
-                  {errors.password.message}
-                </motion.p>
-              )}
-            </motion.div>
+        <div className="relative z-10">
+          <p className="text-xs font-bold uppercase tracking-[0.4em] text-white/20">
+            Est. 2024 &bull; Global Career Network
+          </p>
+        </div>
+      </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="btn-primary w-full py-2.5 flex items-center justify-center"
-              >
-                {isLoading ? <LoadingSpinner size="sm" /> : 'Sign in'}
-              </button>
-            </motion.div>
-          </form>
+      {/* --- Right Column: Form --- */}
+      <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-24 bg-white dark:bg-zinc-950 relative">
+        {/* Background mesh for mobile */}
+        <div className="lg:hidden absolute inset-0 bg-gradient-to-b from-primary-950/20 via-transparent to-transparent pointer-events-none" />
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, delay: 0.4 }}
-            className="mt-6 relative"
-          >
-            <div className="absolute inset-0 flex items-center" aria-hidden="true">
-              <div className="w-full border-t border-ink-900/[0.04] dark:border-ink-300/[0.06]"></div>
+        <div className="w-full max-w-md mx-auto relative z-10">
+          <ScrollReveal direction="up">
+            <div className="flex items-center gap-4 mb-12">
+              <Link to="/" className="p-2 rounded-full bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
+                <ArrowLeftIcon className="h-4 w-4 text-ink-900 dark:text-white" />
+              </Link>
+              <h1 className="text-2xl font-bold text-ink-900 dark:text-white tracking-tight">Sign In</h1>
             </div>
-            <div className="relative flex justify-center text-[11px] uppercase tracking-wider font-semibold">
-              <span className="px-3 bg-card text-ink-300">Or continue with</span>
+          </ScrollReveal>
+
+          <PremiumCard className="p-8 sm:p-10 border-ink-900/[0.04] dark:border-white/[0.04]">
+            <AnimatePresence mode="wait">
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-6 p-4 bg-red-50 dark:bg-red-950/30 rounded-xl text-red-600 dark:text-red-400 text-sm font-medium border border-red-100 dark:border-red-900/30"
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[13px] font-semibold text-ink-700 dark:text-ink-300">Email Address</label>
+                <div className="relative group">
+                  <EnvelopeIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-ink-300 group-focus-within:text-primary-500 transition-colors" />
+                  <input
+                    type="email"
+                    placeholder="you@example.com"
+                    className="input-field pl-12 bg-zinc-50 dark:bg-zinc-900/50"
+                    {...register('email')}
+                  />
+                </div>
+                {errors.email && <p className="text-[12px] text-red-500 font-medium pl-1">{errors.email.message}</p>}
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between items-center px-1">
+                  <label className="text-[13px] font-semibold text-ink-700 dark:text-ink-300">Password</label>
+                  <Link to="/password/reset/request" className="text-[12px] font-bold text-primary-600 hover:text-primary-700 transition-colors">
+                    Forgot?
+                  </Link>
+                </div>
+                <div className="relative group">
+                  <LockClosedIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-ink-300 group-focus-within:text-primary-500 transition-colors" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    className="input-field pl-12 pr-12 bg-zinc-50 dark:bg-zinc-900/50"
+                    {...register('password')}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-300 hover:text-primary-500 transition-colors"
+                  >
+                    {showPassword ? <EyeSlashIcon className="h-5 w-5" /> : <EyeIcon className="h-5 w-5" />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-[12px] text-red-500 font-medium pl-1">{errors.password.message}</p>}
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="group relative w-full px-8 py-4 bg-primary-600 hover:bg-primary-500 text-white text-sm font-bold uppercase tracking-widest rounded-full transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] shadow-xl shadow-primary-600/20 overflow-hidden disabled:opacity-50"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+                  <span className="relative flex items-center justify-center gap-2">
+                    {isLoading ? <LoadingSpinner size="sm" /> : 'Sign In'}
+                  </span>
+                </button>
+              </div>
+            </form>
+
+            <div className="mt-8 relative">
+              <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                <div className="w-full border-t border-ink-900/[0.05] dark:border-white/[0.05]"></div>
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase tracking-[0.2em] font-bold">
+                <span className="px-4 bg-white dark:bg-zinc-900 text-ink-300">Or continue with</span>
+              </div>
             </div>
-          </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="mt-6 flex justify-center"
-          >
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={handleGoogleError}
-              theme="outline"
-              shape="pill"
-              size="large"
-              width="320"
-            />
-          </motion.div>
+            <div className="mt-8 flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={handleGoogleError}
+                theme="outline"
+                shape="pill"
+                size="large"
+                width="100%"
+              />
+            </div>
 
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3, delay: 0.5 }}
-            className="mt-6 pt-5 text-center border-t border-ink-900/[0.04] dark:border-ink-300/[0.06] space-y-2"
-          >
-            <p className="text-[13px] text-ink-400">
-              <Link to="/password/reset/request" className="font-medium text-ink-800 hover:text-primary-600 transition-colors">
-                Forgot password?
+            <p className="mt-10 text-center text-[14px] text-ink-400">
+              New to Jobly?{' '}
+              <Link to="/register" className="font-bold text-primary-600 hover:text-primary-700 transition-colors underline underline-offset-4 decoration-primary-500/30 hover:decoration-primary-500">
+                Create an account
               </Link>
             </p>
-            <p className="text-[13px] text-ink-400">
-              Don&apos;t have an account?{' '}
-              <Link to="/register" className="font-medium text-ink-800 hover:text-primary-600 transition-colors">
-                Create one
-              </Link>
-            </p>
-          </motion.div>
-        </motion.div>
-      </motion.div>
+          </PremiumCard>
+        </div>
+      </div>
     </div>
   );
 }

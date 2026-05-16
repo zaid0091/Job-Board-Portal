@@ -8,12 +8,14 @@ import ErrorBoundary from './ErrorBoundary';
 
 export default function Layout() {
   const location = useLocation();
+  const authPages = ['/login', '/register', '/password/reset/request', '/password/reset/confirm'];
+  const isAuthPage = authPages.some(page => location.pathname.startsWith(page));
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      {!isAuthPage && <Navbar />}
       <ScrollToTop />
-      <main className="flex-1 pt-14">
+      <main className={`flex-1 ${!isAuthPage ? 'pt-14' : ''}`}>
         <ErrorBoundary key={location.pathname}>
           <AnimatePresence mode="wait">
             <PageTransition key={location.pathname}>
@@ -22,7 +24,7 @@ export default function Layout() {
           </AnimatePresence>
         </ErrorBoundary>
       </main>
-      <Footer />
+      {!isAuthPage && <Footer />}
     </div>
   );
 }

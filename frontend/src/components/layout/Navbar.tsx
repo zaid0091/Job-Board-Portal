@@ -72,7 +72,8 @@ export default function Navbar() {
   const isActive = (match: string) => location.pathname.startsWith(match);
   const isHome = location.pathname === '/';
   const isAbout = location.pathname === '/about';
-  const hasTransparentHero = isHome || isAbout;
+  const isContact = location.pathname === '/contact';
+  const hasTransparentHero = isHome || isAbout || isContact;
   const onHero = hasTransparentHero && !pastHero;
 
   const navLinks = [
