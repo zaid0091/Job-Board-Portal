@@ -40,5 +40,9 @@ htmlcov/
 .coverage
 coverage.xml
 
+# Database
+*.sqlite3
+db.sqlite3
+
 # Logs
 *.log
