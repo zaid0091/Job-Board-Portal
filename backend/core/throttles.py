@@ -58,3 +58,9 @@ class AnalyticsThrottle(UserRateThrottle):
     """Per-user throttle for analytics endpoints to prevent data scraping."""
 
     scope = "analytics"
+
+
+class ChatMessageThrottle(UserRateThrottle):
+    """Limit chat message sends via REST (WebSocket has separate validation)."""
+
+    scope = "chat_message"

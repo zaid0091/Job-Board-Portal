@@ -66,7 +66,15 @@ A comprehensive, full-stack Job Board Portal designed for seamless recruitment a
    pip install -r requirements/base.txt  # Use base.txt for full dependencies
    cp .env.example .env  # Update variables in .env
    python manage.py migrate
-   python manage.py runserver
+   # WebSockets (notifications + chat) require Daphne, not runserver:
+   # Windows:
+   .\scripts\run_dev_asgi.ps1
+   # macOS/Linux:
+   # ./scripts/run_dev_asgi.sh
+   # Or manually (from backend/):
+   #   set ENVIRONMENT=development
+   #   daphne -b 127.0.0.1 -p 8000 config.asgi:application
+   # HTTP-only (no live chat/notifications): python manage.py runserver
    ```
 
 4. **Running Background Tasks (Celery):**
@@ -74,7 +82,7 @@ A comprehensive, full-stack Job Board Portal designed for seamless recruitment a
    ```bash
    cd backend
    # Ensure Redis is running first
-   celery -A config worker -l info
+   celery -A config.celery worker -l info
    ```
 
 3. **Frontend Configuration:**

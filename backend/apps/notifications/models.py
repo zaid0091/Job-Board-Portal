@@ -16,6 +16,7 @@ class Notification(UUIDModel, TimeStampedModel):
         PROFILE_VIEW = 'PROFILE_VIEW', _('Profile Viewed')
         WELCOME = 'WELCOME', _('Welcome')
         SYSTEM = 'SYSTEM', _('System')
+        CHAT_MESSAGE = 'CHAT_MESSAGE', _('Chat Message')
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,

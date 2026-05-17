@@ -43,6 +43,7 @@ LOCAL_APPS = [
     "apps.applications",
     "apps.notifications",
     "apps.analytics",
+    "apps.chat",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -135,6 +136,7 @@ REST_FRAMEWORK = {
         "job_create": "20/day",
         # Analytics limits
         "analytics": "30/minute",
+        "chat_message": "60/minute",
     },
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_RENDERER_CLASSES": [

@@ -39,3 +39,9 @@ EMAIL_BACKEND = 'django.core.mail.backends.locmem.EmailBackend'
 # Celery runs tasks synchronously in tests
 CELERY_TASK_ALWAYS_EAGER = True
 CELERY_TASK_EAGER_PROPAGATES = True
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}

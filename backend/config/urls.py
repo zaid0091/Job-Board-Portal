@@ -26,6 +26,7 @@ urlpatterns = [
         path('', include('apps.jobs.urls')),
         path('', include('apps.applications.urls')),
         path('', include('apps.notifications.urls')),
+        path('', include('apps.chat.urls')),
         path('', include('apps.analytics.urls')),
     ])),
 ]

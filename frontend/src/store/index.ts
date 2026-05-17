@@ -3,6 +3,7 @@ import authReducer from './slices/authSlice';
 import jobsReducer from './slices/jobsSlice';
 import notificationsReducer from './slices/notificationsSlice';
 import profileReducer from './slices/profileSlice';
+import chatReducer from './slices/chatSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     jobs: jobsReducer,
     notifications: notificationsReducer,
     profile: profileReducer,
+    chat: chatReducer,
   },
 });
 

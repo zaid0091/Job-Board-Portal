@@ -2,7 +2,8 @@ import os
 from celery import Celery
 from celery.schedules import crontab
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.production')
+# Respect DJANGO_SETTINGS_MODULE from the environment (Docker, manage.py, scripts).
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.development')
 
 app = Celery('jobboard')
 app.config_from_object('django.conf:settings', namespace='CELERY')

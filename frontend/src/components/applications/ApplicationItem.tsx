@@ -6,6 +6,7 @@ import { ArrowRightIcon, ChevronDownIcon, DocumentArrowDownIcon } from '@heroico
 import { applicationsAPI } from '@/api';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import toast from 'react-hot-toast';
+import OpenChatButton from '@/components/chat/OpenChatButton';
 import type { ApplicationListItem, ApplicationDetail, ApplicationStatus } from '@/types';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -104,6 +105,8 @@ const ApplicationItem = memo(function ApplicationItem({
             >
               {app.status}
             </span>
+
+            <OpenChatButton applicationId={app.id} label="Message" />
 
             {!isTerminal && transitions.length > 0 && (
               <div className="flex gap-2">

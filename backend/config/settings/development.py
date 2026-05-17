@@ -1,12 +1,13 @@
 import os
 
-_environment = os.environ.get("DJANGO_SETTINGS_MODULE", "")
-
-# Security: Fail-safe to prevent using development settings in production
-if os.environ.get("ENVIRONMENT") == "production" or "production" in _environment:
+# Security: Fail-safe when development settings are explicitly selected in production
+if (
+    os.environ.get("ENVIRONMENT") == "production"
+    and os.environ.get("DJANGO_SETTINGS_MODULE", "").endswith(".development")
+):
     raise RuntimeError(
         "ERROR: Development settings cannot be used in production! "
-        "Set ENVIRONMENT=development or use config.settings.production."
+        "Set DJANGO_SETTINGS_MODULE=config.settings.production."
     )
 
 from .base import *  # noqa
@@ -20,7 +21,8 @@ CACHES = {
 }
 
 DEBUG = True
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+# Include Vite dev origin host:port for Channels AllowedHostsOriginValidator
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "localhost:5173", "[::1]"]
 
 # Generate a unique dev key per install to prevent accidental reuse
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", os.urandom(64).hex())

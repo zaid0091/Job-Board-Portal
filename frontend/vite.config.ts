@@ -19,6 +19,13 @@ export default defineConfig({
         secure: false,
         ws: true,
       },
+      // Django Channels mounts at /ws/ (not /api/v1/ws/)
+      '/ws': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        secure: false,
+        ws: true,
+      },
     },
   },
 });

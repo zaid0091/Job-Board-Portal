@@ -7,6 +7,7 @@ import Pagination from '@/components/ui/Pagination';
 import SEO from '@/components/SEO';
 import { formatDistanceToNow } from 'date-fns';
 import toast from 'react-hot-toast';
+import OpenChatButton from '@/components/chat/OpenChatButton';
 import type { ApplicationListItem, PaginatedResponse } from '@/types';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -104,6 +105,11 @@ export default function MyApplicationsPage() {
                   >
                     {app.status}
                   </span>
+                  <OpenChatButton
+                    applicationId={app.id}
+                    label="Message employer"
+                    className="btn-secondary text-micro px-2.5 py-1 inline-flex items-center gap-1"
+                  />
                   {app.status === 'PENDING' && (
                     <button
                       onClick={() => handleWithdraw(app.id)}

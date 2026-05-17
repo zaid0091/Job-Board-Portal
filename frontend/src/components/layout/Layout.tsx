@@ -10,6 +10,7 @@ export default function Layout() {
   const location = useLocation();
   const authPages = ['/login', '/register', '/password/reset/request', '/password/reset/confirm'];
   const isAuthPage = authPages.some(page => location.pathname.startsWith(page));
+  const isMessagesPage = location.pathname.startsWith('/messages');
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -24,7 +25,7 @@ export default function Layout() {
           </AnimatePresence>
         </ErrorBoundary>
       </main>
-      {!isAuthPage && <Footer />}
+      {!isAuthPage && !isMessagesPage && <Footer />}
     </div>
   );
 }

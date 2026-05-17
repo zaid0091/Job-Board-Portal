@@ -3,3 +3,4 @@ export * from './job';
 export * from './application';
 export * from './profile';
 export * from './api';
+export * from './chat';

@@ -26,6 +26,8 @@ const RequestResetPasswordPage = lazy(() => import('@/pages/RequestResetPassword
 const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage'));
 const SavedJobsPage = lazy(() => import('@/pages/SavedJobsPage'));
 const CompanyDetailPage = lazy(() => import('@/pages/CompanyDetailPage'));
+const MessagesPage = lazy(() => import('@/pages/MessagesPage'));
+const ChatRoomPage = lazy(() => import('@/pages/ChatRoomPage'));
 
 function SuspenseWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -66,6 +68,8 @@ export default function AppRoutes({ authInitialized }: AppRoutesProps) {
         {/* Authenticated routes */}
         <Route element={<ProtectedRoute authInitialized={authInitialized} />}>
           <Route path="/notifications" element={<SuspenseWrapper><NotificationsPage /></SuspenseWrapper>} />
+          <Route path="/messages" element={<SuspenseWrapper><MessagesPage /></SuspenseWrapper>} />
+          <Route path="/messages/:conversationId" element={<SuspenseWrapper><ChatRoomPage /></SuspenseWrapper>} />
         </Route>
 
         {/* Employer routes */}

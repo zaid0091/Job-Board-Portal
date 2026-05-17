@@ -88,3 +88,12 @@ class ReadOnly(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return request.method in permissions.SAFE_METHODS
+
+
+class IsConversationParticipant(permissions.BasePermission):
+    """Only the seeker applicant or job employer may access a conversation."""
+
+    message = 'You are not a participant in this conversation.'
+
+    def has_object_permission(self, request, view, obj):
+        return obj.is_participant(request.user)

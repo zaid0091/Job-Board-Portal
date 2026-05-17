@@ -5,3 +5,4 @@ export { applicationsAPI } from './applicationsAPI';
 export { profilesAPI } from './profilesAPI';
 export { notificationsAPI } from './notificationsAPI';
 export { analyticsAPI } from './analyticsAPI';
+export { chatAPI } from './chatAPI';

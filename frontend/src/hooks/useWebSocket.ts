@@ -1,8 +1,10 @@
 import { useEffect, useRef, useCallback, useState } from 'react';
 import { useAppDispatch } from '@/store/hooks';
 import { fetchUnreadCount, addNotification } from '@/store/slices/notificationsSlice';
+import { buildWebSocketUrl } from '@/utils/wsUrl';
 
 const WS_ENABLED = import.meta.env.VITE_WS_ENABLED === 'true';
+const NOTIFICATIONS_WS_URL = buildWebSocketUrl('/ws/notifications/');
 
 interface UseWebSocketReturn {
   isConnected: boolean;
@@ -16,18 +18,12 @@ export function useWebSocket(): UseWebSocketReturn {
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
-  const getWsUrl = useCallback(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
-    return `${protocol}//${host}/api/v1/ws/notifications/`;
-  }, []);
-
   const connect = useCallback(() => {
     if (!WS_ENABLED) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
 
     try {
-      const ws = new WebSocket(getWsUrl());
+      const ws = new WebSocket(NOTIFICATIONS_WS_URL);
       wsRef.current = ws;
 
       ws.onopen = () => {
@@ -65,7 +61,7 @@ export function useWebSocket(): UseWebSocketReturn {
     } catch {
       setIsConnected(false);
     }
-  }, [getWsUrl, dispatch]);
+  }, [dispatch]);
 
   const reconnect = useCallback(() => {
     if (!WS_ENABLED) return;

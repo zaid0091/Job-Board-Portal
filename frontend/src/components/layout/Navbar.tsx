@@ -4,7 +4,8 @@ import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { logoutUser } from '@/store/slices/authSlice';
 import { fetchEmployerProfile, fetchSeekerProfile } from '@/store/slices/profileSlice';
 import { fetchUnreadCount } from '@/store/slices/notificationsSlice';
-import { Bars2Icon, XMarkIcon, BellIcon } from '@heroicons/react/24/outline';
+import { fetchChatUnreadCount } from '@/store/slices/chatSlice';
+import { Bars2Icon, XMarkIcon, BellIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ui/ThemeToggle';
@@ -35,6 +36,7 @@ export default function Navbar() {
   }, [isAuthenticated, user, dispatch, seekerProfile, employerProfile]);
 
   const { unreadCount } = useAppSelector((state) => state.notifications);
+  const chatUnreadCount = useAppSelector((state) => state.chat.unreadCount);
 
   useEffect(() => {
     const onScroll = () => {
@@ -48,6 +50,7 @@ export default function Navbar() {
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchUnreadCount());
+      dispatch(fetchChatUnreadCount());
     }
   }, [isAuthenticated, dispatch]);
 
@@ -150,6 +153,21 @@ export default function Navbar() {
 
             {isAuthenticated ? (
               <>
+                <Link
+                  to="/messages"
+                  className={`relative p-2 rounded-lg transition-colors ${
+                    onHero
+                      ? 'text-white/70 hover:text-white hover:bg-white/10'
+                      : 'text-ink-400 hover:text-ink-600 hover:bg-surface-50'
+                  }`}
+                  aria-label="Messages"
+                >
+                  <ChatBubbleLeftRightIcon className="h-[18px] w-[18px]" />
+                  {chatUnreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-primary-500 rounded-full ring-2 ring-white dark:ring-zinc-950" />
+                  )}
+                </Link>
+
                 {/* Notifications Bell */}
                 <Link
                   to="/notifications"
@@ -309,6 +327,18 @@ export default function Navbar() {
           >
             {isAuthenticated ? (
               <>
+                <Link
+                  to="/messages"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg text-[14px] text-ink-700 hover:bg-surface-50 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
+                >
+                  <ChatBubbleLeftRightIcon className="h-4 w-4" />
+                  Messages
+                  {chatUnreadCount > 0 && (
+                    <span className="ml-auto text-[11px] bg-primary-600 text-white rounded-full px-1.5 py-0.5 leading-none">
+                      {chatUnreadCount}
+                    </span>
+                  )}
+                </Link>
                 <Link
                   to="/notifications"
                   className="flex items-center gap-2 px-3 py-2 rounded-lg text-[14px] text-ink-700 hover:bg-surface-50 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
