@@ -7,7 +7,7 @@ interface FloatingCardsProps {
   direction?: 'up' | 'down' | 'left' | 'right';
   distance?: number;
   stagger?: number;
-  containerOffset?: [number, number];
+  containerOffset?: any;
 }
 
 export default function FloatingCards({
@@ -43,7 +43,7 @@ export default function FloatingCards({
         <motion.div
           key={index}
           style={{
-            [axis]: useTransform(scrollYProgress, [0, 1], [fromValue, '0px']),
+            [axis]: value,
             opacity: useTransform(scrollYProgress, [index * stagger, index * stagger + 0.3], [0, 1]),
           }}
         >

@@ -8,16 +8,12 @@ import { registerUser } from '@/store/slices/authSlice';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import SEO from '@/components/SEO';
 import {
-  UserPlusIcon,
   MagnifyingGlassIcon,
   BuildingOffice2Icon,
-  EyeIcon,
-  EyeSlashIcon,
   EnvelopeIcon,
   LockClosedIcon,
   UserIcon,
-  ArrowLeftIcon,
-  IdentificationIcon
+  ArrowLeftIcon
 } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import PremiumCard from '@/components/ui/PremiumCard';

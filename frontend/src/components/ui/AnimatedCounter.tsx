@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { motion, useInView, useMotionValue, useSpring } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+import { useInView, useMotionValue, useSpring } from 'framer-motion';
 
 interface AnimatedCounterProps {
   value: number;
@@ -13,7 +13,6 @@ interface AnimatedCounterProps {
 
 export default function AnimatedCounter({
   value,
-  duration = 2,
   prefix = '',
   suffix = '',
   className = '',

@@ -1,17 +1,15 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { analyticsAPI, jobsAPI } from '@/api';
 import { DashboardSkeleton } from '@/components/ui/Skeleton';
 import SEO from '@/components/SEO';
 import toast from 'react-hot-toast';
 import {
   BriefcaseIcon,
-  DocumentTextIcon,
   EyeIcon,
   CheckCircleIcon,
   PencilIcon,
   TrashIcon,
   UsersIcon,
-  ArrowUpRightIcon,
   PlusIcon,
   ChartBarIcon,
 } from '@heroicons/react/24/outline';
@@ -30,7 +28,7 @@ import {
 } from 'recharts';
 import { Link, useNavigate } from 'react-router-dom';
 import type { JobListItem, JobStatus } from '@/types';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import PremiumCard from '@/components/ui/PremiumCard';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import Parallax from '@/components/ui/Parallax';
