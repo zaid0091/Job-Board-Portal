@@ -14,7 +14,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import PremiumCard from '@/components/ui/PremiumCard';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import Parallax from '@/components/ui/Parallax';
-import Magnetic from '@/components/ui/Magnetic';
 
 const loginSchema = z.object({
   email: z.string().email('Enter a valid email'),
