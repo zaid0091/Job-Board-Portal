@@ -8,12 +8,12 @@ import {
 import { usePlatformStats } from '@/hooks/usePlatformStats';
 import SEO from '@/components/SEO';
 import ScrollReveal from '@/components/ui/ScrollReveal';
-import Parallax from '@/components/ui/Parallax';
 import PremiumCard from '@/components/ui/PremiumCard';
 import Magnetic from '@/components/ui/Magnetic';
 import LineReveal from '@/components/ui/LineReveal';
 import ScrollScale from '@/components/ui/ScrollScale';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
+import { HeroGeometric } from '@/components/ui/shape-landing-hero';
 
 export default function AboutPage() {
   const { stats } = usePlatformStats();
@@ -26,14 +26,11 @@ export default function AboutPage() {
         canonical="/about" 
       />
 
-      {/* --- Hero Section --- */}
-      <section className="relative pt-32 pb-20 sm:pt-48 sm:pb-32 px-4 sm:px-6 overflow-hidden bg-gradient-to-b from-primary-950 via-zinc-950 to-zinc-950 dark:from-primary-950/80 dark:via-zinc-900 dark:to-zinc-900 -mt-14 [mask-image:linear-gradient(to_bottom,black_calc(100%-80px),transparent_100%)]">
-        {/* Grid overlay */}
-        <div className="absolute inset-0 bg-grid-white opacity-[0.05]" />
-        {/* Gradient orbs */}
-        <Parallax offset={100} className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary-600/20 rounded-full blur-[120px]" />
-        <Parallax offset={-80} className="absolute bottom-0 left-1/4 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px]" />
-
+      {/* --- Hero Section (geometric landing) --- */}
+      <HeroGeometric
+        className="min-h-0 pt-32 pb-20 sm:pt-48 sm:pb-32 -mt-14 [mask-image:linear-gradient(to_bottom,black_calc(100%-80px),transparent_100%)]"
+        contentClassName="px-4 sm:px-6"
+      >
         <div className="relative max-w-5xl mx-auto text-center">
           <ScrollReveal direction="up" duration={1} distance={20}>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm mb-8">
@@ -57,7 +54,7 @@ export default function AboutPage() {
             </p>
           </ScrollReveal>
         </div>
-      </section>
+      </HeroGeometric>
 
       {/* --- Stats strip --- */}
       <section className="py-12 border-b border-ink-900/[0.04] dark:border-ink-300/[0.06]">
