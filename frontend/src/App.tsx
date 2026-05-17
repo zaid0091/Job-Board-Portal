@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCurrentUser, logout } from '@/store/slices/authSlice';
@@ -12,6 +12,7 @@ function App() {
   const location = useLocation();
   const { isAuthenticated } = useAppSelector((state) => state.auth);
   const [authInitialized, setAuthInitialized] = useState(false);
+  const lenisRef = useRef<Lenis | null>(null);
 
   useWebSocket();
 
@@ -24,6 +25,7 @@ function App() {
       gestureOrientation: 'vertical',
       smoothWheel: true,
     });
+    lenisRef.current = lenis;
 
     function raf(time: number) {
       lenis.raf(time);
@@ -38,8 +40,20 @@ function App() {
 
     return () => {
       lenis.destroy();
+      lenisRef.current = null;
     };
   }, []);
+
+  // Let the chat room use its own scroll container (no Lenis hijacking)
+  useEffect(() => {
+    const lenis = lenisRef.current;
+    if (!lenis) return;
+    if (location.pathname.startsWith('/messages')) {
+      lenis.stop();
+    } else {
+      lenis.start();
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const authPages = ['/login', '/register', '/password/reset/request', '/password/reset/confirm'];

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from apps.applications.models import Application
+from core.sanitizers import strip_all_html
 
 from .models import Conversation, Message
 from .services import get_or_create_conversation, unread_count_for_user
@@ -133,6 +134,17 @@ class OpenConversationSerializer(serializers.Serializer):
     def create(self, validated_data):
         application = self.context['application']
         return get_or_create_conversation(application)
+
+
+class SendChatMessageSerializer(serializers.Serializer):
+    text = serializers.CharField(max_length=4000, trim_whitespace=True)
+    client_message_id = serializers.UUIDField(required=False)
+
+    def validate_text(self, value):
+        cleaned = strip_all_html(value or '')
+        if not cleaned:
+            raise serializers.ValidationError('Message text cannot be empty.')
+        return cleaned[: Message.MAX_TEXT_LENGTH]
 
 
 class MarkReadSerializer(serializers.Serializer):

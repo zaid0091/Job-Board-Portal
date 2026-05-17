@@ -1,9 +1,15 @@
+import logging
+
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.db.models import Prefetch
 from django.utils import timezone
 
 from core.sanitizers import strip_all_html
 
 from .models import Conversation, Message
+
+logger = logging.getLogger(__name__)
 
 
 def get_conversation_for_user(conversation_id):
@@ -90,6 +96,55 @@ def create_message(conversation, sender, text, client_id=None):
     conversation.last_message_at = message.created_at
     conversation.save(update_fields=['last_message_at', 'updated_at'])
     return message
+
+
+def recipient_user_id_for_sender(conversation, sender):
+    app = conversation.application
+    if sender.id == app.applicant_id:
+        return app.job.employer.user_id
+    return app.applicant_id
+
+
+def broadcast_chat_packet(conversation_id, packet):
+    """Push a chat.message packet to everyone in the conversation room."""
+    channel_layer = get_channel_layer()
+    if channel_layer is None:
+        logger.warning('No channel layer configured; chat broadcast skipped')
+        return
+    async_to_sync(channel_layer.group_send)(
+        f'chat_{conversation_id}',
+        {
+            'type': 'chat.message.event',
+            'data': packet,
+        },
+    )
+
+
+def push_chat_inbox_update(recipient_user_id, conversation_id, packet):
+    """Notify a user on their notifications WebSocket (inbox list / badge)."""
+    channel_layer = get_channel_layer()
+    if channel_layer is None:
+        return
+    async_to_sync(channel_layer.group_send)(
+        f'notifications_{recipient_user_id}',
+        {
+            'type': 'notification_event',
+            'data': {
+                'type': 'chat.inbox_update',
+                'conversation_id': str(conversation_id),
+                'message': packet['message'],
+            },
+        },
+    )
+
+
+def deliver_chat_message(conversation, sender, message):
+    """Broadcast to room participants and push inbox update to the other party."""
+    packet = message_to_packet(message)
+    broadcast_chat_packet(conversation.id, packet)
+    recipient_id = recipient_user_id_for_sender(conversation, sender)
+    push_chat_inbox_update(recipient_id, conversation.id, packet)
+    return packet
 
 
 def message_to_packet(message):

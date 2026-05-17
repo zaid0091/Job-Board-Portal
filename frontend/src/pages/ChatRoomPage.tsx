@@ -7,8 +7,11 @@ import {
   fetchMessageHistory,
   markConversationRead,
   addOptimisticMessage,
+  replaceOptimisticMessage,
+  applyInboxUpdate,
   fetchChatUnreadCount,
 } from '@/store/slices/chatSlice';
+import { isWebSocketEnabled } from '@/utils/wsConfig';
 import { chatAPI } from '@/api';
 import { useChatWebSocket, createOptimisticMessage } from '@/hooks/useChatWebSocket';
 import ChatMessageList from '@/components/chat/ChatMessageList';
@@ -88,22 +91,34 @@ export default function ChatRoomPage() {
   }, [activeMessages, conversationId, dispatch]);
 
   const handleSend = useCallback(
-    (text: string) => {
-      if (!user?.id) return;
+    async (text: string) => {
+      if (!user?.id || !conversationId) return;
       const clientId = crypto.randomUUID();
       dispatch(
         addOptimisticMessage(createOptimisticMessage(text, user.id, clientId)),
       );
+
+      const tryRest = async () => {
+        try {
+          const message = await chatAPI.sendMessage(conversationId, text, clientId);
+          dispatch(replaceOptimisticMessage({ clientId, message }));
+          dispatch(applyInboxUpdate({ conversationId, message }));
+        } catch {
+          toast.error('Failed to send message. Please try again.');
+        }
+      };
+
+      if (!isWebSocketEnabled()) {
+        await tryRest();
+        return;
+      }
+
       const sent = sendMessage(text, clientId);
       if (!sent) {
-        toast.error(
-          import.meta.env.VITE_WS_ENABLED === 'true'
-            ? 'Not connected. Reconnecting…'
-            : 'WebSockets are disabled. Enable VITE_WS_ENABLED to send messages in real time.',
-        );
+        await tryRest();
       }
     },
-    [dispatch, sendMessage, user?.id],
+    [conversationId, dispatch, sendMessage, user?.id],
   );
 
   const handleLoadMore = useCallback(async () => {
@@ -129,7 +144,7 @@ export default function ChatRoomPage() {
 
   return (
     <motion.div
-      className="h-[calc(100dvh-3.5rem)] max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex flex-col"
+      className="h-[calc(100dvh-3.5rem)] max-w-3xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex flex-col overflow-hidden"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.25 }}
@@ -183,6 +198,7 @@ export default function ChatRoomPage() {
           </motion.div>
         ) : (
           <ChatMessageList
+            key={conversationId}
             messages={activeMessages}
             currentUserId={user.id}
             otherPartyName={meta.other_party_name}
@@ -193,11 +209,7 @@ export default function ChatRoomPage() {
           />
         )}
 
-        <ChatComposer
-          onSend={handleSend}
-          onTyping={sendTyping}
-          disabled={!isConnected && import.meta.env.VITE_WS_ENABLED === 'true'}
-        />
+        <ChatComposer onSend={handleSend} onTyping={sendTyping} />
       </motion.div>
     </motion.div>
   );

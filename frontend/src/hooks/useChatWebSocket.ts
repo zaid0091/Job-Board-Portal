@@ -4,11 +4,12 @@ import {
   addChatMessage,
   replaceOptimisticMessage,
   setTypingUser,
+  applyInboxUpdate,
+  fetchMessageHistory,
 } from '@/store/slices/chatSlice';
 import { buildWebSocketUrl } from '@/utils/wsUrl';
+import { isWebSocketEnabled } from '@/utils/wsConfig';
 import type { ChatMessage, ChatServerPacket } from '@/types';
-
-const WS_ENABLED = import.meta.env.VITE_WS_ENABLED === 'true';
 
 interface UseChatWebSocketOptions {
   conversationId: string | null;
@@ -24,6 +25,11 @@ interface UseChatWebSocketReturn {
   reconnect: () => void;
 }
 
+function sameUserId(a: string | undefined, b: string | undefined): boolean {
+  if (!a || !b) return false;
+  return String(a) === String(b);
+}
+
 export function useChatWebSocket({
   conversationId,
   onConnected,
@@ -33,6 +39,7 @@ export function useChatWebSocket({
   const userId = useAppSelector((state) => state.auth.user?.id);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectAttemptRef = useRef(0);
   const intentionalCloseRef = useRef(false);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -63,8 +70,23 @@ export function useChatWebSocket({
     setIsConnected(false);
   }, []);
 
+  const handleChatMessage = useCallback(
+    (message: ChatMessage) => {
+      const clientId = message.client_id || message.client_message_id;
+      if (clientId && sameUserId(message.sender_id, userId)) {
+        dispatch(replaceOptimisticMessage({ clientId, message }));
+      } else {
+        dispatch(addChatMessage(message));
+      }
+      if (conversationId) {
+        dispatch(applyInboxUpdate({ conversationId, message }));
+      }
+    },
+    [conversationId, dispatch, userId],
+  );
+
   const connect = useCallback(() => {
-    if (!WS_ENABLED || !conversationId) return;
+    if (!isWebSocketEnabled() || !conversationId) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
     if (wsRef.current?.readyState === WebSocket.CONNECTING) return;
 
@@ -77,6 +99,7 @@ export function useChatWebSocket({
 
     ws.onopen = () => {
       setIsConnected(true);
+      reconnectAttemptRef.current = 0;
     };
 
     ws.onclose = () => {
@@ -84,14 +107,16 @@ export function useChatWebSocket({
       if (wsRef.current === ws) {
         wsRef.current = null;
       }
-      if (intentionalCloseRef.current || !WS_ENABLED || !conversationId) {
+      if (intentionalCloseRef.current || !isWebSocketEnabled() || !conversationId) {
         return;
       }
       clearReconnectTimer();
+      const delay = Math.min(30000, 1000 * 2 ** reconnectAttemptRef.current);
+      reconnectAttemptRef.current += 1;
       reconnectTimeoutRef.current = setTimeout(() => {
         reconnectTimeoutRef.current = null;
         connect();
-      }, 1500);
+      }, delay);
     };
 
     ws.onerror = () => {};
@@ -101,22 +126,14 @@ export function useChatWebSocket({
         const data = JSON.parse(event.data) as ChatServerPacket;
         if (data.type === 'chat.connected') {
           setIsConnected(true);
+          dispatch(
+            fetchMessageHistory({ conversationId: conversationId!, merge: true }),
+          );
           onConnectedRef.current?.();
         } else if (data.type === 'chat.message') {
-          const clientId =
-            data.message.client_id || data.message.client_message_id;
-          if (clientId && data.message.sender_id === userId) {
-            dispatch(
-              replaceOptimisticMessage({
-                clientId,
-                message: data.message,
-              }),
-            );
-          } else {
-            dispatch(addChatMessage(data.message));
-          }
+          handleChatMessage(data.message);
         } else if (data.type === 'chat.typing') {
-          if (data.sender_id !== userId) {
+          if (!sameUserId(data.sender_id, userId)) {
             dispatch(setTypingUser(data.is_typing ? data.sender_id : null));
           }
         } else if (data.type === 'chat.error') {
@@ -126,10 +143,11 @@ export function useChatWebSocket({
         // Ignore malformed packets
       }
     };
-  }, [conversationId, clearReconnectTimer, dispatch, userId]);
+  }, [conversationId, clearReconnectTimer, dispatch, handleChatMessage, userId]);
 
   const disconnect = useCallback(() => {
     clearReconnectTimer();
+    reconnectAttemptRef.current = 0;
     closeSocket();
   }, [clearReconnectTimer, closeSocket]);
 
@@ -164,7 +182,7 @@ export function useChatWebSocket({
   }, []);
 
   useEffect(() => {
-    if (!conversationId || !WS_ENABLED) {
+    if (!conversationId || !isWebSocketEnabled()) {
       disconnect();
       return;
     }

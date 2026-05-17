@@ -1,5 +1,6 @@
 import axiosInstance from './axiosInstance';
 import type {
+  ChatMessage,
   ConversationDetail,
   ConversationInboxItem,
   MessageHistoryResponse,
@@ -34,6 +35,21 @@ export const chatAPI = {
     const response = await axiosInstance.get<MessageHistoryResponse>(
       `/chat/conversations/${conversationId}/messages/`,
       { params: cursor ? { cursor } : {} },
+    );
+    return response.data;
+  },
+
+  sendMessage: async (
+    conversationId: string,
+    text: string,
+    clientMessageId?: string,
+  ) => {
+    const response = await axiosInstance.post<ChatMessage>(
+      `/chat/conversations/${conversationId}/messages/`,
+      {
+        text,
+        ...(clientMessageId ? { client_message_id: clientMessageId } : {}),
+      },
     );
     return response.data;
   },

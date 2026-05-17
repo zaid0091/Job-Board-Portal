@@ -6,8 +6,8 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from .services import (
     create_message,
+    deliver_chat_message,
     get_conversation_for_user,
-    message_to_packet,
     notify_recipient_async,
     user_can_access_conversation,
 )
@@ -113,14 +113,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             })
             return
 
-        packet = await self._message_packet(message)
-        await self.channel_layer.group_send(
-            self.group_name,
-            {
-                'type': 'chat.message.event',
-                'data': packet,
-            },
-        )
+        await self._deliver_message(message)
 
         await self._notify_recipient(message)
 
@@ -162,8 +155,8 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         return create_message(self.conversation, self.user, text, client_id=client_id)
 
     @database_sync_to_async
-    def _message_packet(self, message):
-        return message_to_packet(message)
+    def _deliver_message(self, message):
+        deliver_chat_message(self.conversation, self.user, message)
 
     @database_sync_to_async
     def _notify_recipient(self, message):

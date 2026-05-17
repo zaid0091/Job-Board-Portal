@@ -16,8 +16,15 @@ from .serializers import (
     ConversationInboxSerializer,
     MarkReadSerializer,
     OpenConversationSerializer,
+    SendChatMessageSerializer,
 )
-from .services import inbox_queryset_for_user, user_can_access_conversation
+from .services import (
+    create_message,
+    deliver_chat_message,
+    inbox_queryset_for_user,
+    notify_recipient_async,
+    user_can_access_conversation,
+)
 
 
 class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
@@ -59,10 +66,17 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
             total += unread_count_for_user(conv, request.user)
         return Response({'unread_count': total})
 
-    @action(detail=True, methods=['get'], url_path='messages')
+    def get_throttles(self):
+        if self.action == 'messages' and self.request.method == 'POST':
+            return [ChatMessageThrottle()]
+        return super().get_throttles()
+
+    @action(detail=True, methods=['get', 'post'], url_path='messages')
     def messages(self, request, pk=None):
-        """Paginated message history (cursor = ISO timestamp of oldest loaded)."""
+        """GET: paginated history. POST: send a message (REST fallback for WebSocket)."""
         conversation = self.get_object()
+        if request.method == 'POST':
+            return self._send_message(request, conversation)
         page_size = min(int(request.query_params.get('page_size', 50)), 100)
         cursor = request.query_params.get('cursor')
 
@@ -87,6 +101,26 @@ class ConversationViewSet(viewsets.ReadOnlyModelViewSet):
             'has_more': has_more,
             'next_cursor': next_cursor,
         })
+
+    def _send_message(self, request, conversation):
+        serializer = SendChatMessageSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        client_id = serializer.validated_data.get('client_message_id')
+        try:
+            message = create_message(
+                conversation,
+                request.user,
+                serializer.validated_data['text'],
+                client_id=client_id,
+            )
+        except ValueError as exc:
+            return Response(
+                {'detail': str(exc)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        packet = deliver_chat_message(conversation, request.user, message)
+        notify_recipient_async(request.user, conversation, message)
+        return Response(packet['message'], status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'], url_path='read')
     def mark_read(self, request, pk=None):

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useCallback } from 'react';
 import { format, isToday, isYesterday } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
@@ -9,12 +9,14 @@ interface ChatMessageListProps {
   currentUserId: string;
   otherPartyName: string;
   typingUserId: string | null;
-  onLoadMore?: () => void;
+  onLoadMore?: () => void | Promise<void>;
   hasMore?: boolean;
   isLoadingMore?: boolean;
 }
 
 type MessageGroup = { dateLabel: string; messages: ChatMessage[] };
+
+const NEAR_BOTTOM_THRESHOLD_PX = 96;
 
 function formatDateLabel(date: Date): string {
   if (isToday(date)) return 'Today';
@@ -38,6 +40,12 @@ function groupMessagesByDate(messages: ChatMessage[]): MessageGroup[] {
   return groups;
 }
 
+function isNearBottom(element: HTMLElement): boolean {
+  const distanceFromBottom =
+    element.scrollHeight - element.scrollTop - element.clientHeight;
+  return distanceFromBottom <= NEAR_BOTTOM_THRESHOLD_PX;
+}
+
 export default function ChatMessageList({
   messages,
   currentUserId,
@@ -47,30 +55,106 @@ export default function ChatMessageList({
   hasMore,
   isLoadingMore,
 }: ChatMessageListProps) {
-  const bottomRef = useRef<HTMLDivElement>(null);
-  const prevLengthRef = useRef(messages.length);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const stickToBottomRef = useRef(true);
+  const didInitialScrollRef = useRef(false);
+  const lastMessageIdRef = useRef<string | null>(null);
 
   const groups = useMemo(() => groupMessagesByDate(messages), [messages]);
+  const lastMessageId = messages[messages.length - 1]?.id ?? null;
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'auto') => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const top = el.scrollHeight - el.clientHeight;
+    if (behavior === 'auto') {
+      el.scrollTop = top;
+    } else {
+      el.scrollTo({ top, behavior });
+    }
+  }, []);
+
+  const runScrollToBottom = useCallback(
+    (behavior: ScrollBehavior) => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          scrollToBottom(behavior);
+        });
+      });
+    },
+    [scrollToBottom],
+  );
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    stickToBottomRef.current = isNearBottom(el);
+  }, []);
 
   useEffect(() => {
-    const grew = messages.length > prevLengthRef.current;
-    prevLengthRef.current = messages.length;
-    if (grew || typingUserId) {
-      bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    if (messages.length === 0) {
+      didInitialScrollRef.current = false;
+      lastMessageIdRef.current = null;
+      return;
     }
-  }, [messages.length, typingUserId]);
+
+    const isFirstPaint = !didInitialScrollRef.current;
+    const lastMessageChanged = lastMessageId !== lastMessageIdRef.current;
+    lastMessageIdRef.current = lastMessageId;
+
+    if (isFirstPaint) {
+      didInitialScrollRef.current = true;
+      stickToBottomRef.current = true;
+      runScrollToBottom('auto');
+      return;
+    }
+
+    if ((lastMessageChanged || typingUserId) && stickToBottomRef.current) {
+      runScrollToBottom('smooth');
+    }
+  }, [messages.length, lastMessageId, typingUserId, runScrollToBottom]);
+
+  const handleLoadMoreClick = useCallback(async () => {
+    if (!onLoadMore || isLoadingMore) return;
+    const el = scrollRef.current;
+    const prevScrollHeight = el?.scrollHeight ?? 0;
+    const prevScrollTop = el?.scrollTop ?? 0;
+    stickToBottomRef.current = false;
+
+    await onLoadMore();
+
+    requestAnimationFrame(() => {
+      if (!el) return;
+      const heightAdded = el.scrollHeight - prevScrollHeight;
+      el.scrollTop = prevScrollTop + heightAdded;
+    });
+  }, [onLoadMore, isLoadingMore]);
 
   if (messages.length === 0 && !typingUserId) {
     return <ChatEmptyState otherPartyName={otherPartyName} />;
   }
 
   return (
-    <div className="flex-1 overflow-y-auto min-h-0 px-4 sm:px-5 py-5 space-y-4 bg-surface-50/80 dark:bg-zinc-900/40">
+    <div
+      ref={scrollRef}
+      data-lenis-prevent
+      className="flex-1 min-h-0 overflow-y-auto overscroll-y-contain px-4 sm:px-5 py-5 space-y-4 bg-surface-50/80 dark:bg-zinc-900/40"
+      role="log"
+      aria-live="polite"
+      aria-relevant="additions"
+    >
       {hasMore && onLoadMore && (
         <div className="flex justify-center">
           <button
             type="button"
-            onClick={onLoadMore}
+            onClick={handleLoadMoreClick}
             disabled={isLoadingMore}
             className="px-3 py-1.5 text-[12px] font-medium text-primary-600 dark:text-primary-400 bg-white dark:bg-zinc-800 rounded-full border border-ink-900/[0.06] dark:border-zinc-700 shadow-sm hover:bg-surface-50 disabled:opacity-50 transition-colors"
           >
@@ -114,15 +198,13 @@ export default function ChatMessageList({
           </motion.div>
         )}
       </AnimatePresence>
-
-      <div ref={bottomRef} aria-hidden />
     </div>
   );
 }
 
 function ChatEmptyState({ otherPartyName }: { otherPartyName: string }) {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center min-h-[200px] px-6 text-center bg-surface-50/80 dark:bg-zinc-900/40">
+    <div className="flex-1 min-h-0 flex flex-col items-center justify-center px-6 text-center bg-surface-50/80 dark:bg-zinc-900/40">
       <div className="w-14 h-14 rounded-2xl bg-primary-50 dark:bg-primary-950/40 flex items-center justify-center mb-4 ring-1 ring-primary-500/20">
         <ChatBubbleLeftRightIcon className="h-7 w-7 text-primary-600 dark:text-primary-400" />
       </div>

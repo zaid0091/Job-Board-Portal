@@ -107,6 +107,17 @@ class TestMessages:
         assert response.status_code == status.HTTP_200_OK
         assert len(response.data['results']) == 1
 
+    def test_send_message_via_rest(self, seeker_client, conversation):
+        url = reverse('chat:conversation-messages', kwargs={'pk': conversation.id})
+        response = seeker_client.post(
+            url,
+            {'text': 'Hello via REST'},
+            format='json',
+        )
+        assert response.status_code == status.HTTP_201_CREATED
+        assert response.data['text'] == 'Hello via REST'
+        assert Message.objects.filter(conversation=conversation).count() == 1
+
     def test_mark_read(self, employer_client, conversation, seeker_user):
         msg = create_message(conversation, seeker_user, 'Hi')
         url = reverse('chat:conversation-mark-read', kwargs={'pk': conversation.id})

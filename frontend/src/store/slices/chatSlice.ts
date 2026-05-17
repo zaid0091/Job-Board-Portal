@@ -41,9 +41,18 @@ export const fetchChatUnreadCount = createAsyncThunk(
 
 export const fetchMessageHistory = createAsyncThunk(
   'chat/fetchMessages',
-  async ({ conversationId, cursor }: { conversationId: string; cursor?: string }) => {
+  async ({
+    conversationId,
+    cursor,
+    merge,
+  }: {
+    conversationId: string;
+    cursor?: string;
+    merge?: boolean;
+  }) => {
     return {
       conversationId,
+      merge: Boolean(merge),
       ...(await chatAPI.getMessages(conversationId, cursor)),
     };
   },
@@ -108,6 +117,49 @@ const chatSlice = createSlice({
     setTypingUser: (state, action: PayloadAction<string | null>) => {
       state.typingUserId = action.payload;
     },
+    applyInboxUpdate: (
+      state,
+      action: PayloadAction<{ conversationId: string; message: ChatMessage }>,
+    ) => {
+      const { conversationId, message } = action.payload;
+      const preview =
+        message.text.length > 100 ? `${message.text.slice(0, 100)}…` : message.text;
+      const isActiveRoom = state.activeConversationId === conversationId;
+
+      if (isActiveRoom && !state.activeMessages.some((m) => m.id === message.id)) {
+        state.activeMessages.push(message);
+      }
+
+      if (!state.inbox?.results) {
+        if (!isActiveRoom) {
+          state.unreadCount += 1;
+        }
+        return;
+      }
+
+      const idx = state.inbox.results.findIndex((c) => c.id === conversationId);
+      if (idx < 0) {
+        if (!isActiveRoom) {
+          state.unreadCount += 1;
+        }
+        return;
+      }
+
+      const conv = state.inbox.results[idx];
+      const unread = isActiveRoom ? conv.unread_count : conv.unread_count + 1;
+      const updated = {
+        ...conv,
+        last_message_preview: preview,
+        last_message_at: message.timestamp,
+        unread_count: unread,
+      };
+      state.inbox.results.splice(idx, 1);
+      state.inbox.results.unshift(updated);
+
+      if (!isActiveRoom) {
+        state.unreadCount += 1;
+      }
+    },
     clearChatState: () => initialState,
   },
   extraReducers: (builder) => {
@@ -130,16 +182,29 @@ const chatSlice = createSlice({
       })
       .addCase(fetchMessageHistory.fulfilled, (state, action) => {
         state.isLoadingMessages = false;
-        const { conversationId, results, has_more, next_cursor } = action.payload;
-        if (state.activeConversationId === conversationId) {
-          if (action.meta.arg.cursor) {
-            state.activeMessages = [...results, ...state.activeMessages];
-          } else {
-            state.activeMessages = results;
+        const { conversationId, results, has_more, next_cursor, merge } = action.payload;
+        if (state.activeConversationId !== conversationId) return;
+
+        if (action.meta.arg.cursor) {
+          const existing = new Set(state.activeMessages.map((m) => m.id));
+          const toPrepend = results.filter((m) => !existing.has(m.id));
+          state.activeMessages = [...toPrepend, ...state.activeMessages];
+        } else if (merge) {
+          const existing = new Set(state.activeMessages.map((m) => m.id));
+          for (const msg of results) {
+            if (!existing.has(msg.id)) {
+              state.activeMessages.push(msg);
+            }
           }
-          state.hasMoreMessages = has_more;
-          state.nextCursor = next_cursor;
+          state.activeMessages.sort(
+            (a, b) =>
+              new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+          );
+        } else {
+          state.activeMessages = results;
         }
+        state.hasMoreMessages = has_more;
+        state.nextCursor = next_cursor;
       })
       .addCase(fetchMessageHistory.rejected, (state) => {
         state.isLoadingMessages = false;
@@ -161,6 +226,7 @@ export const {
   replaceOptimisticMessage,
   prependMessages,
   setTypingUser,
+  applyInboxUpdate,
   clearChatState,
 } = chatSlice.actions;
 
