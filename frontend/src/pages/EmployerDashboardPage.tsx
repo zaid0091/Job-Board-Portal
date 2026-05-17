@@ -154,7 +154,7 @@ export default function EmployerDashboardPage() {
           
           <ScrollReveal delay={0.2}>
             <div className="flex gap-4">
-              <Link to="/employer/applications" className="px-6 py-3 bg-zinc-100 dark:bg-zinc-800 text-ink-700 dark:text-white font-bold uppercase tracking-widest text-[11px] rounded-xl transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700">
+              <Link to="/messages" className="px-6 py-3 bg-zinc-100 dark:bg-zinc-800 text-ink-700 dark:text-white font-bold uppercase tracking-widest text-[11px] rounded-xl transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700">
                 Inbox
               </Link>
               <Link to="/employer/jobs/create" className="group flex items-center gap-3 px-8 py-3 bg-primary-600 hover:bg-primary-500 text-white font-bold uppercase tracking-widest text-[11px] rounded-xl transition-all shadow-xl shadow-primary-500/20">

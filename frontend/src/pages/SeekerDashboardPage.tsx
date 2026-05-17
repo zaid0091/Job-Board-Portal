@@ -317,21 +317,6 @@ export default function SeekerDashboardPage() {
                 )}
               </PremiumCard>
             </ScrollReveal>
-
-            <ScrollReveal delay={0.7}>
-              <PremiumCard className="p-8 border-white/5 bg-gradient-to-br from-primary-600 to-primary-800 text-white overflow-hidden relative group">
-                <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-125 transition-transform">
-                  <SparklesIcon className="w-32 h-32" />
-                </div>
-                <h3 className="text-xl font-bold mb-2 relative z-10">Premium Member</h3>
-                <p className="text-primary-100 text-[13px] mb-6 relative z-10 leading-relaxed">
-                  Unlock exclusive data insights, direct employer messaging, and priority application status.
-                </p>
-                <button className="w-full py-3 bg-white text-primary-700 text-[12px] font-bold uppercase tracking-widest rounded-xl hover:bg-primary-50 transition-colors relative z-10">
-                  Upgrade Now
-                </button>
-              </PremiumCard>
-            </ScrollReveal>
           </div>
         </div>
       </div>
