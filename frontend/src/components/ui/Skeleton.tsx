@@ -30,16 +30,19 @@ export function SkeletonBadge({ className = 'h-5 w-16' }: SkeletonProps) {
 /* ── Job Card skeleton ── */
 export function JobCardSkeleton() {
   return (
-    <div className="rounded-xl p-5 bg-card" style={{ boxShadow: 'var(--card-shadow)' }}>
-      <div className="flex items-start gap-3.5">
-        <Skeleton className="h-10 w-10 rounded-lg flex-shrink-0" />
-        <div className="flex-1 min-w-0 space-y-2">
+    <div
+      className="overflow-hidden rounded-2xl border border-ink-900/[0.06] bg-card p-5 sm:p-6 dark:border-white/[0.08]"
+      style={{ boxShadow: 'var(--card-shadow)' }}
+    >
+      <div className="flex items-start gap-4">
+        <Skeleton className="h-12 w-12 flex-shrink-0 rounded-xl" />
+        <div className="min-w-0 flex-1 space-y-2.5">
           <Skeleton className="h-4 w-3/5" />
           <Skeleton className="h-3.5 w-2/5" />
         </div>
-        <Skeleton className="hidden sm:block h-5 w-20 rounded-md" />
+        <Skeleton className="hidden h-6 w-20 rounded-lg sm:block" />
       </div>
-      <div className="mt-3.5 flex flex-wrap gap-3">
+      <div className="mt-4 flex flex-wrap gap-3 border-t border-ink-900/[0.04] pt-4 dark:border-white/[0.06]">
         <Skeleton className="h-3.5 w-24" />
         <Skeleton className="h-3.5 w-20" />
         <Skeleton className="h-3.5 w-28" />

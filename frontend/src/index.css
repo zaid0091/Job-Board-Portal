@@ -57,8 +57,24 @@ html.theme-transition,
 html.theme-transition *,
 html.theme-transition *::before,
 html.theme-transition *::after {
-  transition: background-color 350ms ease, color 250ms ease, border-color 350ms ease,
-    box-shadow 350ms ease, fill 300ms ease, stroke 300ms ease, opacity 300ms ease !important;
+  transition-property: background-color, color, border-color, box-shadow, fill, stroke, opacity,
+    outline-color, backdrop-filter, -webkit-backdrop-filter, text-decoration-color !important;
+  transition-duration: 500ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-delay: 0ms !important;
+}
+
+html.theme-transition .theme-crossfade-light,
+html.theme-transition .theme-crossfade-dark {
+  transition-property: opacity !important;
+  transition-duration: 500ms !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 500ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @layer base {
@@ -306,8 +322,47 @@ html.theme-transition *::after {
 }
 
 @layer utilities {
+  .bg-page {
+    background-color: rgb(var(--bg-page));
+  }
   .bg-card {
     background-color: rgb(var(--bg-card));
+  }
+
+  /* Frosted navbar bar (light = glass, not solid white) */
+  .nav-glass {
+    border-bottom: 1px solid rgb(var(--ink-900) / 0.06);
+    background-color: rgb(255 255 255 / 0.4);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.5) inset;
+  }
+
+  .dark .nav-glass {
+    border-bottom-color: rgb(255 255 255 / 0.06);
+    background-color: rgb(9 9 11 / 0.5);
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.04) inset;
+  }
+
+  /* Home dark hero: neutral dark glass (avoids purple wash from light frosted + violet hero) */
+  .nav-glass-dark {
+    border-bottom: 1px solid rgb(255 255 255 / 0.08);
+    background-color: rgb(9 9 11 / 0.45);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    backdrop-filter: blur(20px) saturate(140%);
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.06) inset;
+  }
+
+  @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+    .nav-glass {
+      background-color: rgb(255 255 255 / 0.92);
+    }
+    .dark .nav-glass {
+      background-color: rgb(9 9 11 / 0.92);
+    }
+    .nav-glass-dark {
+      background-color: rgb(9 9 11 / 0.88);
+    }
   }
   .text-micro {
     font-size: 0.625rem;

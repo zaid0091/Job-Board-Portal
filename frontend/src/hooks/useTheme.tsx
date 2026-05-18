@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { flushSync } from 'react-dom';
 
 type Theme = 'light' | 'dark';
 
@@ -9,33 +10,49 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
+const THEME_TRANSITION_MS = 500;
+
 function getInitialTheme(): Theme {
   const stored = localStorage.getItem('theme');
   if (stored === 'dark' || stored === 'light') return stored;
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
+function applyThemeClass(theme: Theme) {
+  document.documentElement.classList.toggle('dark', theme === 'dark');
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   useEffect(() => {
-    const root = document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    applyThemeClass(theme);
   }, [theme]);
 
   const toggleTheme = () => {
     const root = document.documentElement;
-    root.classList.add('theme-transition');
-    setTheme((prev) => {
-      const next = prev === 'dark' ? 'light' : 'dark';
+    const next: Theme = theme === 'dark' ? 'light' : 'dark';
+
+    const apply = () => {
+      root.classList.add('theme-transition');
+      applyThemeClass(next);
       localStorage.setItem('theme', next);
-      return next;
-    });
-    setTimeout(() => root.classList.remove('theme-transition'), 400);
+      flushSync(() => setTheme(next));
+    };
+
+    const cleanup = () => {
+      window.setTimeout(() => {
+        root.classList.remove('theme-transition');
+      }, THEME_TRANSITION_MS);
+    };
+
+    if (typeof document.startViewTransition === 'function') {
+      const transition = document.startViewTransition(apply);
+      transition.finished.then(cleanup).catch(cleanup);
+    } else {
+      apply();
+      cleanup();
+    }
   };
 
   return (

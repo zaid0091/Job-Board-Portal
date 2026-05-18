@@ -1,7 +1,13 @@
 ﻿import { useEffect, useState, useRef } from 'react';
 import { useForm } from 'react-hook-form';
-import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+import {
+  MagnifyingGlassIcon,
+  AdjustmentsHorizontalIcon,
+  ChevronDownIcon,
+  MapPinIcon,
+} from '@heroicons/react/24/outline';
 import { useDebounce } from '@/hooks';
+import SectionBadge from '@/components/ui/SectionBadge';
 import type { JobFilters } from '@/types';
 
 interface DropdownOption {
@@ -36,25 +42,34 @@ function CustomSelect({ options, value, onChange, placeholder }: CustomSelectPro
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="input-field w-full flex items-center justify-between gap-2 text-left"
+        className="input-field flex w-full items-center justify-between gap-2 rounded-xl border-ink-900/[0.08] bg-card/80 text-left backdrop-blur-sm transition-shadow focus:ring-2 focus:ring-primary-500/20 dark:border-white/[0.08]"
       >
-        <span className={selected ? 'text-ink-800' : 'text-ink-400'}>{selected ? selected.label : placeholder}</span>
-        <ChevronDownIcon className={`h-3.5 w-3.5 text-ink-300 transition-transform duration-150 ${open ? 'rotate-180' : ''}`} />
+        <span className={selected ? 'font-medium text-ink-800 dark:text-zinc-200' : 'text-ink-400'}>
+          {selected ? selected.label : placeholder}
+        </span>
+        <ChevronDownIcon
+          className={`h-4 w-4 text-ink-300 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        />
       </button>
       {open && (
         <div
-          className="absolute z-50 mt-1 w-full bg-card rounded-xl border border-ink-900/[0.06] py-1 animate-scale-in origin-top max-h-60 overflow-y-auto"
+          data-lenis-prevent
+          className="animate-scale-in absolute z-50 mt-1.5 max-h-60 w-full origin-top overflow-y-auto overscroll-y-contain rounded-xl border border-ink-900/[0.08] bg-card/95 py-1 shadow-xl backdrop-blur-xl dark:border-white/[0.08]"
           style={{ boxShadow: 'var(--card-shadow-lg)' }}
+          onWheel={(e) => e.stopPropagation()}
         >
           {options.map((opt) => (
             <button
               key={opt.value}
               type="button"
-              onClick={() => { onChange(opt.value); setOpen(false); }}
-              className={`w-full text-left px-3 py-2 text-[13px] transition-colors ${
+              onClick={() => {
+                onChange(opt.value);
+                setOpen(false);
+              }}
+              className={`w-full px-3.5 py-2.5 text-left text-[13px] transition-colors ${
                 opt.value === value
-                  ? 'bg-primary-50 dark:bg-primary-950/30 text-primary-600 font-medium'
-                  : 'text-ink-600 hover:bg-surface-50 hover:text-ink-800'
+                  ? 'bg-primary-50 font-semibold text-primary-700 dark:bg-primary-950/40 dark:text-primary-300'
+                  : 'text-ink-600 hover:bg-surface-50 hover:text-ink-900 dark:text-zinc-300 dark:hover:bg-zinc-800'
               }`}
             >
               {opt.label}
@@ -97,34 +112,34 @@ export default function JobFiltersComponent({ filters, onFilterChange }: JobFilt
   };
 
   return (
-    <div className="bg-card rounded-xl p-5 space-y-4 mb-6" style={{ boxShadow: 'var(--card-shadow)' }}>
-      {/* Search */}
-      <div className="relative">
-        <MagnifyingGlassIcon className="absolute left-3.5 top-1/2 transform -translate-y-1/2 h-4 w-4 text-ink-300" />
+    <div
+      className="overflow-visible rounded-2xl border border-ink-900/[0.06] bg-card/90 p-5 shadow-sm backdrop-blur-xl dark:border-white/[0.08]"
+      style={{ boxShadow: 'var(--card-shadow)' }}
+    >
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <SectionBadge label="Refine" />
+        <AdjustmentsHorizontalIcon className="h-5 w-5 text-primary-500/60" />
+      </div>
+
+      <div className="relative mb-5">
+        <MagnifyingGlassIcon className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-primary-500/50" />
         <input
           type="text"
-          placeholder="Search by title, skills, location, or company..."
-          className="input-field pl-10"
+          placeholder="Title, skills, company..."
+          className="input-field rounded-xl border-ink-900/[0.08] bg-card/80 pl-10 backdrop-blur-sm transition-shadow focus:border-primary-300 focus:ring-2 focus:ring-primary-500/15 dark:border-white/[0.08]"
           {...register('search')}
         />
       </div>
 
-      {/* Filter Row */}
-      <div className="flex items-center gap-2 text-[13px] text-ink-400">
-        <AdjustmentsHorizontalIcon className="h-4 w-4 text-ink-300" />
-        <span className="font-medium text-ink-600">Filters</span>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-        {/* Job Type */}
+      <div className="space-y-3">
         <CustomSelect
-          placeholder="All Job Types"
+          placeholder="Job type"
           value={filters.job_type || ''}
           onChange={(v) => handleSelectChange('job_type', v)}
           options={[
-            { value: '', label: 'All Job Types' },
-            { value: 'FULL_TIME', label: 'Full Time' },
-            { value: 'PART_TIME', label: 'Part Time' },
+            { value: '', label: 'All job types' },
+            { value: 'FULL_TIME', label: 'Full time' },
+            { value: 'PART_TIME', label: 'Part time' },
             { value: 'CONTRACT', label: 'Contract' },
             { value: 'INTERNSHIP', label: 'Internship' },
             { value: 'FREELANCE', label: 'Freelance' },
@@ -132,56 +147,73 @@ export default function JobFiltersComponent({ filters, onFilterChange }: JobFilt
           ]}
         />
 
-        {/* Experience Level */}
         <CustomSelect
-          placeholder="All Levels"
+          placeholder="Experience"
           value={filters.experience_level || ''}
           onChange={(v) => handleSelectChange('experience_level', v)}
           options={[
-            { value: '', label: 'All Levels' },
-            { value: 'ENTRY', label: 'Entry Level' },
-            { value: 'MID', label: 'Mid Level' },
-            { value: 'SENIOR', label: 'Senior Level' },
-            { value: 'LEAD', label: 'Lead / Manager' },
+            { value: '', label: 'All levels' },
+            { value: 'ENTRY', label: 'Entry level' },
+            { value: 'MID', label: 'Mid level' },
+            { value: 'SENIOR', label: 'Senior level' },
+            { value: 'LEAD', label: 'Lead / manager' },
             { value: 'EXECUTIVE', label: 'Executive' },
           ]}
         />
 
-        {/* Location */}
-        <input
-          type="text"
-          placeholder="Location"
-          className="input-field"
-          {...register('location')}
-          onBlur={(e) => handleSelectChange('location', e.target.value)}
-        />
+        <div className="relative">
+          <MapPinIcon className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-300" />
+          <input
+            type="text"
+            placeholder="City or region"
+            className="input-field rounded-xl border-ink-900/[0.08] bg-card/80 pl-10 backdrop-blur-sm dark:border-white/[0.08]"
+            {...register('location')}
+            onBlur={(e) => handleSelectChange('location', e.target.value)}
+          />
+        </div>
 
-        {/* Sort */}
         <CustomSelect
-          placeholder="Sort By"
+          placeholder="Sort by"
           value={filters.ordering || ''}
           onChange={(v) => handleSelectChange('ordering', v)}
           options={[
-            { value: '', label: 'Sort By' },
-            { value: '-date', label: 'Newest First' },
-            { value: 'date', label: 'Oldest First' },
-            { value: '-salary', label: 'Highest Salary' },
-            { value: 'salary', label: 'Lowest Salary' },
-            { value: '-views', label: 'Most Viewed' },
+            { value: '', label: 'Default' },
+            { value: '-date', label: 'Newest first' },
+            { value: 'date', label: 'Oldest first' },
+            { value: '-salary', label: 'Highest salary' },
+            { value: 'salary', label: 'Lowest salary' },
+            { value: '-views', label: 'Most viewed' },
           ]}
         />
       </div>
 
-      {/* Remote toggle */}
-      <label className="inline-flex items-center gap-2 cursor-pointer select-none">
-        <input
-          type="checkbox"
-          checked={!!filters.is_remote}
-          onChange={(e) => handleCheckboxChange('is_remote', e.target.checked)}
-          className="h-3.5 w-3.5 rounded border-ink-200 text-primary-600 focus:ring-primary-500 transition-colors"
-        />
-        <span className="text-[13px] font-medium text-ink-600">Remote only</span>
-      </label>
+      <div className="mt-5 border-t border-ink-900/[0.04] pt-5 dark:border-white/[0.06]">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={!!filters.is_remote}
+          onClick={() => handleCheckboxChange('is_remote', !filters.is_remote)}
+          className={`flex w-full items-center justify-between gap-3 rounded-xl border px-4 py-3 text-[13px] font-semibold transition-all ${
+            filters.is_remote
+              ? 'border-primary-300 bg-primary-50 text-primary-800 shadow-sm dark:border-primary-700/50 dark:bg-primary-950/40 dark:text-primary-200'
+              : 'border-ink-900/[0.06] bg-surface-50/80 text-ink-600 hover:border-primary-200 hover:bg-primary-50/50 dark:border-white/[0.08] dark:bg-zinc-800/50 dark:text-zinc-300'
+          }`}
+        >
+          <span className="min-w-0 text-left">Remote only</span>
+          <span
+            aria-hidden
+            className={`relative inline-flex h-5 w-10 flex-shrink-0 overflow-hidden rounded-full p-0.5 transition-colors ${
+              filters.is_remote ? 'bg-primary-600' : 'bg-ink-200 dark:bg-zinc-600'
+            }`}
+          >
+            <span
+              className={`block h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out ${
+                filters.is_remote ? 'translate-x-5' : 'translate-x-0'
+              }`}
+            />
+          </span>
+        </button>
+      </div>
     </div>
   );
 }

@@ -18,7 +18,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const { scrolled, pastHero } = useNavbarScrollState();
-  const { onHeroOverlay, showNavBackground } = useNavbarAppearance(scrolled, pastHero);
+  const { onHeroOverlay, showNavBackground, navGlass } = useNavbarAppearance(scrolled, pastHero);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { employerProfile, seekerProfile } = useAppSelector((state) => state.profile);
   const dispatch = useAppDispatch();
@@ -87,9 +87,7 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        showNavBackground
-          ? 'bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl border-b border-ink-900/[0.06] dark:border-ink-300/[0.06] shadow-sm'
-          : 'bg-transparent'
+        navGlass === 'dark' ? 'nav-glass-dark' : navGlass === 'light' ? 'nav-glass' : 'bg-transparent'
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -116,8 +114,12 @@ export default function Navbar() {
 
           {/* Center Nav */}
           <div
-            className={`hidden md:flex items-center gap-0.5 rounded-xl p-1 border transition-colors duration-300 ${
-              onHeroOverlay ? 'bg-white/10 border-white/10' : 'bg-surface-50/80 border-ink-900/[0.04] dark:bg-zinc-900/50 dark:border-white/[0.08]'
+            className={`hidden md:flex items-center gap-0.5 rounded-xl border p-1 transition-colors duration-300 ${
+              onHeroOverlay
+                ? 'border-white/10 bg-white/10'
+                : showNavBackground
+                  ? 'border-ink-900/[0.06] bg-white/30 backdrop-blur-sm dark:border-white/[0.08] dark:bg-zinc-900/30'
+                  : 'border-ink-900/[0.04] bg-surface-50/80 dark:border-white/[0.08] dark:bg-zinc-900/50'
             }`}
           >
             {navLinks.map((link) => (
@@ -284,7 +286,7 @@ export default function Navbar() {
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="md:hidden premium-sidebar-scroll overflow-hidden bg-white/95 dark:bg-zinc-950/95 backdrop-blur-xl border-t border-ink-900/[0.06] px-4"
+          className="premium-sidebar-scroll md:hidden overflow-hidden border-t border-ink-900/[0.06] bg-white/50 px-4 backdrop-blur-2xl backdrop-saturate-150 dark:border-white/[0.06] dark:bg-zinc-950/50"
         >
           <motion.div
             initial={{ opacity: 0, y: -8 }}

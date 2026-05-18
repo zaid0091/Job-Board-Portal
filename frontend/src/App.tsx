@@ -24,6 +24,8 @@ function App() {
       orientation: 'vertical',
       gestureOrientation: 'vertical',
       smoothWheel: true,
+      prevent: (node) =>
+        node instanceof Element && node.closest('[data-lenis-prevent]') !== null,
     });
     lenisRef.current = lenis;
 
