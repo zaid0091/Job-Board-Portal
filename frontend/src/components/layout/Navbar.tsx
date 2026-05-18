@@ -86,8 +86,8 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        navGlass === 'dark' ? 'nav-glass-dark' : navGlass === 'light' ? 'nav-glass' : 'bg-transparent'
+      className={`fixed top-0 left-0 right-0 z-50 border-0 shadow-none transition-[background-color,backdrop-filter,-webkit-backdrop-filter] duration-300 ${
+        navGlass === 'dark' ? 'nav-glass-dark' : navGlass === 'light' ? 'nav-glass' : 'bg-transparent backdrop-blur-none'
       }`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6">

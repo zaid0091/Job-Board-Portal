@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCurrentUser, logout } from '@/store/slices/authSlice';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import AppRoutes from './routes';
+import { LENIS_SCROLL_EVENT } from '@/hooks/useNavbarScrollState';
 import Lenis from 'lenis';
 // import { motion, AnimatePresence } from 'framer-motion';
 
@@ -28,6 +29,16 @@ function App() {
         node instanceof Element && node.closest('[data-lenis-prevent]') !== null,
     });
     lenisRef.current = lenis;
+
+    const emitLenisScroll = (y: number) => {
+      window.dispatchEvent(new CustomEvent(LENIS_SCROLL_EVENT, { detail: { y } }));
+    };
+
+    lenis.on('scroll', ({ scroll }: { scroll: number }) => {
+      emitLenisScroll(scroll);
+    });
+
+    emitLenisScroll(0);
 
     function raf(time: number) {
       lenis.raf(time);
