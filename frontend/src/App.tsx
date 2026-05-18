@@ -59,22 +59,31 @@ function App() {
     const authPages = ['/login', '/register', '/password/reset/request', '/password/reset/confirm'];
     const isAuthPage = authPages.includes(location.pathname);
 
-    // Initialize auth state on app load or after logout
+    if (isAuthenticated || isAuthPage) {
+      setAuthInitialized(true);
+      return;
+    }
+
+    let cancelled = false;
+
     const initializeAuth = async () => {
-      if (!isAuthenticated && !isAuthPage) {
-        try {
-          await dispatch(fetchCurrentUser()).unwrap();
-        } catch (error) {
-          // User is not authenticated - ensure state is cleared
-          dispatch(logout());
-          console.log('User not authenticated:', error);
+      try {
+        await dispatch(fetchCurrentUser()).unwrap();
+      } catch {
+        dispatch(logout());
+      } finally {
+        if (!cancelled) {
+          setAuthInitialized(true);
         }
       }
-      setAuthInitialized(true);
     };
 
     initializeAuth();
-  }, [dispatch, location.pathname]); // Re-run on route change
+
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch, isAuthenticated, location.pathname]);
 
   return <AppRoutes authInitialized={authInitialized} />;
 }

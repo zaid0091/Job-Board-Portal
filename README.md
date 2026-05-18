@@ -105,7 +105,7 @@ docker-compose up --build
 
 The project follows a clean separation of concerns:
 - **Backend:** Modular Django apps (`users`, `jobs`, `applications`, `profiles`, `notifications`, `analytics`).
-- **Frontend:** Atomic component structure with Redux for global state and RTK Query for API interactions.
+- **Frontend:** Atomic component structure with Redux Toolkit for global state and axios for API interactions.
 
 ## 📄 License
 

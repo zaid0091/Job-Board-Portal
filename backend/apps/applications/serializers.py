@@ -6,6 +6,10 @@ from .models import Application, ApplicationStatusLog, CoverLetterDraft
 from .services.cover_letter import audit_application_cover_letter
 
 
+def _applicant_display_name(application):
+    return application.applicant.get_full_name()
+
+
 class ApplicationListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for application lists."""
     job_title = serializers.CharField(source='job.title', read_only=True)
@@ -23,7 +27,7 @@ class ApplicationListSerializer(serializers.ModelSerializer):
         ]
 
     def get_applicant_name(self, obj):
-        return obj.applicant.get_full_name()
+        return _applicant_display_name(obj)
 
 
 class ApplicationDetailSerializer(serializers.ModelSerializer):
@@ -43,7 +47,7 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
         ]
 
     def get_applicant_name(self, obj):
-        return obj.applicant.get_full_name()
+        return _applicant_display_name(obj)
 
     def get_status_logs(self, obj):
         logs = obj.status_logs.all()[:20]

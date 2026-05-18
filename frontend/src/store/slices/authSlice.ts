@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authAPI } from '@/api';
 import type { User, LoginCredentials, RegisterData } from '@/types';
+import { getApiErrorMessage } from '@/utils/getApiErrorMessage';
 
 interface AuthState {
   user: User | null;
@@ -23,8 +24,7 @@ export const loginUser = createAsyncThunk(
       const response = await authAPI.login(credentials);
       return response;
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { detail?: string } } };
-      return rejectWithValue(err.response?.data?.detail || 'Invalid credentials');
+      return rejectWithValue(getApiErrorMessage(error, 'Invalid credentials'));
     }
   },
 );
@@ -36,13 +36,7 @@ export const registerUser = createAsyncThunk(
       const response = await authAPI.register(data);
       return response;
     } catch (error: unknown) {
-      const err = error as { response?: { data?: Record<string, string[]> } };
-      const errorData = err.response?.data;
-      if (errorData) {
-        const firstError = Object.values(errorData)[0];
-        return rejectWithValue(Array.isArray(firstError) ? firstError[0] : 'Registration failed');
-      }
-      return rejectWithValue('Registration failed');
+      return rejectWithValue(getApiErrorMessage(error, 'Registration failed'));
     }
   },
 );
@@ -54,8 +48,7 @@ export const googleLoginUser = createAsyncThunk(
       const response = await authAPI.googleLogin(token);
       return response;
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { error?: string } } };
-      return rejectWithValue(err.response?.data?.error || 'Google login failed');
+      return rejectWithValue(getApiErrorMessage(error, 'Google login failed'));
     }
   },
 );
@@ -66,27 +59,19 @@ export const fetchCurrentUser = createAsyncThunk(
     try {
       return await authAPI.getCurrentUser();
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { detail?: string } } };
-      return rejectWithValue(err.response?.data?.detail || 'Failed to fetch user');
+      return rejectWithValue(getApiErrorMessage(error, 'Failed to fetch user'));
     }
   },
 );
 
-export const logoutUser = createAsyncThunk(
-  'auth/logout',
-  async (_, { rejectWithValue }) => {
-    try {
-      await authAPI.logout();
-      // Return success to trigger fulfilled case
-      return { success: true };
-    } catch (error) {
-      // Logout API failure shouldn't prevent local logout
-      console.error('Logout API error:', error);
-      // Still clear local state even if API fails
-      return rejectWithValue('Logout failed');
-    }
-  },
-);
+export const logoutUser = createAsyncThunk('auth/logout', async () => {
+  try {
+    await authAPI.logout();
+  } catch (error) {
+    console.error('Logout API error:', error);
+  }
+  return { success: true };
+});
 
 const authSlice = createSlice({
   name: 'auth',

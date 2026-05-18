@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import ScrollScale from '@/components/ui/ScrollScale';
 import PremiumCard from '@/components/ui/PremiumCard';
-import { HeroGeometric } from '@/components/ui/shape-landing-hero';
+import MarketingHero from '@/components/marketing/MarketingHero';
 import LineReveal from '@/components/ui/LineReveal';
 
 const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string;
@@ -42,36 +42,18 @@ export default function ContactPage() {
         canonical="/contact" 
       />
 
-      {/* --- Hero Section (geometric landing — same shell as About) --- */}
-      <HeroGeometric
-        className="min-h-0 pt-32 pb-20 sm:pt-48 sm:pb-32 -mt-14 [mask-image:linear-gradient(to_bottom,black_calc(100%-80px),transparent_100%)]"
-        contentClassName="px-4 sm:px-6"
-      >
-        <div className="relative max-w-5xl mx-auto text-center">
-          <ScrollReveal direction="up" duration={1} distance={20}>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50/80 border border-primary-200/60 backdrop-blur-sm mb-8 dark:bg-white/[0.06] dark:border-white/[0.08]">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary-500 dark:bg-primary-400 animate-pulse" />
-              <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-primary-700 dark:text-white/60">Connect</span>
-            </div>
-          </ScrollReveal>
+      <MarketingHero
+        badge="Connect"
+        title={
+          <>
+            Let&apos;s build the future <br />
+            <span className="text-primary-600 dark:text-primary-400">of hiring together</span>
+          </>
+        }
+        description="Have a question, feedback, or partnership inquiry? Reach out and we&apos;ll get back to you within 24 hours."
+      />
 
-          <ScrollReveal direction="up" delay={0.2} duration={1}>
-            <h1 className="text-display-sm sm:text-display lg:text-display-lg text-ink-900 dark:text-white max-w-4xl mx-auto leading-[1.1] font-extrabold tracking-tighter">
-              Let&apos;s build the future <br />
-              <span className="text-primary-600 dark:text-primary-400">of hiring together</span>
-            </h1>
-          </ScrollReveal>
-
-          <ScrollReveal direction="up" delay={0.4} duration={1}>
-            <p className="mt-8 text-body-lg text-ink-600 dark:text-white/50 max-w-2xl mx-auto leading-relaxed">
-              Have a question, feedback, or partnership inquiry? Reach out and we&apos;ll
-              get back to you within 24 hours.
-            </p>
-          </ScrollReveal>
-        </div>
-      </HeroGeometric>
-
-      {/* --- Contact Info Grid --- */}
+    {/* --- Contact Info Grid --- */}
       <section className="py-24 sm:py-32">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="grid md:grid-cols-3 gap-8">

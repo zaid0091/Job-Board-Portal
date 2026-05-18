@@ -9,29 +9,30 @@ import { Bars2Icon, XMarkIcon, BellIcon, ChatBubbleLeftRightIcon } from '@heroic
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ui/ThemeToggle';
-import { useTheme } from '@/hooks/useTheme';
+import { UserRole } from '@/constants/roles';
+import { useNavbarScrollState } from '@/hooks/useNavbarScrollState';
+import { useNavbarAppearance } from '@/hooks/useNavbarAppearance';
 // import Logo from '@/components/ui/Logo';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  const [pastHero, setPastHero] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const { scrolled, pastHero } = useNavbarScrollState();
+  const { onHeroOverlay, showNavBackground } = useNavbarAppearance(scrolled, pastHero);
   const { user, isAuthenticated } = useAppSelector((state) => state.auth);
   const { employerProfile, seekerProfile } = useAppSelector((state) => state.profile);
   const dispatch = useAppDispatch();
   const location = useLocation();
-  const { theme } = useTheme();
 
-  const avatarUrl = user?.role === 'EMPLOYER' 
-    ? employerProfile?.company_logo 
+  const avatarUrl = user?.role === UserRole.EMPLOYER
+    ? employerProfile?.company_logo
     : seekerProfile?.avatar;
 
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role === 'SEEKER' && !seekerProfile) {
+      if (user.role === UserRole.SEEKER && !seekerProfile) {
         dispatch(fetchSeekerProfile());
-      } else if (user.role === 'EMPLOYER' && !employerProfile) {
+      } else if (user.role === UserRole.EMPLOYER && !employerProfile) {
         dispatch(fetchEmployerProfile());
       }
     }
@@ -39,15 +40,6 @@ export default function Navbar() {
 
   const { unreadCount } = useAppSelector((state) => state.notifications);
   const chatUnreadCount = useAppSelector((state) => state.chat.unreadCount);
-
-  useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 4);
-      setPastHero(window.scrollY > window.innerHeight * 0.7);
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -75,29 +67,15 @@ export default function Navbar() {
   };
 
   const isActive = (match: string) => location.pathname.startsWith(match);
-  const isHome = location.pathname === '/';
-  const isAbout = location.pathname === '/about';
-  const isContact = location.pathname === '/contact';
-  const hasTransparentHero = isHome || isAbout || isContact;
-  const onHero = hasTransparentHero && !pastHero;
-  /** Light geometric heroes (About/Contact): ink nav. Dark heroes: white overlay nav. */
-  const onLightHero = onHero && (isAbout || isContact) && theme === 'light';
-  const onHeroOverlay = onHero && !onLightHero;
-  /** Transparent at top on light heroes; frosted blur after scroll. */
-  const lightHeroFrostedBar = onLightHero && scrolled;
-  const showNavBackground =
-    (scrolled && !hasTransparentHero) ||
-    pastHero ||
-    lightHeroFrostedBar;
 
   const navLinks = [
     { to: '/jobs', label: 'Jobs', match: '/jobs' },
     { to: '/about', label: 'About', match: '/about' },
     { to: '/contact', label: 'Contact', match: '/contact' },
-    ...(isAuthenticated && user?.role === 'EMPLOYER'
+    ...(isAuthenticated && user?.role === UserRole.EMPLOYER
       ? [{ to: '/employer/dashboard', label: 'Dashboard', match: '/employer' }]
       : []),
-      ...(isAuthenticated && user?.role === 'SEEKER'
+      ...(isAuthenticated && user?.role === UserRole.SEEKER
         ? [
             { to: '/seeker/dashboard', label: 'Dashboard', match: '/seeker/dashboard' },
             { to: '/seeker/applications', label: 'Applications', match: '/seeker/applications' },
@@ -147,9 +125,13 @@ export default function Navbar() {
                 key={link.to}
                 to={link.to}
                 className={`relative overflow-hidden px-3.5 py-1.5 text-[13px] font-medium rounded-lg transition-all duration-200 ${
-                  onHeroOverlay
-                    ? 'group border-0 text-white hover:shadow-[0_0_16px_rgba(255,255,255,0.08)] hover:scale-[1.05] active:scale-[0.97]'
-                    : 'group border-0 text-ink-700 dark:text-zinc-200 hover:shadow-sm hover:scale-[1.05] active:scale-[0.97]'
+                  isActive(link.match)
+                    ? onHeroOverlay
+                      ? 'bg-white/15 text-white'
+                      : 'bg-primary-50 text-primary-700 dark:bg-primary-900/25 dark:text-primary-400'
+                    : onHeroOverlay
+                      ? 'group border-0 text-white hover:shadow-[0_0_16px_rgba(255,255,255,0.08)] hover:scale-[1.05] active:scale-[0.97]'
+                      : 'group border-0 text-ink-700 dark:text-zinc-200 hover:shadow-sm hover:scale-[1.05] active:scale-[0.97]'
                 }`}
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
@@ -237,7 +219,7 @@ export default function Navbar() {
                         <p className="text-[11px] text-ink-400 truncate">{user?.email}</p>
                       </div>
                       <Link
-                        to={user?.role === 'EMPLOYER' ? '/employer/profile' : '/seeker/profile'}
+                        to={user?.role === UserRole.EMPLOYER ? '/employer/profile' : '/seeker/profile'}
                         className="block px-3 py-2 text-[13px] text-ink-700 hover:bg-surface-50 dark:hover:bg-zinc-800 transition-colors"
                       >
                         Profile
@@ -363,7 +345,7 @@ export default function Navbar() {
                   )}
                 </Link>
                 <Link
-                  to={user?.role === 'EMPLOYER' ? '/employer/profile' : '/seeker/profile'}
+                  to={user?.role === UserRole.EMPLOYER ? '/employer/profile' : '/seeker/profile'}
                   className="px-3 py-2 rounded-lg text-[14px] text-ink-700 hover:bg-surface-50 dark:text-zinc-300 dark:hover:bg-zinc-800 transition-colors"
                 >
                   Profile

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { jobsAPI } from '@/api';
 import type { JobListItem, JobDetail, JobCategory, JobFilters, PaginatedResponse } from '@/types';
+import { getApiErrorMessage } from '@/utils/getApiErrorMessage';
 
 interface JobsState {
   jobs: PaginatedResponse<JobListItem> | null;
@@ -26,8 +27,7 @@ export const fetchJobs = createAsyncThunk(
     try {
       return await jobsAPI.getJobs(filters);
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { detail?: string } } };
-      return rejectWithValue(err.response?.data?.detail || 'Failed to fetch jobs');
+      return rejectWithValue(getApiErrorMessage(error, 'Failed to fetch jobs'));
     }
   },
 );
@@ -38,8 +38,7 @@ export const fetchJobDetail = createAsyncThunk(
     try {
       return await jobsAPI.getJob(slug);
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { detail?: string } } };
-      return rejectWithValue(err.response?.data?.detail || 'Failed to fetch job');
+      return rejectWithValue(getApiErrorMessage(error, 'Failed to fetch job'));
     }
   },
 );
@@ -50,8 +49,7 @@ export const fetchCategories = createAsyncThunk(
     try {
       return await jobsAPI.getCategories();
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { detail?: string } } };
-      return rejectWithValue(err.response?.data?.detail || 'Failed to fetch categories');
+      return rejectWithValue(getApiErrorMessage(error, 'Failed to fetch categories'));
     }
   },
 );

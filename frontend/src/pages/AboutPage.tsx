@@ -13,7 +13,8 @@ import Magnetic from '@/components/ui/Magnetic';
 import LineReveal from '@/components/ui/LineReveal';
 import ScrollScale from '@/components/ui/ScrollScale';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
-import { HeroGeometric } from '@/components/ui/shape-landing-hero';
+import MarketingHero from '@/components/marketing/MarketingHero';
+import SectionBadge from '@/components/ui/SectionBadge';
 
 export default function AboutPage() {
   const { stats } = usePlatformStats();
@@ -26,35 +27,16 @@ export default function AboutPage() {
         canonical="/about" 
       />
 
-      {/* --- Hero Section (geometric landing) --- */}
-      <HeroGeometric
-        className="min-h-0 pt-32 pb-20 sm:pt-48 sm:pb-32 -mt-14 [mask-image:linear-gradient(to_bottom,black_calc(100%-80px),transparent_100%)]"
-        contentClassName="px-4 sm:px-6"
-      >
-        <div className="relative max-w-5xl mx-auto text-center">
-          <ScrollReveal direction="up" duration={1} distance={20}>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50/80 border border-primary-200/60 backdrop-blur-sm mb-8 dark:bg-white/[0.06] dark:border-white/[0.08]">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary-500 dark:bg-primary-400 animate-pulse" />
-              <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-primary-700 dark:text-white/60">Our Mission</span>
-            </div>
-          </ScrollReveal>
-          
-          <ScrollReveal direction="up" delay={0.2} duration={1}>
-            <h1 className="text-display-sm sm:text-display lg:text-display-lg text-ink-900 dark:text-white max-w-4xl mx-auto leading-[1.1] font-extrabold tracking-tighter">
-              Making hiring <br />
-              <span className="text-primary-600 dark:text-primary-400">human again</span>
-            </h1>
-          </ScrollReveal>
-
-          <ScrollReveal direction="up" delay={0.4} duration={1}>
-            <p className="mt-8 text-body-lg text-ink-600 dark:text-white/50 max-w-2xl mx-auto leading-relaxed">
-              Jobly was founded with a simple belief: the hiring process should be transparent,
-              fair, and efficient for everyone involved. We connect exceptional talent with companies
-              that genuinely value what they do.
-            </p>
-          </ScrollReveal>
-        </div>
-      </HeroGeometric>
+      <MarketingHero
+        badge="Our Mission"
+        title={
+          <>
+            Making hiring <br />
+            <span className="text-primary-600 dark:text-primary-400">human again</span>
+          </>
+        }
+        description="Jobly was founded with a simple belief: the hiring process should be transparent, fair, and efficient for everyone involved. We connect exceptional talent with companies that genuinely value what they do."
+      />
 
       {/* --- Stats strip --- */}
       <section className="py-12 border-b border-ink-900/[0.04] dark:border-ink-300/[0.06]">
@@ -83,13 +65,7 @@ export default function AboutPage() {
           <div className="grid lg:grid-cols-2 gap-16 items-start">
             <ScrollReveal direction="left" duration={1}>
               <div className="space-y-8">
-                <div className="relative inline-flex items-center px-6 py-2 bg-primary-50/50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-900/50">
-                  <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                  <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                  <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                  <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                  <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-primary-700 dark:text-primary-200">The Problem</p>
-                </div>
+                <SectionBadge label="The Problem" />
                 <h2 className="text-display-sm text-ink-900 dark:text-white font-bold tracking-tight leading-tight">
                   No more sending applications <br /> into a <span className="text-ink-400 italic font-serif">black hole.</span>
                 </h2>

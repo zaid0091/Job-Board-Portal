@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { profilesAPI } from '@/api';
 import type { EmployerProfile, SeekerProfile } from '@/types';
+import { getApiErrorMessage } from '@/utils/getApiErrorMessage';
 
 interface ProfileState {
   employerProfile: EmployerProfile | null;
@@ -22,8 +23,7 @@ export const fetchEmployerProfile = createAsyncThunk(
     try {
       return await profilesAPI.getEmployerProfile();
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { detail?: string } } };
-      return rejectWithValue(err.response?.data?.detail || 'Failed to fetch employer profile');
+      return rejectWithValue(getApiErrorMessage(error, 'Failed to fetch employer profile'));
     }
   },
 );
@@ -34,8 +34,7 @@ export const updateEmployerProfile = createAsyncThunk(
     try {
       return await profilesAPI.updateEmployerProfile(data);
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { detail?: string } } };
-      return rejectWithValue(err.response?.data?.detail || 'Failed to update employer profile');
+      return rejectWithValue(getApiErrorMessage(error, 'Failed to update employer profile'));
     }
   },
 );
@@ -46,8 +45,7 @@ export const fetchSeekerProfile = createAsyncThunk(
     try {
       return await profilesAPI.getSeekerProfile();
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { detail?: string } } };
-      return rejectWithValue(err.response?.data?.detail || 'Failed to fetch seeker profile');
+      return rejectWithValue(getApiErrorMessage(error, 'Failed to fetch seeker profile'));
     }
   },
 );
@@ -58,8 +56,7 @@ export const updateSeekerProfile = createAsyncThunk(
     try {
       return await profilesAPI.updateSeekerProfile(data);
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { detail?: string } } };
-      return rejectWithValue(err.response?.data?.detail || 'Failed to update seeker profile');
+      return rejectWithValue(getApiErrorMessage(error, 'Failed to update seeker profile'));
     }
   },
 );

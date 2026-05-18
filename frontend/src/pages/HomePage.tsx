@@ -9,6 +9,7 @@ import Magnetic from '@/components/ui/Magnetic';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
 import ScrollScale from '@/components/ui/ScrollScale';
 import LineReveal from '@/components/ui/LineReveal';
+import SectionBadge from '@/components/ui/SectionBadge';
 
 import {
   ArrowRightIcon,
@@ -171,13 +172,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" distance={10}>
             <div className="flex justify-center mb-8">
-              <div className="relative inline-flex items-center px-6 py-2 bg-primary-50/50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-900/50">
-                <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary-700 dark:text-primary-200">Trusted by teams at</p>
-              </div>
+              <SectionBadge label="Trusted by teams at" />
             </div>
             <div className="flex items-center justify-center gap-10 sm:gap-16 flex-wrap grayscale">
               {[
@@ -213,13 +208,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <ScrollReveal direction="up" duration={0.8}>
             <div className="text-center max-w-xl mx-auto">
-              <div className="relative inline-flex items-center px-6 py-2 bg-primary-50/50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-900/50 mb-6">
-                <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary-700 dark:text-primary-200">Platform</p>
-              </div>
+              <SectionBadge label="Platform" className="mb-6" />
               <h2 className="mt-3 text-display-sm text-ink-900">
                 Built for modern hiring
               </h2>
@@ -265,13 +254,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <div className="py-24 sm:py-32 text-center max-w-xl mx-auto">
             <ScrollReveal direction="up" duration={0.8}>
-              <div className="relative inline-flex items-center px-6 py-2 bg-primary-50/50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-900/50 mb-6">
-                <span className="absolute -top-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                <span className="absolute -top-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                <span className="absolute -bottom-[1.5px] -left-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                <span className="absolute -bottom-[1.5px] -right-[1.5px] w-[3px] h-[3px] bg-primary-500 z-10" />
-                <p className="text-[11px] font-bold tracking-[0.2em] uppercase text-primary-700 dark:text-primary-200">Process</p>
-              </div>
+              <SectionBadge label="Process" className="mb-6" />
               <h2 className="mt-3 text-display-sm text-ink-900">
                 Three steps to your next role
               </h2>

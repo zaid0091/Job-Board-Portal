@@ -37,23 +37,6 @@ class IsAdmin(permissions.BasePermission):
         )
 
 
-class IsOwner(permissions.BasePermission):
-    """
-    Object-level permission to only allow the owner
-    of an object to access/modify it.
-    """
-    message = 'You do not have permission to access this resource.'
-
-    def has_object_permission(self, request, view, obj):
-        if hasattr(obj, 'user'):
-            return obj.user == request.user
-        if hasattr(obj, 'employer'):
-            return obj.employer.user == request.user
-        if hasattr(obj, 'applicant'):
-            return obj.applicant == request.user
-        return False
-
-
 class IsJobOwner(permissions.BasePermission):
     """Only the employer who created the job can modify it."""
     message = 'You can only modify your own job listings.'

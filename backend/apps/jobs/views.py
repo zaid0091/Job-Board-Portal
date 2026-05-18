@@ -1,19 +1,8 @@
 import logging
+
 from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
-
-from django.http import JsonResponse
-
-
-def cached_job_list(request):
-    jobs = cache.get("jobs")
-    if jobs is None:
-        jobs = list(Job.objects.filter(status=Job.Status.ACTIVE).values())
-        cache.set("jobs", jobs, timeout=300)  # 5 minutes
-    return JsonResponse({"jobs": jobs})
-
-
 from django.db.models import F
 from rest_framework import viewsets, generics, status, permissions
 from rest_framework.decorators import action

@@ -1,13 +1,17 @@
-from django.db.models import F
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from core.permissions import IsSeeker, IsApplicationOwner, IsJobOwner
+from core.permissions import IsEmployer, IsSeeker, IsApplicationOwner
 from core.pagination import StandardResultsPagination
 from core.throttles import ApplicationCreateThrottle, CoverLetterPreviewThrottle
 
-from .models import Application, ApplicationStatusLog
+from .models import Application
+from .services import (
+    increment_job_applications_count,
+    transition_application_status,
+    withdraw_application,
+)
 from .views_cover_letter import handle_preview_cover_letter
 from .serializers import (
     ApplicationListSerializer,
@@ -32,10 +36,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         elif self.action == "preview_cover_letter":
             return [permissions.IsAuthenticated(), IsSeeker()]
         elif self.action in ["update_status"]:
-            return [
-                permissions.IsAuthenticated(),
-                IsApplicationOwner(),
-            ]
+            return [permissions.IsAuthenticated(), IsEmployer()]
         elif self.action == "withdraw":
             return [
                 permissions.IsAuthenticated(),
@@ -78,12 +79,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         application = serializer.save()
-        # Increment application count on job
-        from apps.jobs.models import Job
-
-        Job.objects.filter(pk=application.job_id).update(
-            applications_count=F("applications_count") + 1
-        )
+        increment_job_applications_count(application.job_id)
 
     @action(
         detail=False,
@@ -97,36 +93,19 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"], url_path="update-status")
     def update_status(self, request, pk=None):
-        """Update application status (employer only)."""
+        """Update application status (employer only; queryset scoped to employer's jobs)."""
         application = self.get_object()
-
-        # Verify the requesting user is the job's employer
-        if application.job.employer.user != request.user:
-            return Response(
-                {"detail": "You do not have permission to update this application."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
 
         serializer = ApplicationStatusUpdateSerializer(
             data=request.data, context={"application": application, "request": request}
         )
         serializer.is_valid(raise_exception=True)
 
-        old_status = application.status
-        new_status = serializer.validated_data["status"]
-        notes = serializer.validated_data.get("notes", "")
-
-        # Update status
-        application.status = new_status
-        application.save(update_fields=["status", "updated_at"])
-
-        # Create status log
-        ApplicationStatusLog.objects.create(
-            application=application,
-            from_status=old_status,
-            to_status=new_status,
+        transition_application_status(
+            application,
+            new_status=serializer.validated_data["status"],
             changed_by=request.user,
-            notes=notes,
+            notes=serializer.validated_data.get("notes", ""),
         )
 
         return Response(
@@ -147,17 +126,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        old_status = application.status
-        application.status = Application.Status.WITHDRAWN
-        application.save(update_fields=["status", "updated_at"])
-
-        ApplicationStatusLog.objects.create(
-            application=application,
-            from_status=old_status,
-            to_status=Application.Status.WITHDRAWN,
-            changed_by=request.user,
-            notes="Application withdrawn by applicant.",
-        )
+        withdraw_application(application, changed_by=request.user)
 
         return Response(
             ApplicationDetailSerializer(application, context={"request": request}).data,

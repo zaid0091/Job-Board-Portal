@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { AppDispatch, RootState } from '@/store';
 import { logout } from '@/store/slices/authSlice';
+import { isAccessTokenExpired } from '@/utils/authToken';
 
 let _store: { getState: () => RootState; dispatch: AppDispatch } | null = null;
 export const injectStore = (s: typeof _store) => { _store = s; };
@@ -35,21 +36,6 @@ const processQueue = (error: unknown) => {
   });
   failedQueue = [];
 };
-
-function isAccessTokenExpired(): boolean {
-  try {
-    const cookies = document.cookie.split('; ');
-    const accessCookie = cookies.find((c) => c.startsWith('access='));
-    if (!accessCookie) return false;
-    const token = accessCookie.split('=')[1];
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const now = Math.floor(Date.now() / 1000);
-    // Consider expired if less than 30 seconds remaining
-    return payload.exp - now < 30;
-  } catch {
-    return true;
-  }
-}
 
 async function refreshToken(): Promise<void> {
   await axiosInstance.post('/auth/token/refresh/', {});
