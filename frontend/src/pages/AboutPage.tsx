@@ -33,21 +33,21 @@ export default function AboutPage() {
       >
         <div className="relative max-w-5xl mx-auto text-center">
           <ScrollReveal direction="up" duration={1} distance={20}>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.06] border border-white/[0.08] backdrop-blur-sm mb-8">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse" />
-              <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-white/60">Our Mission</span>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-50/80 border border-primary-200/60 backdrop-blur-sm mb-8 dark:bg-white/[0.06] dark:border-white/[0.08]">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary-500 dark:bg-primary-400 animate-pulse" />
+              <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-primary-700 dark:text-white/60">Our Mission</span>
             </div>
           </ScrollReveal>
           
           <ScrollReveal direction="up" delay={0.2} duration={1}>
-            <h1 className="text-display-sm sm:text-display lg:text-display-lg text-white max-w-4xl mx-auto leading-[1.1] font-extrabold tracking-tighter">
+            <h1 className="text-display-sm sm:text-display lg:text-display-lg text-ink-900 dark:text-white max-w-4xl mx-auto leading-[1.1] font-extrabold tracking-tighter">
               Making hiring <br />
-              <span className="text-primary-400">human again</span>
+              <span className="text-primary-600 dark:text-primary-400">human again</span>
             </h1>
           </ScrollReveal>
 
           <ScrollReveal direction="up" delay={0.4} duration={1}>
-            <p className="mt-8 text-body-lg text-white/50 max-w-2xl mx-auto leading-relaxed">
+            <p className="mt-8 text-body-lg text-ink-600 dark:text-white/50 max-w-2xl mx-auto leading-relaxed">
               Jobly was founded with a simple belief: the hiring process should be transparent,
               fair, and efficient for everyone involved. We connect exceptional talent with companies
               that genuinely value what they do.

@@ -9,6 +9,7 @@ import { Bars2Icon, XMarkIcon, BellIcon, ChatBubbleLeftRightIcon } from '@heroic
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import { useTheme } from '@/hooks/useTheme';
 // import Logo from '@/components/ui/Logo';
 
 export default function Navbar() {
@@ -20,6 +21,7 @@ export default function Navbar() {
   const { employerProfile, seekerProfile } = useAppSelector((state) => state.profile);
   const dispatch = useAppDispatch();
   const location = useLocation();
+  const { theme } = useTheme();
 
   const avatarUrl = user?.role === 'EMPLOYER' 
     ? employerProfile?.company_logo 
@@ -78,6 +80,12 @@ export default function Navbar() {
   const isContact = location.pathname === '/contact';
   const hasTransparentHero = isHome || isAbout || isContact;
   const onHero = hasTransparentHero && !pastHero;
+  /** White-on-dark overlay nav (home/contact always; about only in dark mode). */
+  const onHeroOverlay = onHero && !(isAbout && theme === 'light');
+  const showNavBackground =
+    (scrolled && !hasTransparentHero) ||
+    pastHero ||
+    (isAbout && theme === 'light' && onHero);
 
   const navLinks = [
     { to: '/jobs', label: 'Jobs', match: '/jobs' },
@@ -98,8 +106,8 @@ export default function Navbar() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        (scrolled && !hasTransparentHero) || pastHero
-          ? 'bg-white/60 dark:bg-zinc-950/70 backdrop-blur-2xl border-b border-ink-900/[0.06] shadow-sm'
+        showNavBackground
+          ? 'bg-white/70 dark:bg-zinc-950/70 backdrop-blur-2xl border-b border-ink-900/[0.06] dark:border-ink-300/[0.06] shadow-sm'
           : 'bg-transparent'
       }`}
     >
@@ -115,10 +123,10 @@ export default function Navbar() {
               />
               <div className="absolute inset-0 bg-primary-500/10 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </div>
-            <div className={`h-8 w-[2px] mx-2 transition-colors duration-300 ${onHero ? 'bg-white' : 'bg-ink-900/30'}`} />
+            <div className={`h-8 w-[2px] mx-2 transition-colors duration-300 ${onHeroOverlay ? 'bg-white' : 'bg-ink-900/30 dark:bg-white/30'}`} />
             <span
               className={`text-2xl font-courier tracking-normal transition-colors duration-300 ${
-                onHero ? 'text-white' : 'text-ink-900'
+                onHeroOverlay ? 'text-white' : 'text-ink-900 dark:text-white'
               }`}
             >
               Jobly
@@ -128,7 +136,7 @@ export default function Navbar() {
           {/* Center Nav */}
           <div
             className={`hidden md:flex items-center gap-0.5 rounded-xl p-1 border transition-colors duration-300 ${
-              onHero ? 'bg-white/10 border-white/10' : 'bg-surface-50/80 border-ink-900/[0.04]'
+              onHeroOverlay ? 'bg-white/10 border-white/10' : 'bg-surface-50/80 border-ink-900/[0.04] dark:bg-zinc-900/50 dark:border-white/[0.08]'
             }`}
           >
             {navLinks.map((link) => (
@@ -136,9 +144,9 @@ export default function Navbar() {
                 key={link.to}
                 to={link.to}
                 className={`relative overflow-hidden px-3.5 py-1.5 text-[13px] font-medium rounded-lg transition-all duration-200 ${
-                  onHero
+                  onHeroOverlay
                     ? 'group border-0 text-white hover:shadow-[0_0_16px_rgba(255,255,255,0.08)] hover:scale-[1.05] active:scale-[0.97]'
-                    : 'group border-0 text-ink-700 hover:shadow-sm hover:scale-[1.05] active:scale-[0.97]'
+                    : 'group border-0 text-ink-700 dark:text-zinc-200 hover:shadow-sm hover:scale-[1.05] active:scale-[0.97]'
                 }`}
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-700" />
@@ -149,14 +157,14 @@ export default function Navbar() {
 
           {/* Right */}
           <div className="hidden md:flex items-center gap-1.5">
-            <ThemeToggle />
+            <ThemeToggle onHero={onHeroOverlay} />
 
             {isAuthenticated ? (
               <>
                 <Link
                   to="/messages"
                   className={`relative p-2 rounded-lg transition-colors ${
-                    onHero
+                    onHeroOverlay
                       ? 'text-white/70 hover:text-white hover:bg-white/10'
                       : 'text-ink-400 hover:text-ink-600 hover:bg-surface-50'
                   }`}
@@ -172,7 +180,7 @@ export default function Navbar() {
                 <Link
                   to="/notifications"
                   className={`relative p-2 rounded-lg transition-colors ${
-                    onHero
+                    onHeroOverlay
                       ? 'text-white/70 hover:text-white hover:bg-white/10'
                       : 'text-ink-400 hover:text-ink-600 hover:bg-surface-50'
                   }`}
@@ -191,7 +199,7 @@ export default function Navbar() {
                       setProfileOpen((prev) => !prev);
                     }}
                     className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors ${
-                      onHero
+                      onHeroOverlay
                         ? 'text-white/80 hover:text-white hover:bg-white/10'
                         : 'text-ink-600 hover:text-ink-800 hover:bg-surface-50'
                     }`}
@@ -247,7 +255,7 @@ export default function Navbar() {
                 <Link
                   to="/login"
                   className={`px-3.5 py-1.5 text-[13px] font-medium rounded-lg transition-colors ${
-                    onHero
+                    onHeroOverlay
                       ? 'text-white/80 hover:text-white hover:bg-white/10'
                       : 'text-ink-600 hover:text-ink-800 hover:bg-surface-50'
                   }`}
@@ -267,7 +275,7 @@ export default function Navbar() {
           {/* Mobile menu button */}
           <button
             className={`md:hidden p-2 rounded-lg transition-colors ${
-              onHero
+              onHeroOverlay
                 ? 'text-white/80 hover:text-white hover:bg-white/10'
                 : 'text-ink-500 hover:text-ink-700 hover:bg-surface-50'
             }`}
