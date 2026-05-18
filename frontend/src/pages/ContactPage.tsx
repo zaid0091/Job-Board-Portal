@@ -42,11 +42,7 @@ export default function ContactPage() {
         canonical="/contact" 
       />
 
-<<<<<<< HEAD
-      {/* --- Hero Section (geometric landing) --- */}
-=======
-      {/* --- Hero Section (same shell as About) --- */}
->>>>>>> 8287b81e36405688073c5063520b8f6412645675
+      {/* --- Hero Section (geometric landing — same shell as About) --- */}
       <HeroGeometric
         className="min-h-0 pt-32 pb-20 sm:pt-48 sm:pb-32 -mt-14 [mask-image:linear-gradient(to_bottom,black_calc(100%-80px),transparent_100%)]"
         contentClassName="px-4 sm:px-6"
