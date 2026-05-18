@@ -80,12 +80,13 @@ export default function Navbar() {
   const isContact = location.pathname === '/contact';
   const hasTransparentHero = isHome || isAbout || isContact;
   const onHero = hasTransparentHero && !pastHero;
-  /** White-on-dark overlay nav (home/contact always; about only in dark mode). */
-  const onHeroOverlay = onHero && !(isAbout && theme === 'light');
+  /** Light hero pages: ink nav + frosted bar. Dark hero: white overlay nav. */
+  const onLightHero = onHero && (isHome || isAbout || isContact) && theme === 'light';
+  const onHeroOverlay = onHero && !onLightHero;
   const showNavBackground =
     (scrolled && !hasTransparentHero) ||
     pastHero ||
-    (isAbout && theme === 'light' && onHero);
+    onLightHero;
 
   const navLinks = [
     { to: '/jobs', label: 'Jobs', match: '/jobs' },
