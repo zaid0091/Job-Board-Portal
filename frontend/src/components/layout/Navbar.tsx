@@ -80,12 +80,15 @@ export default function Navbar() {
   const isContact = location.pathname === '/contact';
   const hasTransparentHero = isHome || isAbout || isContact;
   const onHero = hasTransparentHero && !pastHero;
-  /** White-on-dark overlay nav (home/contact always; about only in dark mode). */
-  const onHeroOverlay = onHero && !(isAbout && theme === 'light');
+  /** Light geometric heroes (About/Contact): ink nav. Dark heroes: white overlay nav. */
+  const onLightHero = onHero && (isAbout || isContact) && theme === 'light';
+  const onHeroOverlay = onHero && !onLightHero;
+  /** Transparent at top on light heroes; frosted blur after scroll. */
+  const lightHeroFrostedBar = onLightHero && scrolled;
   const showNavBackground =
     (scrolled && !hasTransparentHero) ||
     pastHero ||
-    (isAbout && theme === 'light' && onHero);
+    lightHeroFrostedBar;
 
   const navLinks = [
     { to: '/jobs', label: 'Jobs', match: '/jobs' },
