@@ -69,38 +69,58 @@ export function StatCardSkeleton() {
 /* ── Job Detail page skeleton ── */
 export function JobDetailSkeleton() {
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
-      <div className="bg-card rounded-2xl p-6 sm:p-8 space-y-5" style={{ boxShadow: 'var(--card-shadow-md)' }}>
-        <div className="space-y-3">
-          <Skeleton className="h-7 w-3/5" />
-          <Skeleton className="h-4 w-1/3" />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <SkeletonBadge className="h-5 w-20" />
-          <SkeletonBadge className="h-5 w-16" />
-          <SkeletonBadge className="h-5 w-24" />
-          <SkeletonBadge className="h-5 w-28" />
-        </div>
-        <div className="flex flex-wrap gap-4">
-          <Skeleton className="h-3.5 w-28" />
-          <Skeleton className="h-3.5 w-24" />
-          <Skeleton className="h-3.5 w-20" />
+    <div className="min-h-screen bg-page">
+      <div className="relative -mt-14 border-b border-ink-900/[0.04] dark:border-white/[0.06]">
+        <div className="mx-auto max-w-6xl px-4 pb-8 pt-24 sm:px-6 sm:pb-10 sm:pt-28">
+          <Skeleton className="h-4 w-32" />
+          <div className="mt-6 flex gap-4">
+            <Skeleton className="h-16 w-16 flex-shrink-0 rounded-2xl" />
+            <div className="flex-1 space-y-3">
+              <Skeleton className="h-5 w-24" />
+              <Skeleton className="h-9 w-4/5 max-w-md" />
+              <Skeleton className="h-4 w-40" />
+            </div>
+          </div>
+          <div className="mt-6 flex flex-wrap gap-2">
+            <SkeletonBadge className="h-7 w-20" />
+            <SkeletonBadge className="h-7 w-16" />
+            <SkeletonBadge className="h-7 w-24" />
+          </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-6">
-          {[1, 2].map((i) => (
-            <div key={i} className="bg-card rounded-2xl p-6 space-y-4" style={{ boxShadow: 'var(--card-shadow-md)' }}>
-              <Skeleton className="h-4 w-24" />
-              <SkeletonText lines={5} />
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
+            {[1, 2].map((i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-ink-900/[0.06] bg-card p-6 sm:p-8"
+                style={{ boxShadow: 'var(--card-shadow-md)' }}
+              >
+                <Skeleton className="mb-5 h-8 w-28" />
+                <SkeletonText lines={5} />
+              </div>
+            ))}
+          </div>
+          <div className="space-y-6">
+            <div
+              className="rounded-2xl border border-ink-900/[0.06] bg-card p-6"
+              style={{ boxShadow: 'var(--card-shadow-md)' }}
+            >
+              <Skeleton className="mb-4 h-8 w-20" />
+              <div className="flex flex-wrap gap-2">
+                <SkeletonBadge className="h-6 w-16" />
+                <SkeletonBadge className="h-6 w-20" />
+                <SkeletonBadge className="h-6 w-14" />
+              </div>
             </div>
-          ))}
-        </div>
-        <div>
-          <div className="bg-card rounded-2xl p-6 space-y-4" style={{ boxShadow: 'var(--card-shadow-md)' }}>
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-10 w-full rounded-xl" />
-            <SkeletonText lines={3} />
+            <div
+              className="rounded-2xl border border-ink-900/[0.06] bg-card p-6"
+              style={{ boxShadow: 'var(--card-shadow-md)' }}
+            >
+              <Skeleton className="mb-4 h-8 w-16" />
+              <Skeleton className="h-11 w-full rounded-xl" />
+            </div>
           </div>
         </div>
       </div>

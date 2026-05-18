@@ -1,25 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { sanitizeHTML } from '@/utils/sanitize';
 import { useAppSelector } from '@/store/hooks';
 import { jobsAPI } from '@/api';
 import ApplicationForm from '@/components/jobs/ApplicationForm';
+import JobDetailHero from '@/components/jobs/JobDetailHero';
+import JobDetailSection from '@/components/jobs/JobDetailSection';
+import { formatJobSalary } from '@/components/jobs/jobDetailLabels';
 import Modal from '@/components/ui/Modal';
+import PremiumCard from '@/components/ui/PremiumCard';
+import ScrollReveal from '@/components/ui/ScrollReveal';
+import SectionBadge from '@/components/ui/SectionBadge';
 import { JobDetailSkeleton } from '@/components/ui/Skeleton';
 import SEO from '@/components/SEO';
-import {
-  MapPinIcon,
-  BriefcaseIcon,
-  CurrencyDollarIcon,
-  CalendarIcon,
-  ClockIcon,
-  BuildingOffice2Icon,
-  BookmarkIcon as BookmarkOutline,
-} from '@heroicons/react/24/outline';
-import { BookmarkIcon as BookmarkSolid } from '@heroicons/react/24/solid';
-import { formatDistanceToNow } from 'date-fns';
+import { BuildingOffice2Icon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
-import { motion } from 'framer-motion';
 import type { JobDetail } from '@/types';
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://jobly.com';
@@ -32,6 +28,9 @@ const jobTypeToSchemaType: Record<string, string> = {
   FREELANCE: 'CONTRACTOR',
   TEMPORARY: 'TEMPORARY',
 };
+
+const PROSE_CLASS =
+  'prose prose-sm max-w-none text-ink-600 dark:prose-invert dark:text-zinc-400 prose-headings:text-ink-900 dark:prose-headings:text-white prose-a:text-primary-600 break-words';
 
 export default function JobDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -116,7 +115,6 @@ export default function JobDetailPage() {
 
   const handleSaveToggle = async () => {
     if (!job) return;
-    // Optimistic update
     const prev = isSaved;
     setIsSaved(!isSaved);
     try {
@@ -128,7 +126,7 @@ export default function JobDetailPage() {
         toast.success('Job saved');
       }
     } catch {
-      setIsSaved(prev); // revert
+      setIsSaved(prev);
       toast.error('Failed to update saved status');
     }
   };
@@ -145,29 +143,38 @@ export default function JobDetailPage() {
 
   if (!job) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-        <h2 className="text-heading text-ink-900">Job not found</h2>
-        <p className="mt-2 text-sm text-ink-400">This job may have been removed or the link is incorrect.</p>
-        <Link to="/jobs" className="btn-primary mt-4 inline-block">
-          Browse positions
-        </Link>
+      <div className="bg-page min-h-screen">
+        <div className="mx-auto max-w-3xl px-4 py-24 text-center">
+          <h2 className="text-display-sm font-extrabold tracking-tighter text-ink-900 dark:text-white">
+            Job not found
+          </h2>
+          <p className="mt-3 text-sm text-ink-500 dark:text-zinc-400">
+            This job may have been removed or the link is incorrect.
+          </p>
+          <Link to="/jobs" className="btn-primary mt-6 inline-block">
+            Browse positions
+          </Link>
+        </div>
       </div>
     );
   }
 
-  const formatSalary = () => {
-    if (!job.salary_min && !job.salary_max) return null;
-    const fmt = (n: number) =>
-      new Intl.NumberFormat('en-US', { style: 'currency', currency: job.salary_currency || 'USD', maximumFractionDigits: 0 }).format(n);
-    if (job.salary_min && job.salary_max) return `${fmt(Number(job.salary_min))} - ${fmt(Number(job.salary_max))}`;
-    if (job.salary_min) return `From ${fmt(Number(job.salary_min))}`;
-    return `Up to ${fmt(Number(job.salary_max!))}`;
-  };
+  const salary = formatJobSalary(job);
+  const showSave = Boolean(isAuthenticated && user?.role === 'SEEKER');
 
-  const salary = formatSalary();
+  const contentSections: { key: string; label: string; html: string }[] = [
+    { key: 'description', label: 'Description', html: job.description },
+    ...(job.requirements
+      ? [{ key: 'requirements', label: 'Requirements', html: job.requirements }]
+      : []),
+    ...(job.responsibilities
+      ? [{ key: 'responsibilities', label: 'Responsibilities', html: job.responsibilities }]
+      : []),
+    ...(job.benefits ? [{ key: 'benefits', label: 'Benefits', html: job.benefits }] : []),
+  ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+    <div className="min-h-screen bg-page">
       <SEO
         title={job.title}
         description={`${job.job_type.replace('_', ' ')} position at ${job.employer?.company_name || 'a top company'} — ${job.is_remote ? 'Remote' : job.location}`}
@@ -177,182 +184,114 @@ export default function JobDetailPage() {
         articlePublishedTime={job.created_at}
         articleModifiedTime={job.updated_at}
       />
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="bg-card rounded-2xl p-6 sm:p-8"
-        style={{ boxShadow: 'var(--card-shadow-md)' }}
-      >
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
-            <h1 className="text-display-sm text-ink-900">{job.title}</h1>
-            <Link 
-              to={`/employers/${job.employer.id}`} 
-              className="mt-2 flex items-center text-ink-500 hover:text-primary-600 transition-colors group"
-            >
-              <BuildingOffice2Icon className="h-4 w-4 mr-1.5 text-ink-400 group-hover:text-primary-500 transition-colors" />
-              <span className="text-sm font-medium">{job.employer.company_name}</span>
-            </Link>
-          </div>
-          {isAuthenticated && user?.role === 'SEEKER' && (
-            <motion.button
-              whileHover={{ scale: 1.15 }}
-              whileTap={{ scale: 0.9 }}
-              transition={{ duration: 0.15 }}
-              onClick={handleSaveToggle}
-              className="text-ink-300 hover:text-primary-600 transition-colors"
-            >
-              {isSaved ? (
-                <BookmarkSolid className="h-6 w-6 text-primary-600" />
-              ) : (
-                <BookmarkOutline className="h-6 w-6" />
-              )}
-            </motion.button>
-          )}
-        </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, delay: 0.15 }}
-          className="mt-4 flex flex-wrap gap-2"
-        >
-          <span className="inline-flex items-center text-micro px-2 py-0.5 rounded-md bg-primary-50 text-primary-700 dark:bg-primary-950/40 dark:text-primary-400 font-medium">
-            <BriefcaseIcon className="h-3 w-3 mr-1 inline" />
-            {job.job_type.replace('_', ' ')}
-          </span>
-          {job.experience_level && (
-            <span className="inline-flex items-center text-micro px-2 py-0.5 rounded-md bg-violet-50 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400 font-medium">{job.experience_level}</span>
-          )}
-          <span className="inline-flex items-center text-micro px-2 py-0.5 rounded-md bg-surface-100 text-ink-600 font-medium">
-            <MapPinIcon className="h-3 w-3 mr-1 inline" />
-            {job.is_remote ? 'Remote' : job.location}
-          </span>
-          {salary && (
-            <span className="inline-flex items-center text-micro px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 font-medium">
-              <CurrencyDollarIcon className="h-3 w-3 mr-1 inline" />
-              {salary}
-            </span>
-          )}
-        </motion.div>
+      <JobDetailHero
+        job={job}
+        salary={salary}
+        isExpired={isExpired}
+        showSave={showSave}
+        isSaved={isSaved}
+        onSaveToggle={handleSaveToggle}
+      />
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, delay: 0.2 }}
-          className="mt-4 flex flex-wrap gap-4 text-[13px] text-ink-400"
-        >
-          <span className="flex items-center">
-            <CalendarIcon className="h-3.5 w-3.5 mr-1" />
-            Posted {formatDistanceToNow(new Date(job.created_at), { addSuffix: true })}
-          </span>
-          {job.application_deadline && (
-            <span className={`flex items-center ${isExpired ? 'text-red-500 dark:text-red-400 font-medium' : ''}`}>
-              <ClockIcon className="h-3.5 w-3.5 mr-1" />
-              {isExpired ? 'Expired: ' : 'Deadline: '}{new Date(job.application_deadline).toLocaleDateString()}
-            </span>
-          )}
-          <span>{job.applications_count} application{job.applications_count !== 1 ? 's' : ''}</span>
-          <span>{job.views_count} view{job.views_count !== 1 ? 's' : ''}</span>
-        </motion.div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-        className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6"
-      >
-        {/* Main content */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-card rounded-2xl p-6 overflow-hidden" style={{ boxShadow: 'var(--card-shadow-md)' }}>
-            <h2 className="text-[15px] font-semibold text-ink-800 mb-4">Description</h2>
-            <div
-              className="prose prose-sm max-w-none text-ink-500 text-justify break-words"
-              dangerouslySetInnerHTML={{ __html: sanitizeHTML(job.description) }}
-            />
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-10">
+          <div className="space-y-6 lg:col-span-2">
+            {contentSections.map((section, index) => (
+              <JobDetailSection key={section.key} label={section.label} delay={index * 0.05}>
+                <div
+                  className={`${PROSE_CLASS} ${section.key === 'description' ? 'text-justify' : ''}`}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHTML(section.html) }}
+                />
+              </JobDetailSection>
+            ))}
           </div>
 
-          {job.requirements && (
-            <div className="bg-card rounded-2xl p-6 overflow-hidden" style={{ boxShadow: 'var(--card-shadow-md)' }}>
-              <h2 className="text-[15px] font-semibold text-ink-800 mb-4">Requirements</h2>
-              <div
-                className="prose prose-sm max-w-none text-ink-500 break-words"
-                dangerouslySetInnerHTML={{ __html: sanitizeHTML(job.requirements) }}
-              />
-            </div>
-          )}
+          <aside className="space-y-6 lg:sticky lg:top-20 lg:self-start">
+            {job.skills_required && job.skills_required.length > 0 && (
+              <ScrollReveal direction="up" delay={0.1} duration={0.7}>
+                <PremiumCard>
+                  <div className="p-6">
+                    <SectionBadge label="Skills" className="mb-4" />
+                    <div className="flex flex-wrap gap-2">
+                      {job.skills_required.map((skill) => (
+                        <span
+                          key={skill.id}
+                          className="rounded-lg bg-surface-100 px-2.5 py-1 text-[11px] font-semibold text-ink-700 ring-1 ring-inset ring-ink-900/5 dark:bg-zinc-800/60 dark:text-zinc-200"
+                        >
+                          {skill.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </PremiumCard>
+              </ScrollReveal>
+            )}
 
-          {job.responsibilities && (
-            <div className="bg-card rounded-2xl p-6 overflow-hidden" style={{ boxShadow: 'var(--card-shadow-md)' }}>
-              <h2 className="text-[15px] font-semibold text-ink-800 mb-4">Responsibilities</h2>
-              <div
-                className="prose prose-sm max-w-none text-ink-500 break-words"
-                dangerouslySetInnerHTML={{ __html: sanitizeHTML(job.responsibilities) }}
-              />
-            </div>
-          )}
+            <ScrollReveal direction="up" delay={0.15} duration={0.7}>
+              <PremiumCard className="overflow-hidden">
+                <div className="border-b border-ink-900/[0.04] bg-gradient-to-br from-primary-50/80 via-white to-violet-50/40 p-6 dark:border-white/[0.06] dark:from-primary-950/40 dark:via-zinc-900 dark:to-violet-950/20">
+                  <SectionBadge label="Apply" className="mb-3" />
+                  <p className="text-sm text-ink-600 dark:text-zinc-400">
+                    {isExpired
+                      ? 'This role is no longer accepting applications.'
+                      : 'Ready to join the team? Submit your application in a few minutes.'}
+                  </p>
+                </div>
 
-          {job.benefits && (
-            <div className="bg-card rounded-2xl p-6 overflow-hidden" style={{ boxShadow: 'var(--card-shadow-md)' }}>
-              <h2 className="text-[15px] font-semibold text-ink-800 mb-4">Benefits</h2>
-              <div
-                className="prose prose-sm max-w-none text-ink-500 break-words"
-                dangerouslySetInnerHTML={{ __html: sanitizeHTML(job.benefits) }}
-              />
-            </div>
-          )}
-        </div>
+                <div className="p-6">
+                  {isAuthenticated && user?.role === 'SEEKER' && job.status === 'ACTIVE' ? (
+                    <>
+                      {applicationStatus === 'HIRED' ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="w-full cursor-not-allowed rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white opacity-90"
+                        >
+                          Hired
+                        </button>
+                      ) : applicationStatus ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="btn-primary w-full cursor-not-allowed py-3 opacity-60"
+                        >
+                          Applied · {applicationStatus.replace('_', ' ')}
+                        </button>
+                      ) : isExpired ? (
+                        <button
+                          type="button"
+                          disabled
+                          className="w-full cursor-not-allowed rounded-xl bg-ink-100 py-3 text-sm font-medium text-ink-400 dark:bg-zinc-800 dark:text-zinc-500"
+                        >
+                          Application deadline has passed
+                        </button>
+                      ) : (
+                        <motion.button
+                          type="button"
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          onClick={() => setShowApplicationForm(true)}
+                          className="btn-primary w-full py-3 text-sm font-semibold"
+                        >
+                          Apply now
+                        </motion.button>
+                      )}
+                    </>
+                  ) : !isAuthenticated ? (
+                    <>
+                      <p className="mb-4 text-center text-[13px] text-ink-500 dark:text-zinc-400">
+                        Sign in to apply for this position
+                      </p>
+                      <Link
+                        to="/login"
+                        className="btn-primary block w-full py-3 text-center text-sm font-semibold"
+                      >
+                        Sign in to apply
+                      </Link>
+                    </>
+                  ) : null}
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          {job.skills_required && job.skills_required.length > 0 && (
-            <div className="bg-card rounded-2xl p-6" style={{ boxShadow: 'var(--card-shadow-md)' }}>
-              <h3 className="text-[13px] font-semibold text-ink-700 mb-3">Required Skills</h3>
-              <div className="flex flex-wrap gap-1.5">
-                {job.skills_required.map((skill) => (
-                  <span key={skill.id} className="text-micro font-medium px-2 py-0.5 rounded-md bg-surface-100 text-ink-600">
-                    {skill.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {isAuthenticated && user?.role === 'SEEKER' && job.status === 'ACTIVE' && (
-            <div className="bg-card rounded-2xl p-6" style={{ boxShadow: 'var(--card-shadow-md)' }}>
-              {applicationStatus === 'HIRED' ? (
-                <button
-                  disabled
-                  className="w-full py-2.5 rounded-xl text-sm font-medium bg-emerald-600 text-white opacity-90 cursor-not-allowed"
-                >
-                  Hired
-                </button>
-              ) : applicationStatus ? (
-                <button
-                  disabled
-                  className="btn-primary w-full py-2.5 opacity-60 cursor-not-allowed"
-                >
-                  Applied &middot; {applicationStatus}
-                </button>
-              ) : isExpired ? (
-                <button
-                  disabled
-                  className="w-full py-2.5 rounded-xl text-sm font-medium bg-ink-100 text-ink-400 dark:bg-ink-800 dark:text-ink-500 cursor-not-allowed"
-                >
-                  Application deadline has passed
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setShowApplicationForm(true)}
-                    className="btn-primary w-full py-2.5"
-                  >
-                    Apply now
-                  </button>
-                  
                   <Modal
                     isOpen={showApplicationForm}
                     onClose={() => setShowApplicationForm(false)}
@@ -365,21 +304,50 @@ export default function JobDetailPage() {
                       onCancel={() => setShowApplicationForm(false)}
                     />
                   </Modal>
-                </>
-              )}
-            </div>
-          )}
+                </div>
+              </PremiumCard>
+            </ScrollReveal>
 
-          {!isAuthenticated && (
-            <div className="bg-card rounded-2xl p-6 text-center" style={{ boxShadow: 'var(--card-shadow-md)' }}>
-              <p className="text-[13px] text-ink-500 mb-3">Sign in to apply for this position</p>
-              <Link to="/login" className="btn-primary w-full inline-block text-center py-2.5">
-                Sign in
-              </Link>
-            </div>
-          )}
+            <ScrollReveal direction="up" delay={0.2} duration={0.7}>
+              <PremiumCard>
+                <div className="flex items-start gap-4 p-6">
+                  {job.employer.company_logo ? (
+                    <img
+                      src={job.employer.company_logo}
+                      alt=""
+                      className="h-12 w-12 rounded-xl object-cover ring-1 ring-ink-900/[0.08] dark:ring-white/10"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-950/40">
+                      <BuildingOffice2Icon className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-ink-400">
+                      Employer
+                    </p>
+                    <p className="mt-1 font-semibold text-ink-900 dark:text-white">
+                      {job.employer.company_name}
+                    </p>
+                    {job.employer.industry && (
+                      <p className="mt-0.5 text-xs text-ink-500 dark:text-zinc-400">
+                        {job.employer.industry}
+                      </p>
+                    )}
+                    <Link
+                      to={`/employers/${job.employer.id}`}
+                      className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary-600 hover:text-primary-700 dark:text-primary-400"
+                    >
+                      View company profile
+                      <ArrowRightIcon className="h-3.5 w-3.5" />
+                    </Link>
+                  </div>
+                </div>
+              </PremiumCard>
+            </ScrollReveal>
+          </aside>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
