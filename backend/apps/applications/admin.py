@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import Application, ApplicationStatusLog
+from .models import (
+    Application,
+    ApplicationStatusLog,
+    CoverLetterAudit,
+    CoverLetterDraft,
+)
 
 
 class ApplicationStatusLogInline(admin.TabularInline):
@@ -22,3 +27,23 @@ class ApplicationAdmin(admin.ModelAdmin):
     raw_id_fields = ['job', 'applicant']
     readonly_fields = ['created_at', 'updated_at']
     inlines = [ApplicationStatusLogInline]
+
+
+@admin.register(CoverLetterDraft)
+class CoverLetterDraftAdmin(admin.ModelAdmin):
+    list_display = [
+        'user', 'job', 'generator', 'profile_hash', 'expires_at', 'created_at',
+    ]
+    list_filter = ['generator', 'created_at']
+    search_fields = ['user__email', 'job__title']
+    raw_id_fields = ['user', 'job']
+    readonly_fields = ['created_at', 'updated_at']
+
+
+@admin.register(CoverLetterAudit)
+class CoverLetterAuditAdmin(admin.ModelAdmin):
+    list_display = ['user', 'job', 'action', 'draft', 'created_at']
+    list_filter = ['action', 'created_at']
+    search_fields = ['user__email', 'job__title']
+    raw_id_fields = ['user', 'job', 'draft']
+    readonly_fields = ['created_at', 'updated_at']

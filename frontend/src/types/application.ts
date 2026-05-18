@@ -50,7 +50,18 @@ export interface ApplicationDetail {
 export interface ApplicationCreateData {
   job: string;
   cover_letter?: string;
+  cover_letter_draft_id?: string;
   resume?: File;
   expected_salary?: number;
   available_from?: string;
+}
+
+export interface CoverLetterPreviewResponse {
+  draft_id: string;
+  cover_letter: string;
+  highlights: string[];
+  cached: boolean;
+  generator: 'template' | 'llm';
+  profile_hash: string;
+  disclaimer: string;
 }

@@ -5,9 +5,10 @@ from rest_framework.response import Response
 
 from core.permissions import IsSeeker, IsApplicationOwner, IsJobOwner
 from core.pagination import StandardResultsPagination
-from core.throttles import ApplicationCreateThrottle
+from core.throttles import ApplicationCreateThrottle, CoverLetterPreviewThrottle
 
 from .models import Application, ApplicationStatusLog
+from .views_cover_letter import handle_preview_cover_letter
 from .serializers import (
     ApplicationListSerializer,
     ApplicationDetailSerializer,
@@ -28,6 +29,8 @@ class ApplicationViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action == "create":
             return [permissions.IsAuthenticated(), IsSeeker()]
+        elif self.action == "preview_cover_letter":
+            return [permissions.IsAuthenticated(), IsSeeker()]
         elif self.action in ["update_status"]:
             return [
                 permissions.IsAuthenticated(),
@@ -43,6 +46,8 @@ class ApplicationViewSet(viewsets.ModelViewSet):
     def get_throttles(self):
         if self.action == "create":
             return [ApplicationCreateThrottle()]
+        if self.action == "preview_cover_letter":
+            return [CoverLetterPreviewThrottle()]
         return super().get_throttles()
 
     def get_serializer_class(self):
@@ -79,6 +84,16 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         Job.objects.filter(pk=application.job_id).update(
             applications_count=F("applications_count") + 1
         )
+
+    @action(
+        detail=False,
+        methods=["post"],
+        url_path="preview-cover-letter",
+        url_name="preview-cover-letter",
+    )
+    def preview_cover_letter(self, request):
+        """POST /api/v1/applications/preview-cover-letter/"""
+        return handle_preview_cover_letter(request)
 
     @action(detail=True, methods=["post"], url_path="update-status")
     def update_status(self, request, pk=None):

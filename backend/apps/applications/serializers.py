@@ -2,7 +2,8 @@ from rest_framework import serializers
 
 from apps.jobs.serializers import JobListSerializer
 from core.sanitizers import strip_all_html
-from .models import Application, ApplicationStatusLog
+from .models import Application, ApplicationStatusLog, CoverLetterDraft
+from .services.cover_letter import audit_application_cover_letter
 
 
 class ApplicationListSerializer(serializers.ModelSerializer):
@@ -55,11 +56,12 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
     Security: cover_letter is stripped of HTML; max_length enforced.
     """
     cover_letter = serializers.CharField(max_length=10000, required=False, allow_blank=True)
+    cover_letter_draft_id = serializers.UUIDField(required=False, allow_null=True)
 
     class Meta:
         model = Application
         fields = [
-            'job', 'cover_letter', 'resume',
+            'job', 'cover_letter', 'cover_letter_draft_id', 'resume',
             'expected_salary', 'available_from',
         ]
 
@@ -81,6 +83,22 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
                 'You have already applied to this job.'
             )
 
+        draft_id = attrs.pop('cover_letter_draft_id', None)
+        if draft_id in (None, ''):
+            draft_id = None
+        if draft_id:
+            try:
+                draft = CoverLetterDraft.objects.get(
+                    id=draft_id,
+                    user=request.user,
+                    job=job,
+                )
+            except CoverLetterDraft.DoesNotExist:
+                raise serializers.ValidationError(
+                    {'cover_letter_draft_id': 'Invalid or expired cover letter draft.'}
+                )
+            attrs['_cover_letter_draft'] = draft
+
         return attrs
 
     def validate_cover_letter(self, value):
@@ -100,8 +118,17 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        draft = validated_data.pop('_cover_letter_draft', None)
         validated_data['applicant'] = self.context['request'].user
-        return super().create(validated_data)
+        application = super().create(validated_data)
+        if draft:
+            audit_application_cover_letter(
+                user=self.context['request'].user,
+                job=application.job,
+                draft=draft,
+                submitted_cover_letter=application.cover_letter,
+            )
+        return application
 
 
 class ApplicationStatusUpdateSerializer(serializers.Serializer):

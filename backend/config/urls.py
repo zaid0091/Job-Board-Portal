@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
+from apps.applications.views import ApplicationViewSet
 from apps.jobs.seo_views import generate_sitemap, generate_robots_txt
 
 def health_check(request):
@@ -21,6 +22,12 @@ urlpatterns = [
 
     # API v1
     path('api/v1/', include([
+        # Must be before router includes so "preview-cover-letter" is not captured as <pk>
+        path(
+            'applications/preview-cover-letter/',
+            ApplicationViewSet.as_view({'post': 'preview_cover_letter'}),
+            name='application-preview-cover-letter',
+        ),
         path('', include('apps.users.urls')),
         path('', include('apps.profiles.urls')),
         path('', include('apps.jobs.urls')),

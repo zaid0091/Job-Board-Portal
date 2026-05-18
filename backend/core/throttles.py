@@ -35,6 +35,12 @@ class ApplicationCreateThrottle(UserRateThrottle):
     scope = "application_create"
 
 
+class CoverLetterPreviewThrottle(UserRateThrottle):
+    """Per-user throttle for cover letter preview generation."""
+
+    scope = "cover_letter_preview"
+
+
 class JobCreateThrottle(UserRateThrottle):
     scope = "job_create"
 

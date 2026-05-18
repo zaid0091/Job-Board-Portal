@@ -3,6 +3,7 @@ import type {
   ApplicationListItem,
   ApplicationDetail,
   ApplicationStatus,
+  CoverLetterPreviewResponse,
   PaginatedResponse,
 } from '@/types';
 
@@ -24,6 +25,14 @@ export const applicationsAPI = {
     const response = await axiosInstance.post<ApplicationDetail>('/applications/', data, {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
+    return response.data;
+  },
+
+  previewCoverLetter: async (jobId: string, regenerate = false) => {
+    const response = await axiosInstance.post<CoverLetterPreviewResponse>(
+      '/applications/preview-cover-letter/',
+      { job_id: jobId, regenerate },
+    );
     return response.data;
   },
 

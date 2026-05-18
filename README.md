@@ -16,6 +16,7 @@ A comprehensive, full-stack Job Board Portal designed for seamless recruitment a
 - **Advanced Job Search:** Filter jobs by category, location, salary range, and job type.
 - **Personalized Dashboard:** Track application status (Pending, Interviewing, Hired, Rejected).
 - **Profile Management:** Showcase your skills, experience, and upload resumes.
+- **AI Cover Letter Drafts:** Job-specific cover letter suggestions when applying (template or optional LLM).
 - **Notifications:** Real-time system and email alerts for job updates.
 - **Google OAuth:** One-click registration and login.
 

@@ -133,6 +133,7 @@ REST_FRAMEWORK = {
         "password_reset": "3/hour",
         # Resource-creation limits
         "application_create": "50/day",
+        "cover_letter_preview": "30/day",
         "job_create": "20/day",
         # Analytics limits
         "analytics": "30/minute",
@@ -260,6 +261,24 @@ RESUME_PARSE_RETENTION_DAYS = int(os.environ.get("RESUME_PARSE_RETENTION_DAYS", 
 RESUME_PARSE_MAX_RAW_TEXT_CHARS = int(os.environ.get("RESUME_PARSE_MAX_RAW_TEXT_CHARS", 50000))
 RESUME_PARSE_ENABLE_LLM = os.environ.get("RESUME_PARSE_ENABLE_LLM", "false").lower() == "true"
 RESUME_PARSE_LLM_MODEL = os.environ.get("RESUME_PARSE_LLM_MODEL", "")
+
+# Cover letter AI draft generation
+COVER_LETTER_ENABLE_LLM = os.environ.get("COVER_LETTER_ENABLE_LLM", "false").lower() == "true"
+COVER_LETTER_LLM_MODEL = os.environ.get("COVER_LETTER_LLM_MODEL", "gpt-4o-mini")
+COVER_LETTER_LLM_API_KEY = os.environ.get("COVER_LETTER_LLM_API_KEY", "") or os.environ.get(
+    "OPENAI_API_KEY", ""
+)
+COVER_LETTER_LLM_BASE_URL = os.environ.get("COVER_LETTER_LLM_BASE_URL", "https://api.openai.com/v1")
+COVER_LETTER_LLM_TIMEOUT = int(os.environ.get("COVER_LETTER_LLM_TIMEOUT", "45"))
+COVER_LETTER_CACHE_TTL_SECONDS = int(os.environ.get("COVER_LETTER_CACHE_TTL_SECONDS", "86400"))
+COVER_LETTER_MAX_OUTPUT_TOKENS = int(os.environ.get("COVER_LETTER_MAX_OUTPUT_TOKENS", "800"))
+COVER_LETTER_MAX_INPUT_CHARS = int(os.environ.get("COVER_LETTER_MAX_INPUT_CHARS", "12000"))
+COVER_LETTER_PROFILE_HASH_FIELDS_VERSION = int(
+    os.environ.get("COVER_LETTER_PROFILE_HASH_FIELDS_VERSION", "1")
+)
+COVER_LETTER_FALLBACK_ON_LLM_ERROR = os.environ.get(
+    "COVER_LETTER_FALLBACK_ON_LLM_ERROR", "true"
+).lower() == "true"
 
 # STATIC & MEDIA FILES
 STATIC_URL = "/static/"
