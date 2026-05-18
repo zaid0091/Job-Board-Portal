@@ -39,18 +39,12 @@ def invalidate_cache_on_application_delete(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=ApplicationStatusLog)
-def notify_on_status_change(sender, instance, created, **kwargs):
-    """Notify applicant when their application status changes."""
-    if created:
-        # Invalidate dashboard caches on status change
-        try:
-            cache.delete(f'seeker_dashboard_{instance.application.applicant_id}')
-            cache.delete(f'employer_dashboard_{instance.application.job.employer.user_id}')
-        except Exception:
-            pass
-
-        try:
-            from apps.applications.tasks import send_application_status_notification
-            send_application_status_notification.delay(str(instance.id))
-        except Exception as e:
-            logger.warning('Failed to queue status change notification: %s', e)
+def invalidate_cache_on_status_change(sender, instance, created, **kwargs):
+    """Invalidate dashboard caches when application status changes."""
+    if not created:
+        return
+    try:
+        cache.delete(f'seeker_dashboard_{instance.application.applicant_id}')
+        cache.delete(f'employer_dashboard_{instance.application.job.employer.user_id}')
+    except Exception:
+        pass

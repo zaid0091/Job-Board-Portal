@@ -116,6 +116,26 @@ class TestApplicationStatusUpdate:
         response = employer_client.patch(url, {'status': 'ACCEPTED'}, format='json')
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
+    @pytest.mark.django_db(transaction=False)
+    def test_employer_status_update_notifies_seeker(self, employer_client, employer_user):
+        from apps.notifications.models import Notification
+
+        job = JobFactory(employer=employer_user)
+        application = ApplicationFactory(job=job)
+        applicant_id = application.applicant_id
+        url = reverse('applications:application-update-status', kwargs={'pk': application.id})
+
+        response = employer_client.post(url, {'status': 'REVIEWING'}, format='json')
+        assert response.status_code == status.HTTP_200_OK
+
+        notification = Notification.objects.filter(
+            user_id=applicant_id,
+            notification_type=Notification.Type.APPLICATION_STATUS,
+            related_object_id=str(application.id),
+        ).first()
+        assert notification is not None
+        assert 'REVIEWING' in notification.message or 'Under Review' in notification.message
+
 
 @pytest.mark.django_db
 class TestApplicationWithdraw:

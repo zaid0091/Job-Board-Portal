@@ -1,4 +1,5 @@
 from apps.applications.models import Application, ApplicationStatusLog
+from apps.applications.services.notifications import notify_applicant_of_status_change
 
 
 def transition_application_status(application, *, new_status, changed_by, notes=''):
@@ -7,13 +8,14 @@ def transition_application_status(application, *, new_status, changed_by, notes=
     application.status = new_status
     application.save(update_fields=['status', 'updated_at'])
 
-    ApplicationStatusLog.objects.create(
+    status_log = ApplicationStatusLog.objects.create(
         application=application,
         from_status=old_status,
         to_status=new_status,
         changed_by=changed_by,
         notes=notes,
     )
+    notify_applicant_of_status_change(status_log)
     return application
 
 

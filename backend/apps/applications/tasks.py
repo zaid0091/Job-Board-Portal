@@ -42,39 +42,30 @@ def send_application_received_notification(self, application_id):
 
 @shared_task(bind=True, max_retries=3, queue='applications')
 def send_application_status_notification(self, status_log_id):
-    """Notify applicant about status change."""
+    """Notify applicant about status change (legacy Celery entry point)."""
     from .models import ApplicationStatusLog
+    from .services.notifications import build_applicant_status_notification_payload
 
     try:
         log = ApplicationStatusLog.objects.select_related(
             'application', 'application__job', 'application__applicant'
         ).get(id=status_log_id)
 
-        application = log.application
-        applicant = application.applicant
-
-        status_display = dict(application.Status.choices).get(
-            log.to_status, log.to_status
-        )
-
         from apps.notifications.tasks import create_notification
-        create_notification.delay(
-            user_id=str(applicant.id),
-            notification_type='APPLICATION_STATUS',
-            title=f'Application status updated: {application.job.title}',
-            message=f'Your application for "{application.job.title}" has been '
-                    f'updated to: {status_display}.',
-            related_object_id=str(application.id),
-            related_content_type='application',
-        )
+
+        payload = build_applicant_status_notification_payload(log)
+        create_notification.delay(**payload)
 
         logger.info(
-            f'Sent status change notification to {applicant.email} '
-            f'for application {application.id}: {log.from_status} → {log.to_status}'
+            'Sent status change notification to %s for application %s: %s → %s',
+            log.application.applicant.email,
+            log.application.id,
+            log.from_status,
+            log.to_status,
         )
 
     except ApplicationStatusLog.DoesNotExist:
-        logger.warning(f'Status log {status_log_id} not found.')
+        logger.warning('Status log %s not found.', status_log_id)
     except Exception as exc:
-        logger.error(f'Error sending status change notification: {exc}')
+        logger.error('Error sending status change notification: %s', exc)
         raise self.retry(exc=exc, countdown=60)

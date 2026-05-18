@@ -64,7 +64,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    command: celery -A config.celery worker -l info --concurrency=4
+    command: >
+      celery -A config.celery worker -l info --concurrency=4
+      -Q celery,applications,notifications,jobs,auth,analytics,profiles
     volumes:
       - media_volume:/app/media
     env_file:
