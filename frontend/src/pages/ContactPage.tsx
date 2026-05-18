@@ -42,7 +42,11 @@ export default function ContactPage() {
         canonical="/contact" 
       />
 
+<<<<<<< HEAD
       {/* --- Hero Section (geometric landing) --- */}
+=======
+      {/* --- Hero Section (same shell as About) --- */}
+>>>>>>> 8287b81e36405688073c5063520b8f6412645675
       <HeroGeometric
         className="min-h-0 pt-32 pb-20 sm:pt-48 sm:pb-32 -mt-14 [mask-image:linear-gradient(to_bottom,black_calc(100%-80px),transparent_100%)]"
         contentClassName="px-4 sm:px-6"
@@ -54,7 +58,7 @@ export default function ContactPage() {
               <span className="text-[10px] font-bold tracking-[0.25em] uppercase text-primary-700 dark:text-white/60">Connect</span>
             </div>
           </ScrollReveal>
-          
+
           <ScrollReveal direction="up" delay={0.2} duration={1}>
             <h1 className="text-display-sm sm:text-display lg:text-display-lg text-ink-900 dark:text-white max-w-4xl mx-auto leading-[1.1] font-extrabold tracking-tighter">
               Let&apos;s build the future <br />
